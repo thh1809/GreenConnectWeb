@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core Backgrounds - từ config */
+  --background: 0 0% 96%; /* #F5F5F5 */
+  --foreground: 0 0% 0%; /* #000000 */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 0 0% 0%; /* #000000 */
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  
+  /* Primary Colors - từ config */
+  --primary: 142 72% 42%; /* #21BC5A */
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary */
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+  
+  /* Muted */
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+  
+  /* Accent */
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+  
+  /* Destructive - từ config */
+  --destructive: 0 70% 46%; /* #C72323 */
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Border & Input - từ config */
+  --border: 0 0% 93%; /* #EEEEEE */
+  --input: 0 0% 96%; /* #F5F5F5 */
+  --ring: 142 72% 42%; /* #21BC5A */
+  
+  /* Radius */
+  --radius: 0.5rem;
+  
+  /* Chart colors */
+  --chart-1: 142 72% 42%;
+  --chart-2: 142 65% 55%;
+  --chart-3: 142 55% 65%;
+  --chart-4: 142 45% 70%;
+  --chart-5: 142 35% 75%;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  /* Core Backgrounds - từ config dark */
+  --background: 0 0% 7%; /* #121212 */
+  --foreground: 0 0% 94%; /* #EFEFEF */
+  --card: 0 0% 12%; /* #1E1E1E */
+  --card-foreground: 0 0% 94%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 94%;
+  
+  /* Primary Colors */
+  --primary: 142 72% 42%; /* #21BC5A */
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary */
+  --secondary: 0 0% 14.9%;
+  --secondary-foreground: 0 0% 94%;
+  
+  /* Muted */
+  --muted: 0 0% 14.9%;
+  --muted-foreground: 0 0% 63.9%;
+  
+  /* Accent */
+  --accent: 0 0% 14.9%;
+  --accent-foreground: 0 0% 94%;
+  
+  /* Destructive */
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 94%;
+  
+  /* Border & Input - từ config dark */
+  --border: 0 0% 20%; /* #333333 */
+  --input: 0 0% 17%; /* #2C2C2C */
+  --ring: 142 72% 42%;
+  
+  /* Chart colors */
+  --chart-1: 142 72% 42%;
+  --chart-2: 142 65% 55%;
+  --chart-3: 142 55% 65%;
+  --chart-4: 142 45% 70%;
+  --chart-5: 142 35% 75%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: hsl(var(--border));
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-roboto), system-ui, sans-serif;
 }

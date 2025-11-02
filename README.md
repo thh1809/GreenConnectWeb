@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GreenConnect - Next.js 15 Frontend
 
-## Getting Started
+Frontend project với Next.js 15 + Tailwind CSS + shadcn/ui + TanStack Query + Axios
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Next.js 15** - React framework với App Router
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **shadcn/ui** - Component library built on Radix UI
+- **TanStack Query** - Data fetching & state management
+- **Axios** - HTTP client
+- **Roboto** - Google Font
+
+## 📦 Installation
+
+```bash
+npm install
+```
+
+## 🛠️ Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở [http://localhost:3000](http://localhost:3000) trong browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/              # Next.js App Router
+│   ├── layout.tsx    # Root layout với Providers
+│   ├── page.tsx      # Homepage
+│   └── providers.tsx # TanStack Query Provider
+├── components/       # React components
+│   └── ui/          # shadcn/ui components
+├── hooks/            # Custom React hooks
+│   └── useApi.ts    # TanStack Query hooks
+├── lib/              # Utilities & configs
+│   ├── utils.ts     # cn() helper cho Tailwind
+│   └── api/         # API client setup
+│       ├── client.ts    # Axios instance
+│       └── endpoints.ts # API endpoints
+├── services/         # API services
+├── stores/           # Zustand stores
+├── types/            # TypeScript types
+└── utils/            # Helper functions
+```
 
-## Learn More
+## 🎨 Adding shadcn/ui Components
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx shadcn@latest add button
+npx shadcn@latest add card
+npx shadcn@latest add input
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📡 Using TanStack Query
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```tsx
+import { useApi } from "@/hooks/useApi";
 
-## Deploy on Vercel
+function MyComponent() {
+  const { data, isLoading, error } = useApi(
+    ["users"],
+    "/api/users"
+  );
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error!</div>;
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  return <div>{/* Render data */}</div>;
+}
+```
+
+## 🔧 Configuration
+
+- **Tailwind Config**: `tailwind.config.ts`
+- **shadcn/ui Config**: `components.json`
+- **API Base URL**: Set `NEXT_PUBLIC_API_URL` in `.env.local`
+
+## 📝 Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## 🎯 Next Steps
+
+1. Add shadcn/ui components as needed
+2. Setup API endpoints in `src/lib/api/endpoints.ts`
+3. Create API services in `src/services/`
+4. Add Zustand stores if needed in `src/stores/`
