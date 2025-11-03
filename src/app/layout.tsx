@@ -1,9 +1,10 @@
 import { Providers } from '@/components/providers';
+import { ThemeProvider } from '@/components/theme-provider';
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
 import './globals.css';
 
-export const roboto = Roboto({
+const roboto = Roboto({
   subsets: ['latin'],
   weight: ['100', '300', '400', '500', '700', '900'],
   variable: '--font-roboto',
@@ -20,15 +21,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isDark = false;
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body
-        className={`${roboto.variable} ${
-          isDark ? 'dark' : ''
-        } font-sans antialiased`}
-      >
-        <Providers>{children}</Providers>
+      <body className={`${roboto.variable}  font-sans antialiased`}>
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

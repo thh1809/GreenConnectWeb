@@ -1,46 +1,33 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ===========================
-   🌞 Light Theme
+  🎨 DEFINE THEME (v4)
+=========================== */
+
+/* ===========================
+  🌞 Light Theme (Variable CSS)
 =========================== */
 :root {
-  /* Background & Text */
+  --light-dark-reverse: 0 0% 0%;
+  --light-dark-default: 0 0% 100%;
   --background: 0 0% 96%;
-  /* #F5F5F5 */
   --foreground: 0 0% 0%;
-  /* #000000 */
   --card: 0 0% 100%;
-  /* #FFFFFF */
   --card-foreground: 0 0% 0%;
-  /* #000000 */
-
-  /* Primary / Secondary */
   --primary: 144 70% 43%;
-  /* #21BC5A */
   --primary-foreground: 0 0% 100%;
   --secondary: 60 33% 91%;
-  /* #F3F3D4 */
   --secondary-foreground: 0 0% 0%;
-
-  /* Alerts */
   --warning: 48 100% 61%;
-  /* #FFD83D */
   --danger: 0 70% 45%;
-  /* #C72323 */
   --warning-update: 20 94% 59%;
-  /* #F96E38 */
-
-  /* Muted / Borders */
   --muted: 0 0% 93%;
   --muted-foreground: 160 9% 50%;
   --border: 0 0% 93%;
   --input: 0 0% 96%;
   --ring: var(--primary);
-
-  /* Radius */
   --radius: 0.625rem;
 
-  /* Gradients */
   --gradient-primary-from: 144 64% 47%;
   --gradient-primary-to: 145 49% 64%;
   --gradient-secondary-from: 60 33% 91%;
@@ -48,26 +35,22 @@
 }
 
 /* ===========================
-   🌚 Dark Theme
+  🌚 Dark Theme (Variable CSS)
 =========================== */
 .dark {
+  --light-dark-reverse: 0 0% 100%;
+  --light-dark-default: 0 0% 0%;
   --background: 0 0% 7%;
-  /* #121212 */
   --foreground: 0 0% 94%;
-  /* #EFEFEF */
   --card: 0 0% 12%;
-  /* #1E1E1E */
   --card-foreground: 0 0% 94%;
-
   --primary: 144 70% 43%;
   --primary-foreground: 0 0% 7%;
   --secondary: 60 33% 24%;
   --secondary-foreground: 0 0% 94%;
-
   --warning: 48 100% 61%;
   --danger: 0 70% 45%;
   --warning-update: 20 94% 59%;
-
   --muted: 0 0% 20%;
   --muted-foreground: 160 10% 60%;
   --border: 0 0% 20%;
@@ -76,16 +59,78 @@
 }
 
 /* ===========================
-   Gradients Utilities
+  🧩 Tailwind Theme Variables
 =========================== */
-.bg-gradient-primary {
-  background: linear-gradient(to right,
-      hsl(var(--gradient-primary-from)),
-      hsl(var(--gradient-primary-to)));
-}
+@theme {
+  /* 🎨 Color namespace */
+  --color-light-dark-reverse: hsl(var(--light-dark-reverse));
+  --color-light-dark-default: hsl(var(--light-dark-default));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-update: hsl(var(--warning-update));
+  --color-danger: hsl(var(--danger));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --ring-color: hsl(var(--ring));
 
-.bg-gradient-secondary {
-  background: linear-gradient(to bottom right,
-      hsl(var(--gradient-secondary-from)),
-      hsl(var(--gradient-secondary-to)));
+  /* 🌈 Gradient colors */
+  --color-gradient-primary-from: hsl(var(--gradient-primary-from));
+  --color-gradient-primary-to: hsl(var(--gradient-primary-to));
+  --color-gradient-secondary-from: hsl(var(--gradient-secondary-from));
+  --color-gradient-secondary-to: hsl(var(--gradient-secondary-to));
+
+  /* 🟩 Border radius */
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 0.25rem);
+  --radius-xl: calc(var(--radius) + 0.5rem);
+
+  /* ✍️ Typography */
+  --font-roboto: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* font sizes (for Tailwind text-* utilities) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* font weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* line heights */
+  --leading-tight: 1.2;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* letter spacing (tracking) */
+  --tracking-tight: -0.015em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.05em;
+
+  /* 🧱 Spacing scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
 }

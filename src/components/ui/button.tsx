@@ -9,7 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-gradient-primary text-white shadow hover:opacity-90',
+        primary:
+          'bg-primary text-light-dark-default radius-md shadow hover:opacity-90',
         update: 'bg-[hsl(var(--warning-update))] text-white hover:opacity-90',
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
         destructive:

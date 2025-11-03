@@ -81,7 +81,7 @@ const Testimonials = () => {
     return visible;
   };
 
-  console.log(direction);
+  // console.log(direction);
   return (
     <section
       id="testimonials"

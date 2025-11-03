@@ -4,6 +4,7 @@ import Logo from '@public/Eco-Tech-logo-web-no-background.ico';
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+
 const navLinks = [
   { name: 'Home', href: '#home' },
   { name: 'Features', href: '#features' },
@@ -28,26 +29,26 @@ const Header = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 font-roboto ${
           isScrolled
             ? 'bg-card/80 backdrop-blur-xl shadow-md py-3'
-            : 'bg-primarybasic py-6'
+            : 'bg-transparent py-6'
         }`}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <a href="#home" className="flex items-center gap-2 group">
-              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md group-hover:shadow-lg transition-smooth">
-                <Image src={Logo} alt="logo" quality={100} />
+              <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+                <Image src={Logo} alt="logo" width={50} height={50} priority />
               </div>
-              <span
-                className={`text-xl font-semibold  text-white ${
-                  isScrolled ? 'block' : 'hidden sm:block'
+              <h3
+                className={`2xl:text-2xl font-semibold text-white  tracking-wide transition-all hover:opacity-70 ${
+                  isScrolled ? 'opacity-100' : 'hidden sm:block opacity-90'
                 }`}
               >
                 Green Connect
-              </span>
+              </h3>
             </a>
 
             {/* Desktop Navigation */}
@@ -56,8 +57,10 @@ const Header = () => {
                 <a
                   key={link.name}
                   href={link.href}
-                  className={`text-sm font-medium relative group transition-smooth ${
-                    isScrolled ? 'text-black' : 'text-white'
+                  className={`relative text-sm font-medium transition-all duration-300 group ${
+                    isScrolled
+                      ? 'color-light-dark-reverse hover:text-primary'
+                      : 'text-light-dark-default hover:text-light-dark-reverse'
                   }`}
                 >
                   {link.name}
@@ -71,7 +74,7 @@ const Header = () => {
               <Button
                 size="lg"
                 variant="primary"
-                className="rounded-full font-semibold tracking-wide"
+                className="font-semibold tracking-wide shadow-md hover:shadow-lg transition-all"
               >
                 Get the App
               </Button>
@@ -80,9 +83,7 @@ const Header = () => {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`md:hidden p-2 rounded-lg transition-smooth ${
-                isScrolled ? 'text-foreground' : 'text-primarybasic'
-              }`}
+              className="md:hidden p-2 rounded-lg text-foreground hover:bg-muted transition-all duration-300"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (
@@ -105,25 +106,25 @@ const Header = () => {
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-foreground/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-foreground/50 backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
 
         {/* Menu Content */}
         <div
-          className={`absolute top-20 left-4 right-4 bg-card rounded-2xl shadow-lg p-6 transition-all duration-500 ${
+          className={`absolute top-24 left-4 right-4 bg-card rounded-2xl shadow-lg p-6 transition-all duration-500 ${
             isMobileMenuOpen
               ? 'translate-y-0 opacity-100'
               : '-translate-y-4 opacity-0'
           }`}
         >
-          <nav className="flex flex-col gap-4">
+          <nav className="flex flex-col gap-4 text-center">
             {navLinks.map((link, index) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-lg font-medium text-foreground hover:text-primary transition-smooth py-2 text-center"
+                className="text-lg font-medium text-foreground hover:text-primary transition-all duration-300 py-2"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {link.name}
@@ -133,7 +134,7 @@ const Header = () => {
               size="lg"
               variant="primary"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="rounded-full mt-4"
+              className="rounded-full mt-4 font-semibold tracking-wide"
             >
               Get the App
             </Button>

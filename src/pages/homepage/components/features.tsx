@@ -33,7 +33,7 @@ const Features = () => {
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Simple, Smart, Sustainable
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground  mx-auto">
             Everything you need to turn your scrap into rewards
           </p>
         </div>

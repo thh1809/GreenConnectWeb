@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
+import Logo from '@public/Eco-Tech-logo-web-no-background.ico';
 import { Instagram, Leaf, Twitter } from 'lucide-react';
-
+import Image from 'next/image';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
@@ -20,9 +21,6 @@ const Footer = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <div className="bg-danger">
-              <h1 className="text-gradient-primary">fdsaf</h1>
-            </div>
             <Button
               size="lg"
               className="bg-white text-primary hover:bg-white/90 transition-smooth shadow-glow text-base font-medium uppercase tracking-wide"
@@ -41,30 +39,40 @@ const Footer = () => {
       </section>
 
       {/* Footer Links */}
-      <div id="contact" className="py-12 px-4 bg-card/5">
+      <div id="contact" className="py-12 px-4 bg-black/90">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8 ">
             {/* Brand */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-                  <Leaf className="w-6 h-6 text-white" />
+              <a href="#home" className="flex items-center gap-2 group">
+                <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+                  <Image
+                    src={Logo}
+                    alt="logo"
+                    width={50}
+                    height={50}
+                    priority
+                  />
                 </div>
-                <span className="text-xl font-bold">Green Connect</span>
-              </div>
-              <p className="text-sm text-background/70">
+                <h3
+                  className={`2xl:text-2xl font-semibold text-white  tracking-wide transition-all hover:opacity-70 `}
+                >
+                  Green Connect
+                </h3>
+              </a>
+              <p className="text-sm text-white/70">
                 Connecting communities for a sustainable future.
               </p>
             </div>
 
             {/* Product */}
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
+              <h3 className="text-white font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     Features
                   </a>
@@ -72,7 +80,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     How It Works
                   </a>
@@ -80,7 +88,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     Pricing
                   </a>
@@ -88,7 +96,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     FAQ
                   </a>
@@ -98,12 +106,12 @@ const Footer = () => {
 
             {/* Company */}
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
+              <h3 className="text-white font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     About Us
                   </a>
@@ -111,7 +119,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     Blog
                   </a>
@@ -119,7 +127,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     Careers
                   </a>
@@ -127,7 +135,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     Contact
                   </a>
@@ -137,12 +145,12 @@ const Footer = () => {
 
             {/* Legal */}
             <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
+              <h3 className="text-white font-semibold mb-4">Legal</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     Privacy Policy
                   </a>
@@ -150,7 +158,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     Terms of Service
                   </a>
@@ -158,7 +166,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="#"
-                    className="text-background/70 hover:text-background transition-smooth"
+                    className="text-white/70 hover:text-background transition-smooth"
                   >
                     Cookie Policy
                   </a>
@@ -168,8 +176,8 @@ const Footer = () => {
           </div>
 
           {/* Bottom Bar */}
-          <div className="pt-8 border-t border-background/10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-background/70">
+          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-white/70">
               © {currentYear} Green Connect. All rights reserved.
             </p>
 
@@ -177,17 +185,17 @@ const Footer = () => {
             <div className="flex gap-4">
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-background/10 hover:bg-primary transition-smooth flex items-center justify-center group"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-primary transition-smooth flex items-center justify-center group"
                 aria-label="Twitter"
               >
-                <Twitter className="w-5 h-5 text-background/70 group-hover:text-white transition-smooth" />
+                <Twitter className="w-5 h-5 text-white/70 group-hover:text-white transition-smooth" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-background/10 hover:bg-primary transition-smooth flex items-center justify-center group"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-primary transition-smooth flex items-center justify-center group"
                 aria-label="Instagram"
               >
-                <Instagram className="w-5 h-5 text-background/70 group-hover:text-white transition-smooth" />
+                <Instagram className="w-5 h-5 text-white/70 group-hover:text-white transition-smooth" />
               </a>
             </div>
           </div>
