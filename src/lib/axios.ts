@@ -8,8 +8,8 @@ const api = axios.create({
 
 // optional: interceptors for auth refresh
 api.interceptors.response.use(
-  res => res,
-  async err => {
+  (res: any) => res,
+  async (err: any) => {
     return Promise.reject(err);
   }
 );

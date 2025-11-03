@@ -1,16 +1,25 @@
-import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import next from '@next/eslint-plugin-next';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import prettier from 'eslint-config-prettier/flat';
+import { defineConfig, globalIgnores } from 'eslint/config';
 
-export default [
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
-  next.configs['core-web-vitals'],
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  prettier,
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
     rules: {
-      'no-unused-vars': 'warn',
-      'react/react-in-jsx-scope': 'off',
+      'react/no-unescaped-entities': 'off',
+      '@next/next/no-page-custom-font': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-console': 'error',
     },
   },
-];
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+  ]),
+]);
+
+export default eslintConfig;
