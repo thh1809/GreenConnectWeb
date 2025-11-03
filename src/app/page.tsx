@@ -1,25 +1,18 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { HeroSection } from "@/components/sections/HeroSection";
-import { WhyChooseSection } from "@/components/sections/WhyChooseSection";
-import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
-import { GreenImpactSection } from "@/components/sections/GreenImpactSection";
-import { DownloadSection } from "@/components/sections/DownloadSection";
-
-export default function HomePage() {
+export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col">
-      <Header />
-      <HeroSection />
-      <WhyChooseSection />
-      <section id="how-it-works">
-        <HowItWorksSection />
-      </section>
-      <section id="impact">
-        <GreenImpactSection />
-      </section>
-      <DownloadSection />
-      <Footer />
-    </main>
+    <div className="bg-black text-white">
+      <div className="bg-background text-foreground p-6 rounded-lg">
+        <h1 className="text-primary">Hello Tailwind</h1>
+        <p className="text-primary-foreground">
+          This text uses primary foreground color
+        </p>
+        <div className="bg-card text-card-foreground p-4 rounded-md mt-4">
+          Card content
+        </div>
+        <div className="bg-gradient-primary p-4 rounded-lg mt-4 text-white">
+          Gradient Primary
+        </div>
+      </div>
+    </div>
   );
 }

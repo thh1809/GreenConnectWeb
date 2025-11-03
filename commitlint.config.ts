@@ -7,22 +7,18 @@ const config: UserConfig = {
       2,
       'always',
       [
-        'feat',
-        'fix',
-        'docs',
-        'style',
-        'refactor',
-        'perf',
-        'test',
-        'chore',
-        'revert',
-        'build',
-        'ci',
+        'feat', // new feature
+        'fix', // fixx bug
+        'docs', // update documentation
+        'style', //  style, format
+        'refactor', // refractor code
+        'perf', // estimate performance
+        'test', // test
+        'chore', // build, deps, config
       ],
     ],
-    'subject-case': [2, 'never', ['sentence-case', 'start-case', 'pascal-case', 'upper-case']],
+    'subject-case': [0],
   },
 };
 
 export default config;
-
