@@ -42,48 +42,75 @@ The application connects different user types: regular users, admins, and modera
 ## 📂 Folder Structure
 
 ```bash
-GreenConnect/
-├── app/                          # App Router: Pages, layouts, routes
-│   ├── globals.css               # Global Tailwind styles
-│   ├── layout.tsx                # Root layout with providers
-│   └── page.tsx                  # Landing page
+GREENCONNECTWEB/
 │
-├── components/                   # Reusable UI components
-│   ├── ui/                       # Shadcn/UI components (Button, Card, etc.)
-│   ├── providers.tsx             # App providers (QueryClient, Theme)
-│   └── theme-provider.tsx        # Tailwind theme wrapper
+├── .github/                      # GitHub Actions CI/CD workflows
+├── .husky/                       # Husky hooks (lint-staged, pre-commit)
+├── .vscode/                      # VSCode workspace settings
 │
-├── hooks/                        # Custom React hooks
-│   ├── use-api.ts                # Generic API hooks
-│   └── use-users.ts              # Domain-specific hooks (admin users)
-│
-├── lib/                          # Utilities and services
-│   ├── api.ts                    # REST API client (fetch/axios with auth)
-│   ├── constants.ts              # App constants
-│   └── utils.ts                  # Helper functions
-│
-├── pages/                        # Legacy or static pages (if needed)
-│   └── homepage/
-│       ├── components/           # Landing page-specific components
-│       └── homepage.tsx
-│
-├── public/                       # Static assets (images, icons)
+├── public/                       # Static assets (images, icons, favicons)
 │   └── leaf_1.png
 │
-├── types/                        # TypeScript types
-│   └── middleware.ts
+├── src/                          # Application source code
+│   ├── app/                      # Next.js App Router
+│   │   ├── layout.tsx            # Root layout
+│   │   ├── globals.css           # Global styles
+│   │   └── page.tsx              # Default landing page
+│   │
+│   ├── components/               # Shared UI components
+│   │   ├── ui/                   # Shadcn/UI components
+│   │   ├── providers.tsx         # Global context providers
+│   │   └── theme-provider.tsx    # Tailwind theme wrapper
+│   │
+│   ├── hooks/                    # Custom React hooks
+│   │   └── use-api/
+│   │           ├── use-user.tsx
+│   │           └── use-auth.tsx
+│   │
+│   ├── lib/                      # Core utilities and constants
+│   │   ├── api.ts
+│   │   ├── constants.ts
+│   │   └── utils.ts
+│   │
+│   ├── pages/                    # (Optional) Legacy pages
+│   │   └── homepage/
+│   │       ├── components/
+│   │       │   ├── ecomImpact.tsx
+│   │       │   ├── features.tsx
+│   │       │   ├── footer.tsx
+│   │       │   ├── header.tsx
+│   │       │   ├── hero.tsx
+│   │       │   ├── how-it-works.tsx
+│   │       │   └── testimonials.tsx
+│   │       └── homepage.tsx
+│   │
+│   └── types/                    # TypeScript types
+│       └── middleware.ts
 │
-├── .env.development              # Environment variables
-├── .gitignore
-├── .prettierrc                   # Prettier config
-├── commitlint.config.ts          # Commitlint rules
-├── components.json               # Shadcn/UI config
-├── next-env.d.ts
-├── next.config.mjs
-├── middleware.ts                 # Next.js middleware
-├── package-lock.json
+├── tests/                        # Playwright E2E tests
+│   ├── homepage.spec.ts          # Example homepage test
+│   ├── auth.spec.ts              # Example authentication test
+│   └── fixtures/                 # Custom fixtures, setup files
+│
+├── test-results/                 # Playwright output (screenshots, traces)
+├── playwright-report/            # HTML report after test runs
+│
+├── .env                          # Local environment
+├── .env.example
+│
+├── Dockerfile
+├── docker-compose.yml
+│
+├── playwright.config.ts          # Playwright configuration
+├── next.config.mjs               # Next.js configuration
+├── eslint.config.js
+├── prettier.config.js
 ├── tsconfig.json
-└── README.md                     # This file
+│
+├── package.json
+├── pnpm-lock.yaml
+│
+└── README.md
 ```
 
 ## 🚀 Getting Started
@@ -100,7 +127,13 @@ git clone https://github.com/thh1809/GreenConnectWeb.git
 cd GreenConnectWeb
 ```
 
-### 2. Install dependencies
+### 2. create ENV
+
+```bash
+cp .env.example .env
+```
+
+### 3. Install dependencies
 
 ```bash
 npm install
@@ -108,13 +141,13 @@ npm install
 pnpm install
 ```
 
-### 3. Set up environment file
+### 4. Set up environment file
 
 ```bash
 cp .env.example .env
 ```
 
-### 4. Run development server
+### 5. Run development server
 
 ```bash
 npm run dev
@@ -122,7 +155,7 @@ npm run dev
 pnpm dev
 ```
 
-### 5. Build for production
+### 6. Build
 
 ```bash
 npm run build
@@ -130,6 +163,21 @@ npm start
 # or
 pnpm run build
 pnpm start
+```
+
+### 7. Build and Run production
+
+```bash
+docker compose up --build
+docker compose down
+```
+
+### 8. Run test
+
+```bash
+npx playwright test
+npx playwright test --headed
+npx playwright test --ui
 ```
 
 ## 📝 Commit Rules (Commitlint)
