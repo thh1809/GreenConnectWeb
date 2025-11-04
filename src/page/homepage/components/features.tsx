@@ -4,23 +4,23 @@ import { Award, MapPin, Upload } from 'lucide-react';
 const features = [
   {
     icon: Upload,
-    title: 'Create Scrap Posts',
+    title: 'Đăng bài thu gom phế liệu',
     description:
-      'Upload photos of your scrap materials and let our AI suggest the best category and price range.',
+      'Tải lên hình ảnh phế liệu của bạn và để AI gợi ý danh mục cùng mức giá phù hợp nhất.',
     link: '#',
   },
   {
     icon: MapPin,
-    title: 'Find & Collect Jobs',
+    title: 'Tìm & Nhận việc thu gom',
     description:
-      'Browse available scrap jobs on an interactive map. Filter by distance, type, and quantity.',
+      'Duyệt các công việc thu gom có sẵn trên bản đồ tương tác. Lọc theo khoảng cách, loại phế liệu và số lượng.',
     link: '#',
   },
   {
     icon: Award,
-    title: 'Earn Rewards & Feedback',
+    title: 'Nhận thưởng & Đánh giá',
     description:
-      'Get reward points for every transaction. Build your reputation with ratings and grow your impact.',
+      'Nhận điểm thưởng cho mỗi giao dịch. Xây dựng uy tín cá nhân qua đánh giá và gia tăng tác động tích cực.',
     link: '#',
   },
 ];
@@ -31,10 +31,10 @@ const Features = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Simple, Smart, Sustainable
+            Đơn giản, Thông minh, Bền vững
           </h2>
-          <p className="text-xl text-muted-foreground  mx-auto">
-            Everything you need to turn your scrap into rewards
+          <p className="text-xl text-muted-foreground mx-auto">
+            Mọi công cụ bạn cần để biến phế liệu thành phần thưởng giá trị
           </p>
         </div>
 
@@ -47,8 +47,8 @@ const Features = () => {
                 className="p-8 shadow-soft hover:shadow-medium transition-smooth group cursor-pointer border-0 animate-fade-in"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
-                <div className="mb-6 inline-flex p-4 rounded-2xl bg-gradient-primary shadow-glow group-hover:scale-110 transition-smooth">
-                  <Icon className="w-8 h-8 text-white" />
+                <div className="mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-r from-gradient-primary-from to-gradient-primary-to shadow-glow group-hover:scale-110 transition-smooth">
+                  <Icon className="w-8 h-8 text-light-dark-default" />
                 </div>
 
                 <h3 className="text-2xl font-semibold mb-3">{feature.title}</h3>
@@ -61,7 +61,7 @@ const Features = () => {
                   href={feature.link}
                   className="text-primary font-medium inline-flex items-center gap-2 hover:gap-3 transition-smooth"
                 >
-                  Learn More →
+                  Tìm hiểu thêm →
                 </a>
               </Card>
             );

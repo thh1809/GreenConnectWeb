@@ -7,19 +7,19 @@ const stats = [
     icon: Recycle,
     value: 10000,
     suffix: '+',
-    label: 'Tons Recycled',
+    label: 'Tấn phế liệu đã được tái chế',
   },
   {
     icon: Users,
     value: 50000,
     suffix: '+',
-    label: 'Users Connected',
+    label: 'Người dùng đã kết nối',
   },
   {
     icon: Sprout,
     value: 1000000,
     suffix: '+',
-    label: 'Points Redeemed',
+    label: 'Điểm thưởng đã được quy đổi',
   },
 ];
 
@@ -64,7 +64,7 @@ const AnimatedCounter = ({ end, suffix }: { end: number; suffix: string }) => {
   return (
     <div
       ref={ref}
-      className="text-5xl md:text-6xl font-bold gradient-primary bg-clip-text text-transparent"
+      className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gradient-primary-from to-gradient-primary-to bg-clip-text text-transparent"
     >
       {count.toLocaleString()}
       {suffix}
@@ -81,10 +81,10 @@ const EcoImpact = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Our Impact Together
+            Tác động của chúng ta
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Join thousands making a real difference every day
+          <p className="text-xl text-muted-foreground mx-auto">
+            Cùng nhau, chúng ta đang tạo nên sự thay đổi mỗi ngày
           </p>
         </div>
 
@@ -97,8 +97,8 @@ const EcoImpact = () => {
                 className="text-center space-y-4 animate-counter-grow"
                 style={{ animationDelay: `${index * 200}ms` }}
               >
-                <div className="inline-flex p-6 rounded-full bg-gradient-primary shadow-glow mb-4">
-                  <Icon className="w-12 h-12 text-white" />
+                <div className="inline-flex p-6 rounded-full bg-gradient-to-r from-gradient-primary-from to-gradient-primary-to shadow-glow mb-4">
+                  <Icon className="w-12 h-12 text-light-dark-default" />
                 </div>
 
                 <AnimatedCounter end={stat.value} suffix={stat.suffix} />
@@ -107,10 +107,10 @@ const EcoImpact = () => {
                   {stat.label}
                 </p>
 
-                {/* Progress Bar */}
+                {/* Thanh tiến trình */}
                 <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-primary rounded-full transition-all duration-1000 ease-out"
+                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
                     style={{
                       width: '100%',
                       animationDelay: `${index * 200}ms`,

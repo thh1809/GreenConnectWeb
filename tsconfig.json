@@ -23,7 +23,7 @@
       "@lib/*": ["./src/lib/*"],
       "@components/*": ["./src/components/*"],
       "@hook/*": ["./src/hook/*"],
-      "@pages/*": ["./src/pages/*"],
+      "@pages/*": ["src/page/*"],
       "@public/*": ["./public/*"]
     }
   },

@@ -10,23 +10,23 @@ const testimonials = [
     avatar: '👩',
     rating: 5,
     comment:
-      "Green Connect made recycling so easy! I've earned over 500 points in just two months and love seeing my environmental impact grow.",
+      'Green Connect giúp việc tái chế trở nên thật dễ dàng! Tôi đã tích được hơn 500 điểm chỉ trong hai tháng và rất thích khi thấy tác động môi trường của mình ngày càng lớn.',
   },
   {
     name: 'Mike Chen',
     role: 'San Francisco, CA',
     avatar: '👨',
-    rating: 5,
+    rating: 4,
     comment:
-      'The map feature is brilliant. I can plan my routes efficiently and the AI suggestions help me price everything perfectly.',
+      'Tính năng bản đồ thật tuyệt vời. Tôi có thể lên kế hoạch thu gom hiệu quả, và gợi ý từ AI giúp tôi định giá chính xác hơn.',
   },
   {
     name: 'Priya Sharma',
     role: 'Seattle, WA',
     avatar: '👩‍🦱',
-    rating: 5,
+    rating: 3,
     comment:
-      "Finally, an app that makes sustainability rewarding! The community is amazing and I feel like I'm really making a difference.",
+      'Cuối cùng cũng có một ứng dụng khiến việc sống xanh trở nên thú vị! Cộng đồng thật tuyệt và tôi cảm thấy mình đang góp phần tạo ra sự khác biệt.',
   },
   {
     name: 'David Martinez',
@@ -34,7 +34,7 @@ const testimonials = [
     avatar: '🧔',
     rating: 5,
     comment:
-      "I've connected with reliable collectors and made some extra income. The reward points system keeps me motivated every day!",
+      'Tôi đã kết nối được với nhiều người thu gom đáng tin cậy và có thêm thu nhập. Hệ thống điểm thưởng giúp tôi có thêm động lực mỗi ngày!',
   },
   {
     name: 'Emma Wilson',
@@ -42,7 +42,7 @@ const testimonials = [
     avatar: '👱‍♀️',
     rating: 5,
     comment:
-      "Best eco app I've ever used! The interface is so friendly and I love how easy it is to post my recyclables.",
+      'Ứng dụng xanh tốt nhất mà tôi từng dùng! Giao diện rất thân thiện và việc đăng bài tái chế thật dễ dàng.',
   },
   {
     name: 'James Lee',
@@ -50,7 +50,7 @@ const testimonials = [
     avatar: '👨‍🦱',
     rating: 5,
     comment:
-      'As a collector, this app has transformed my business. I can find jobs quickly and the rating system builds trust.',
+      'Là một người thu gom, ứng dụng này đã thay đổi công việc của tôi. Tôi có thể tìm việc nhanh chóng và hệ thống đánh giá giúp xây dựng niềm tin.',
   },
 ];
 
@@ -72,7 +72,6 @@ const Testimonials = () => {
     setCurrentIndex(index);
   };
 
-  // Get visible testimonials (3 on desktop, 1 on mobile)
   const getVisibleTestimonials = () => {
     const visible = [];
     for (let i = 0; i < 3; i++) {
@@ -81,13 +80,12 @@ const Testimonials = () => {
     return visible;
   };
 
-  // console.log(direction);
   return (
     <section
       id="testimonials"
-      className="py-24 px-4 relative overflow-hidden bg-background-secondary"
+      className="py-24 px-4 relative overflow-hidden bg-gradient-to-b from-gradient-secondary-from to-gradient-secondary-to"
     >
-      {/* Floating Leaf Decorations */}
+      {/* Trang trí lá động */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <Leaf
           className="absolute top-20 left-10 w-16 h-16 text-primary/10 animate-pulse"
@@ -109,32 +107,30 @@ const Testimonials = () => {
 
       <div className="container mx-auto relative z-10">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center gap-3">
-            What Our Users Say <span className="text-3xl">🌱</span>
+          <h2 className="text-light-dark-reverse text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center gap-3">
+            Người dùng nói gì <span className="text-3xl">🌱</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Real stories from real people in our green community
+          <p className="text-xl text-muted-foreground mx-auto">
+            Câu chuyện thật từ cộng đồng xanh của chúng ta
           </p>
         </div>
 
-        {/* Desktop: 3 Cards */}
+        {/* Desktop: 3 thẻ hiển thị */}
         <div className="hidden md:grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-8">
           {getVisibleTestimonials().map((testimonial, index) => (
             <Card
               key={`${testimonial.name}-${index}`}
               className="p-6 bg-card shadow-soft hover:shadow-medium hover:scale-105 transition-all duration-300 border-0 rounded-xl"
             >
-              {/* Avatar with gradient border */}
               <div className="flex justify-center mb-4">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-primary rounded-full blur-sm" />
-                  <div className="relative w-20 h-20 rounded-full bg-card flex items-center justify-center text-4xl border-4 border-white">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gradient-primary-from to-gradient-primary-to rounded-full blur-sm" />
+                  <div className="relative w-20 h-20 rounded-full bg-card flex items-center justify-center text-4xl border-4 border-light-dark-default">
                     {testimonial.avatar}
                   </div>
                 </div>
               </div>
 
-              {/* Name & Location */}
               <div className="text-center mb-3">
                 <p className="font-bold text-lg">{testimonial.name}</p>
                 <p className="text-sm text-muted-foreground">
@@ -142,14 +138,12 @@ const Testimonials = () => {
                 </p>
               </div>
 
-              {/* Stars */}
               <div className="flex gap-1 justify-center mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+                  <Star key={i} className="w-4 h-4 fill-warning text-warning" />
                 ))}
               </div>
 
-              {/* Comment */}
               <p className="text-sm text-foreground leading-relaxed italic text-center">
                 "{testimonial.comment}"
               </p>
@@ -157,10 +151,9 @@ const Testimonials = () => {
           ))}
         </div>
 
-        {/* Mobile: 1 Card */}
+        {/* Mobile: 1 thẻ hiển thị */}
         <div className="md:hidden max-w-sm mx-auto mb-8">
           <Card className="p-6 bg-card shadow-soft border-0 rounded-xl transition-smooth">
-            {/* Avatar with gradient border */}
             <div className="flex justify-center mb-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-primary rounded-full blur-sm" />
@@ -170,7 +163,6 @@ const Testimonials = () => {
               </div>
             </div>
 
-            {/* Name & Location */}
             <div className="text-center mb-3">
               <p className="font-bold text-xl">
                 {testimonials[currentIndex].name}
@@ -180,21 +172,19 @@ const Testimonials = () => {
               </p>
             </div>
 
-            {/* Stars */}
             <div className="flex gap-1 justify-center mb-4">
               {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
                 <Star key={i} className="w-5 h-5 fill-accent text-accent" />
               ))}
             </div>
 
-            {/* Comment */}
             <p className="text-base text-foreground leading-relaxed italic text-center">
               "{testimonials[currentIndex].comment}"
             </p>
           </Card>
         </div>
 
-        {/* Dots Navigation */}
+        {/* Nút điều hướng chấm tròn */}
         <div className="flex gap-2 justify-center">
           {testimonials.map((_, index) => (
             <button
@@ -205,7 +195,7 @@ const Testimonials = () => {
                   ? 'bg-gradient-primary w-8 shadow-soft'
                   : 'bg-primary/30 w-3 hover:bg-primary/50'
               }`}
-              aria-label={`Go to testimonial ${index + 1}`}
+              aria-label={`Chuyển đến đánh giá ${index + 1}`}
             />
           ))}
         </div>

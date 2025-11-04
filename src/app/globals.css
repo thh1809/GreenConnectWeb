@@ -30,8 +30,12 @@
 
   --gradient-primary-from: 144 64% 47%;
   --gradient-primary-to: 145 49% 64%;
-  --gradient-secondary-from: 60 33% 91%;
+  --gradient-secondary-from: 68 55% 89%;
   --gradient-secondary-to: 123 41% 87%;
+
+  --gradient-primary: linear-gradient(to right, var(--color-gradient-primary-from), var(--color-gradient-primary-to));
+  --gradient-secondary: linear-gradient(to right, var(--color-gradient-secondary-from), var(--color-gradient-secondary-to));
+
 }
 
 /* ===========================
@@ -56,6 +60,14 @@
   --border: 0 0% 20%;
   --input: 0 0% 17%;
   --ring: var(--primary);
+
+  --gradient-primary-from: 144 64% 47%;
+  --gradient-primary-to: 145 49% 64%;
+  --gradient-secondary-from: 68 55% 89%;
+  --gradient-secondary-to: 123 41% 87%;
+
+  --gradient-primary: linear-gradient(to right, var(--color-gradient-primary-from), var(--color-gradient-primary-to));
+  --gradient-secondary: linear-gradient(to bottom, var(--color-gradient-secondary-from), var(--color-gradient-secondary-to));
 }
 
 /* ===========================

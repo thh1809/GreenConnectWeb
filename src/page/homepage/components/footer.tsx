@@ -1,38 +1,39 @@
 import { Button } from '@/components/ui/button';
 import Logo from '@public/Eco-Tech-logo-web-no-background.ico';
-import { Instagram, Leaf, Twitter } from 'lucide-react';
+import { Facebook, Instagram, Leaf, Twitter } from 'lucide-react';
 import Image from 'next/image';
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-card text-warning">
       {/* CTA Section */}
-      <section className="bg-gradient-primary py-16 px-4">
-        <div className="container mx-auto text-center text-white">
+      <section className="bg-gradient-to-r from-gradient-primary-from to-gradient-primary-to py-16 px-4">
+        <div className="container mx-auto text-center text-light-dark-default">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Leaf className="w-8 h-8" />
             <h2 className="text-3xl md:text-4xl font-bold">
-              Ready to Go Green?
+              Sẵn sàng sống xanh?
             </h2>
           </div>
-          <p className="text-xl mb-8 text-white/90">
-            Download now and start making an impact today
+          <p className="text-xl mb-8 text-light-dark-default/90">
+            Tải ứng dụng ngay hôm nay và bắt đầu tạo tác động tích cực
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 transition-smooth shadow-glow text-base font-medium uppercase tracking-wide"
+              className="bg-light-dark-default text-primary hover:bg-light-dark-default/90 transition-smooth shadow-glow text-base font-medium uppercase tracking-wide"
             >
-              Download for Android
+              Tải cho Android
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="border-2 border-white text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-smooth text-base font-medium uppercase tracking-wide"
+              className="border-2 border-light-dark-default text-light-dark-default bg-light-dark-default/10 hover:bg-light-dark-default/20 backdrop-blur-sm transition-smooth text-base font-medium uppercase tracking-wide"
             >
-              Download for iOS
+              Tải cho iOS
             </Button>
           </div>
         </div>
@@ -41,7 +42,7 @@ const Footer = () => {
       {/* Footer Links */}
       <div id="contact" className="py-12 px-4 bg-black/90">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8 ">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
             {/* Brand */}
             <div className="space-y-4">
               <a href="#home" className="flex items-center gap-2 group">
@@ -55,26 +56,26 @@ const Footer = () => {
                   />
                 </div>
                 <h3
-                  className={`2xl:text-2xl font-semibold text-white  tracking-wide transition-all hover:opacity-70 `}
+                  className={`2xl:text-2xl font-semibold text-white tracking-wide transition-all hover:opacity-70`}
                 >
                   Green Connect
                 </h3>
               </a>
               <p className="text-sm text-white/70">
-                Connecting communities for a sustainable future.
+                Kết nối cộng đồng vì một tương lai bền vững.
               </p>
             </div>
 
             {/* Product */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Product</h3>
+              <h3 className="text-white font-semibold mb-4">Sản phẩm</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    Features
+                    Tính năng
                   </a>
                 </li>
                 <li>
@@ -82,7 +83,7 @@ const Footer = () => {
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    How It Works
+                    Cách hoạt động
                   </a>
                 </li>
                 <li>
@@ -90,7 +91,7 @@ const Footer = () => {
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    Pricing
+                    Bảng giá
                   </a>
                 </li>
                 <li>
@@ -98,7 +99,7 @@ const Footer = () => {
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    FAQ
+                    Câu hỏi thường gặp
                   </a>
                 </li>
               </ul>
@@ -106,14 +107,14 @@ const Footer = () => {
 
             {/* Company */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Company</h3>
+              <h3 className="text-white font-semibold mb-4">Công ty</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    About Us
+                    Giới thiệu
                   </a>
                 </li>
                 <li>
@@ -129,7 +130,7 @@ const Footer = () => {
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    Careers
+                    Tuyển dụng
                   </a>
                 </li>
                 <li>
@@ -137,7 +138,7 @@ const Footer = () => {
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    Contact
+                    Liên hệ
                   </a>
                 </li>
               </ul>
@@ -145,14 +146,14 @@ const Footer = () => {
 
             {/* Legal */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Legal</h3>
+              <h3 className="text-white font-semibold mb-4">Pháp lý</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    Privacy Policy
+                    Chính sách bảo mật
                   </a>
                 </li>
                 <li>
@@ -160,7 +161,7 @@ const Footer = () => {
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    Terms of Service
+                    Điều khoản sử dụng
                   </a>
                 </li>
                 <li>
@@ -168,7 +169,7 @@ const Footer = () => {
                     href="#"
                     className="text-white/70 hover:text-background transition-smooth"
                   >
-                    Cookie Policy
+                    Chính sách cookie
                   </a>
                 </li>
               </ul>
@@ -178,7 +179,7 @@ const Footer = () => {
           {/* Bottom Bar */}
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-white/70">
-              © {currentYear} Green Connect. All rights reserved.
+              © {currentYear} Green Connect. Mọi quyền được bảo lưu.
             </p>
 
             {/* Social Links */}
@@ -196,6 +197,13 @@ const Footer = () => {
                 aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5 text-white/70 group-hover:text-white transition-smooth" />
+              </a>
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-primary transition-smooth flex items-center justify-center group"
+                aria-label="Instagram"
+              >
+                <Facebook className="w-5 h-5 text-white/70 group-hover:text-white transition-smooth" />
               </a>
             </div>
           </div>

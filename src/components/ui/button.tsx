@@ -10,17 +10,20 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-primary text-light-dark-default radius-md shadow hover:opacity-90',
-        update: 'bg-[hsl(var(--warning-update))] text-white hover:opacity-90',
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+          'bg-primary text-light-dark-default radius-md shadow hover:opacity-90 cursor-pointer transition-smooth',
+        update:
+          'bg-[hsl(var(--warning-update))] text-white hover:opacity-90 cursor-pointer transition-smooth',
+        default:
+          'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer transition-smooth',
         destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+          'bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer transition-smooth',
         outline:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+          'border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-smooth',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80 cursor-pointer transition-smooth',
+        ghost:
+          'hover:bg-accent hover:text-accent-foreground cursor-pointer transition-smooth',
+        link: 'text-primary underline-offset-4 hover:underline cursor-pointer transition-smooth',
         // Custom variants
       },
       size: {

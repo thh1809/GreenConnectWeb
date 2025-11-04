@@ -6,12 +6,12 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 const navLinks = [
-  { name: 'Home', href: '#home' },
-  { name: 'Features', href: '#features' },
-  { name: 'How It Works', href: '#how-it-works' },
-  { name: 'Impact', href: '#impact' },
-  { name: 'Testimonials', href: '#testimonials' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Trang chủ', href: '#home' },
+  { name: 'Tính năng', href: '#features' },
+  { name: 'Cách hoạt động', href: '#how-it-works' },
+  { name: 'Tác động', href: '#impact' },
+  { name: 'Đánh giá', href: '#testimonials' },
+  { name: 'Liên hệ', href: '#contact' },
 ];
 
 const Header = () => {
@@ -43,7 +43,7 @@ const Header = () => {
                 <Image src={Logo} alt="logo" width={50} height={50} priority />
               </div>
               <h3
-                className={`2xl:text-2xl font-semibold text-white  tracking-wide transition-all hover:opacity-70 ${
+                className={`2xl:text-2xl font-semibold text-white tracking-wide transition-all hover:opacity-70 ${
                   isScrolled ? 'opacity-100' : 'hidden sm:block opacity-90'
                 }`}
               >
@@ -76,7 +76,7 @@ const Header = () => {
                 variant="primary"
                 className="font-semibold tracking-wide shadow-md hover:shadow-lg transition-all"
               >
-                Get the App
+                Tải ứng dụng
               </Button>
             </div>
 
@@ -84,7 +84,7 @@ const Header = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 rounded-lg text-foreground hover:bg-muted transition-all duration-300"
-              aria-label="Toggle menu"
+              aria-label="Chuyển menu"
             >
               {isMobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -136,7 +136,7 @@ const Header = () => {
               onClick={() => setIsMobileMenuOpen(false)}
               className="rounded-full mt-4 font-semibold tracking-wide"
             >
-              Get the App
+              Tải ứng dụng
             </Button>
           </nav>
         </div>
