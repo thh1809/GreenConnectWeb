@@ -1,15 +1,35 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Search, Trash2, Flag, MoreVertical } from "lucide-react";
-import { ConfirmRemoveDialog } from "@/components/admin/confirm-remove-dialog";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { ConfirmRemoveDialog } from '@/page/admin/components/confirm-remove-dialog';
+import { Flag, MoreVertical, Search, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 
-type PostStatus = "Pending" | "Approved" | "Flagged";
+type PostStatus = 'Pending' | 'Approved' | 'Flagged';
 
 type Post = {
   id: string;
@@ -24,25 +44,28 @@ type Post = {
 
 const posts: Post[] = Array.from({ length: 10 }).map((_, i) => ({
   id: `${i + 1}`,
-  image: "/hero-image.png",
+  image: '/hero-image.png',
   title: `Eco-Friendly Initiative ${i + 1}`,
   author: `User ${i + 1}`,
-  location: i % 3 === 0 ? "Ho Chi Minh City" : i % 3 === 1 ? "Hanoi" : "Da Nang",
-  status: i % 4 === 0 ? "Flagged" : i % 4 === 1 ? "Pending" : "Approved",
+  location:
+    i % 3 === 0 ? 'Ho Chi Minh City' : i % 3 === 1 ? 'Hanoi' : 'Da Nang',
+  status: i % 4 === 0 ? 'Flagged' : i % 4 === 1 ? 'Pending' : 'Approved',
   reports: i % 3 === 0 ? 5 : i % 3 === 1 ? 2 : 0,
-  date: `15-${String(i + 1).padStart(2, "0")}-2026`,
+  date: `15-${String(i + 1).padStart(2, '0')}-2026`,
 }));
 
 export default function PostsPage() {
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
-  const [removeType, setRemoveType] = useState<"selected" | "flagged">("selected");
+  const [removeType, setRemoveType] = useState<'selected' | 'flagged'>(
+    'selected'
+  );
 
   const handleSelectAll = (checked: boolean) => {
     setSelectAll(checked);
     if (checked) {
-      setSelectedPosts(new Set(posts.map((p) => p.id)));
+      setSelectedPosts(new Set(posts.map(p => p.id)));
     } else {
       setSelectedPosts(new Set());
     }
@@ -59,48 +82,55 @@ export default function PostsPage() {
     setSelectAll(newSelected.size === posts.length);
   };
 
-  const flaggedCount = posts.filter((p) => p.status === "Flagged").length;
+  const flaggedCount = posts.filter(p => p.status === 'Flagged').length;
   const selectedCount = selectedPosts.size;
 
   const getStatusColor = (status: PostStatus) => {
     switch (status) {
-      case "Approved":
-        return "bg-primary text-primary-foreground";
-      case "Pending":
-        return "bg-warning/20 text-warning-update";
-      case "Flagged":
-        return "bg-danger text-white";
+      case 'Approved':
+        return 'bg-primary text-primary-foreground';
+      case 'Pending':
+        return 'bg-warning/20 text-warning-update';
+      case 'Flagged':
+        return 'bg-danger text-white';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
 
   const handleRemoveSelected = () => {
-    setRemoveType("selected");
+    setRemoveType('selected');
     setRemoveDialogOpen(true);
   };
 
   const handleRemoveFlagged = () => {
-    setRemoveType("flagged");
+    setRemoveType('flagged');
     setRemoveDialogOpen(true);
   };
 
   const handleConfirmRemove = (reason: string) => {
-    if (removeType === "selected") {
+    if (removeType === 'selected') {
       // Xử lý xóa các bài đã chọn
-      console.log("Removing selected posts:", Array.from(selectedPosts), "Reason:", reason);
+      // console.log(
+      //   'Removing selected posts:',
+      //   Array.from(selectedPosts),
+      //   'Reason:',
+      //   reason
+      // );
       setSelectedPosts(new Set());
       setSelectAll(false);
     } else {
       // Xử lý xóa tất cả bài Flagged
-      const flaggedIds = posts.filter((p) => p.status === "Flagged").map((p) => p.id);
-      console.log("Removing flagged posts:", flaggedIds, "Reason:", reason);
+      const flaggedIds = posts
+        .filter(p => p.status === 'Flagged')
+        .map(p => p.id);
+      // console.log('Removing flagged posts:', flaggedIds, 'Reason:', reason);
     }
     // TODO: Gọi API để xóa thực sự
   };
 
   const getRemoveCount = () => {
-    if (removeType === "selected") {
+    if (removeType === 'selected') {
       return selectedPosts.size;
     } else {
       return flaggedCount;
@@ -111,7 +141,9 @@ export default function PostsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Posts</h1>
-        <p className="text-sm text-muted-foreground">Manage and moderate user posts, reviews, and content</p>
+        <p className="text-sm text-muted-foreground">
+          Manage and moderate user posts, reviews, and content
+        </p>
       </div>
 
       <Card>
@@ -148,12 +180,20 @@ export default function PostsPage() {
             <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/50 p-3">
               <span className="text-sm font-medium">Bulk Actions:</span>
               {selectedCount > 0 && (
-                <Button variant="destructive" size="sm" onClick={handleRemoveSelected}>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleRemoveSelected}
+                >
                   Remove Selected ({selectedCount})
                 </Button>
               )}
               {flaggedCount > 0 && (
-                <Button variant="destructive" size="sm" onClick={handleRemoveFlagged}>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleRemoveFlagged}
+                >
                   Remove All Flagged ({flaggedCount})
                 </Button>
               )}
@@ -168,7 +208,7 @@ export default function PostsPage() {
                   <input
                     type="checkbox"
                     checked={selectAll}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    onChange={e => handleSelectAll(e.target.checked)}
                     className="h-4 w-4 cursor-pointer rounded border-input"
                   />
                 </TableHead>
@@ -183,26 +223,38 @@ export default function PostsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {posts.map((post) => (
+              {posts.map(post => (
                 <TableRow key={post.id}>
                   <TableCell>
                     <input
                       type="checkbox"
                       checked={selectedPosts.has(post.id)}
-                      onChange={(e) => handleSelectPost(post.id, e.target.checked)}
+                      onChange={e =>
+                        handleSelectPost(post.id, e.target.checked)
+                      }
                       className="h-4 w-4 cursor-pointer rounded border-input"
                     />
                   </TableCell>
                   <TableCell>
                     <div className="h-12 w-12 overflow-hidden rounded-md border border-border">
-                      <img src={post.image} alt={post.title} className="h-full w-full object-cover" />
+                      <Image
+                        src={post.image}
+                        alt={post.title}
+                        className="h-full w-full object-cover"
+                      />
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium max-w-xs truncate">{post.title}</TableCell>
+                  <TableCell className="font-medium max-w-xs truncate">
+                    {post.title}
+                  </TableCell>
                   <TableCell>{post.author}</TableCell>
                   <TableCell>{post.location}</TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(post.status)}`}>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(
+                        post.status
+                      )}`}
+                    >
                       {post.status}
                     </span>
                   </TableCell>
@@ -218,10 +270,18 @@ export default function PostsPage() {
                   </TableCell>
                   <TableCell>{post.date}</TableCell>
                   <TableCell className="space-x-2 text-right">
-                    <Button size="icon-sm" variant="outline" aria-label="More options">
+                    <Button
+                      size="icon-sm"
+                      variant="outline"
+                      aria-label="More options"
+                    >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
-                    <Button size="icon-sm" variant="destructive" aria-label="Delete">
+                    <Button
+                      size="icon-sm"
+                      variant="destructive"
+                      aria-label="Delete"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -232,7 +292,9 @@ export default function PostsPage() {
 
           {/* Footer */}
           <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
-            <div className="text-xs text-muted-foreground">Show 10 of 100 posts</div>
+            <div className="text-xs text-muted-foreground">
+              Show 10 of 100 posts
+            </div>
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
@@ -258,4 +320,3 @@ export default function PostsPage() {
     </div>
   );
 }
-

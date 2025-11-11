@@ -1,5 +1,5 @@
-import { Card } from "@/components/ui/card";
-import { ReactNode } from "react";
+import { Card } from '@/components/ui/card';
+import { ReactNode } from 'react';
 
 type StatCardProps = {
   title: string;
@@ -9,7 +9,7 @@ type StatCardProps = {
 
 export function StatCard({ title, value, icon }: StatCardProps) {
   return (
-    <Card className="flex items-center justify-between rounded-xl p-5">
+    <Card className="flex items-center justify-between rounded-xl border-border p-5">
       <div>
         <div className="text-sm text-muted-foreground">{title}</div>
         <div className="mt-1 text-3xl font-semibold">{value}</div>
@@ -18,6 +18,3 @@ export function StatCard({ title, value, icon }: StatCardProps) {
     </Card>
   );
 }
-
-
-

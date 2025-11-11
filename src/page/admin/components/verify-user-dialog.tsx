@@ -1,9 +1,17 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
-import { Calendar, IdCard, User2 } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
+import { Calendar, IdCard, User2 } from 'lucide-react';
 
 type VerifyUser = {
   id: string;
@@ -28,7 +36,9 @@ export function VerifyUserDialog({ user, onVerify }: VerifyUserDialogProps) {
       <DialogContent className="max-w-3xl rounded-xl p-6 sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Verify User Account</DialogTitle>
-          <p className="text-sm text-muted-foreground">Review the user information and documents before verification.</p>
+          <p className="text-sm text-muted-foreground">
+            Review the user information and documents before verification.
+          </p>
         </DialogHeader>
 
         <div className="space-y-6 pt-2">
@@ -45,7 +55,9 @@ export function VerifyUserDialog({ user, onVerify }: VerifyUserDialogProps) {
               <Calendar className="mt-0.5 h-5 w-5 text-muted-foreground" />
               <div>
                 <div className="text-sm font-medium">Join day</div>
-                <div className="text-sm text-muted-foreground">{user.joinDay}</div>
+                <div className="text-sm text-muted-foreground">
+                  {user.joinDay}
+                </div>
               </div>
             </div>
           </div>
@@ -56,22 +68,28 @@ export function VerifyUserDialog({ user, onVerify }: VerifyUserDialogProps) {
           <div>
             <div className="px-1 text-sm font-semibold">Uploaded Documents</div>
             <div className="mt-3 space-y-3">
-              {["front_id.pdf", "back_id.pdf", "image_profile.pdf"].map((name) => (
-                <div
-                  key={name}
-                  className="flex items-center justify-between rounded-md bg-secondary px-4 py-3 text-sm"
-                >
-                  <span>{name}</span>
-                  <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs text-primary">Uploaded</span>
-                </div>
-              ))}
+              {['front_id.pdf', 'back_id.pdf', 'image_profile.pdf'].map(
+                name => (
+                  <div
+                    key={name}
+                    className="flex items-center justify-between rounded-md bg-secondary px-4 py-3 text-sm"
+                  >
+                    <span>{name}</span>
+                    <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                      Uploaded
+                    </span>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
           {/* Actions */}
           <DialogFooter className="pt-2">
             <DialogClose asChild>
-              <Button variant="outline" className="min-w-28">Cancel</Button>
+              <Button variant="outline" className="min-w-28">
+                Cancel
+              </Button>
             </DialogClose>
             <DialogClose asChild>
               <Button
@@ -88,5 +106,3 @@ export function VerifyUserDialog({ user, onVerify }: VerifyUserDialogProps) {
     </Dialog>
   );
 }
-
-
