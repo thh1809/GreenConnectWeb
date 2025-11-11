@@ -107,7 +107,7 @@ const Testimonials = () => {
 
       <div className="container mx-auto relative z-10">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-light-dark-reverse text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center gap-3">
+          <h2 className="text-black text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center gap-3">
             Người dùng nói gì <span className="text-3xl">🌱</span>
           </h2>
           <p className="text-xl text-muted-foreground mx-auto">
