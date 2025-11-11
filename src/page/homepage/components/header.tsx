@@ -44,7 +44,7 @@ const Header = () => {
               </div>
               <h3
                 className={`2xl:text-2xl font-semibold text-white tracking-wide transition-all hover:opacity-70 ${
-                  isScrolled ? 'opacity-100' : 'hidden sm:block opacity-90'
+                  isScrolled ? 'opacity-1' : 'hidden sm:block opacity-90'
                 }`}
               >
                 Green Connect
@@ -59,7 +59,7 @@ const Header = () => {
                   href={link.href}
                   className={`relative text-sm font-medium transition-all duration-300 group ${
                     isScrolled
-                      ? 'color-light-dark-reverse hover:text-primary'
+                      ? 'text-light-dark-reverse hover:text-primary'
                       : 'text-light-dark-default hover:text-light-dark-reverse'
                   }`}
                 >

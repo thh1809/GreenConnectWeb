@@ -27,7 +27,10 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 px-4">
+    <section
+      id="features"
+      className="py-24 px-4 bg-background text-foreground transition-colors duration-300"
+    >
       <div className="container mx-auto">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -44,11 +47,11 @@ const Features = () => {
             return (
               <Card
                 key={index}
-                className="p-8 shadow-soft hover:shadow-medium transition-smooth group cursor-pointer border-0 animate-fade-in"
+                className="p-8 bg-card text-card-foreground border border-border shadow-soft hover:shadow-medium hover:bg-muted/10 transition-all duration-300 group cursor-pointer animate-fade-in"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
-                <div className="mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-r from-gradient-primary-from to-gradient-primary-to shadow-glow group-hover:scale-110 transition-smooth">
-                  <Icon className="w-8 h-8 text-light-dark-default" />
+                <div className="mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-r from-gradient-primary-from to-gradient-primary-to shadow-glow group-hover:scale-110 group-hover:brightness-110 transition-transform duration-300">
+                  <Icon className="w-8 h-8 text-light-dark-default drop-shadow-[0_0_6px_hsl(var(--primary)/0.4)]" />
                 </div>
 
                 <h3 className="text-2xl font-semibold mb-3">{feature.title}</h3>
@@ -59,7 +62,7 @@ const Features = () => {
 
                 <a
                   href={feature.link}
-                  className="text-primary font-medium inline-flex items-center gap-2 hover:gap-3 transition-smooth"
+                  className="text-primary font-medium inline-flex items-center gap-2 hover:gap-3 transition-all duration-300 hover:text-primary-foreground"
                 >
                   Tìm hiểu thêm →
                 </a>
