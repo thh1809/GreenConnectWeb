@@ -71,7 +71,7 @@
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.0.1",
     "eslint-config-prettier": "^10.1.8",
-    "husky": "^9.1.7",
+    "husky": "^8.0.0",
     "lint-staged": "^16.2.6",
     "typescript": "^5",
     "typescript-eslint": "^8.46.3"
