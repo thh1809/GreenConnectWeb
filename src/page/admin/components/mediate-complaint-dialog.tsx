@@ -33,7 +33,7 @@ export function MediateComplaintDialog({ open, onOpenChange, onSubmit }: Mediate
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-full max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Mediate Complaint</DialogTitle>
           <p className="text-sm text-muted-foreground pt-2">
