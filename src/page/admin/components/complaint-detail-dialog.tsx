@@ -33,17 +33,17 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader className="space-y-0 pb-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <DialogClose asChild>
-                <Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground hover:text-light-dark-reverse">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Complaints
                 </Button>
               </DialogClose>
-              <DialogTitle className="text-2xl font-bold">{complaint.title}</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-light-dark-reverse">{complaint.title}</DialogTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 reported by {complaint.user} on {complaint.date}
               </p>
@@ -57,7 +57,7 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
         <div className="space-y-6">
           {/* Complaint Description */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold">Complaint Description</label>
+            <label className="text-sm font-semibold text-light-dark-reverse">Complaint Description</label>
             <div className="rounded-md border border-border bg-muted/30 p-4 text-sm">
               {complaint.description}
             </div>
@@ -81,7 +81,7 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
                 {complaint.chatLogs.map((msg) => (
                   <div key={msg.id} className="space-y-1">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground">{msg.sender}</span>
+                      <span className="font-semibold text-light-dark-reverse">{msg.sender}</span>
                       <span>•</span>
                       <span>{msg.timestamp}</span>
                     </div>
