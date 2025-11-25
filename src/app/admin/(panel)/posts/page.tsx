@@ -1,21 +1,21 @@
-'use client';
+'use client'
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
+} from '@/components/ui/pagination'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -23,24 +23,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { ConfirmRemoveDialog } from '@/page/admin/components/confirm-remove-dialog';
-import { Flag, MoreVertical, Search, Trash2 } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
+} from '@/components/ui/table'
+import { ConfirmRemoveDialog } from '@/page/admin/components/confirm-remove-dialog'
+import { Flag, MoreVertical, Search, Trash2 } from 'lucide-react'
+import Image from 'next/image'
+import { useState } from 'react'
 
-type PostStatus = 'Pending' | 'Approved' | 'Flagged';
+type PostStatus = 'Pending' | 'Approved' | 'Flagged'
 
 type Post = {
-  id: string;
-  image: string;
-  title: string;
-  author: string;
-  location: string;
-  status: PostStatus;
-  reports: number;
-  date: string;
-};
+  id: string
+  image: string
+  title: string
+  author: string
+  location: string
+  status: PostStatus
+  reports: number
+  date: string
+}
 
 const posts: Post[] = Array.from({ length: 10 }).map((_, i) => ({
   id: `${i + 1}`,
@@ -52,90 +52,79 @@ const posts: Post[] = Array.from({ length: 10 }).map((_, i) => ({
   status: i % 4 === 0 ? 'Flagged' : i % 4 === 1 ? 'Pending' : 'Approved',
   reports: i % 3 === 0 ? 5 : i % 3 === 1 ? 2 : 0,
   date: `15-${String(i + 1).padStart(2, '0')}-2026`,
-}));
+}))
 
 export default function PostsPage() {
-  const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
-  const [selectAll, setSelectAll] = useState(false);
-  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set())
+  const [selectAll, setSelectAll] = useState(false)
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
   const [removeType, setRemoveType] = useState<'selected' | 'flagged'>(
     'selected'
-  );
+  )
 
   const handleSelectAll = (checked: boolean) => {
-    setSelectAll(checked);
+    setSelectAll(checked)
     if (checked) {
-      setSelectedPosts(new Set(posts.map(p => p.id)));
+      setSelectedPosts(new Set(posts.map(p => p.id)))
     } else {
-      setSelectedPosts(new Set());
+      setSelectedPosts(new Set())
     }
-  };
+  }
 
   const handleSelectPost = (id: string, checked: boolean) => {
-    const newSelected = new Set(selectedPosts);
+    const newSelected = new Set(selectedPosts)
     if (checked) {
-      newSelected.add(id);
+      newSelected.add(id)
     } else {
-      newSelected.delete(id);
+      newSelected.delete(id)
     }
-    setSelectedPosts(newSelected);
-    setSelectAll(newSelected.size === posts.length);
-  };
+    setSelectedPosts(newSelected)
+    setSelectAll(newSelected.size === posts.length)
+  }
 
-  const flaggedCount = posts.filter(p => p.status === 'Flagged').length;
-  const selectedCount = selectedPosts.size;
+  const flaggedCount = posts.filter(p => p.status === 'Flagged').length
+  const selectedCount = selectedPosts.size
 
   const getStatusColor = (status: PostStatus) => {
     switch (status) {
       case 'Approved':
-        return 'bg-primary text-primary-foreground';
+        return 'bg-primary text-primary-foreground'
       case 'Pending':
-        return 'bg-warning/20 text-warning-update';
+        return 'bg-warning/20 text-warning-update'
       case 'Flagged':
-        return 'bg-danger text-white';
+        return 'bg-danger text-white'
       default:
-        return 'bg-muted text-muted-foreground';
+        return 'bg-muted text-muted-foreground'
     }
-  };
+  }
 
   const handleRemoveSelected = () => {
-    setRemoveType('selected');
-    setRemoveDialogOpen(true);
-  };
+    setRemoveType('selected')
+    setRemoveDialogOpen(true)
+  }
 
   const handleRemoveFlagged = () => {
-    setRemoveType('flagged');
-    setRemoveDialogOpen(true);
-  };
+    setRemoveType('flagged')
+    setRemoveDialogOpen(true)
+  }
 
   const handleConfirmRemove = (reason: string) => {
     if (removeType === 'selected') {
-      // Xử lý xóa các bài đã chọn
-      // console.log(
-      //   'Removing selected posts:',
-      //   Array.from(selectedPosts),
-      //   'Reason:',
-      //   reason
-      // );
-      setSelectedPosts(new Set());
-      setSelectAll(false);
+      setSelectedPosts(new Set())
+      setSelectAll(false)
     } else {
-      // Xử lý xóa tất cả bài Flagged
-      const flaggedIds = posts
-        .filter(p => p.status === 'Flagged')
-        .map(p => p.id);
-      // console.log('Removing flagged posts:', flaggedIds, 'Reason:', reason);
+      posts.filter(p => p.status === 'Flagged').map(p => p.id)
     }
-    // TODO: Gọi API để xóa thực sự
-  };
+    // TODO: call API
+  }
 
   const getRemoveCount = () => {
     if (removeType === 'selected') {
-      return selectedPosts.size;
+      return selectedPosts.size
     } else {
-      return flaggedCount;
+      return flaggedCount
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -320,5 +309,6 @@ export default function PostsPage() {
         onConfirm={handleConfirmRemove}
       />
     </div>
-  );
+  )
 }
+

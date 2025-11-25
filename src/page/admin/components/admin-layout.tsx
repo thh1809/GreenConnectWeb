@@ -2,14 +2,15 @@
 
 import type { LucideIcon } from 'lucide-react';
 import * as Icons from 'lucide-react';
-import { Moon, PanelLeftClose, PanelLeftOpen, Sun } from 'lucide-react';
+import { LogOut, Moon, PanelLeftClose, PanelLeftOpen, Sun } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function AdminLayout({ items, logo, children }: any) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('sidebar-collapsed') === 'true';
@@ -40,13 +41,23 @@ export default function AdminLayout({ items, logo, children }: any) {
     localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
   };
 
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
+      document.cookie =
+        'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+      router.push('/admin/login');
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-background text-foreground transition-colors">
       {/* ===== Sidebar ===== */}
       <aside
         className={`${
           isCollapsed ? 'w-18' : 'w-64'
-        } border-r border-border bg-card px-4 py-4 transition-all duration-300`}
+        } border-r border-border bg-card px-4 py-4 transition-all duration-300 flex flex-col`}
       >
         {/* Logo + Name */}
         <div
@@ -65,7 +76,7 @@ export default function AdminLayout({ items, logo, children }: any) {
         </div>
 
         {/* Nav items */}
-        <nav className="flex flex-col gap-2">
+        <nav className="flex flex-1 flex-col gap-2">
           {items.map((it: any) => {
             const active = pathname === it.href;
 
@@ -100,6 +111,18 @@ export default function AdminLayout({ items, logo, children }: any) {
             );
           })}
         </nav>
+
+        <div className="mt-6 border-t border-border pt-4">
+          <button
+            onClick={handleLogout}
+            className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10 transition-colors ${
+              isCollapsed ? 'justify-center' : ''
+            }`}
+          >
+            <LogOut className="h-5 w-5" />
+            {!isCollapsed && <span>Đăng xuất</span>}
+          </button>
+        </div>
       </aside>
 
       {/* ===== Right Section ===== */}

@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { LineAreaChart } from '@/page/admin/components/line-area-chart';
-import { StatCard } from '@/page/admin/components/stat-card';
-import { AlarmClock, AlertTriangle, CheckCheck, Gift } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { LineAreaChart } from '@/page/admin/components/line-area-chart'
+import { StatCard } from '@/page/admin/components/stat-card'
+import { AlarmClock, AlertTriangle, CheckCheck, Gift } from 'lucide-react'
 
 const mock = [
   { label: 'Mon', value: 12 },
@@ -12,7 +12,7 @@ const mock = [
   { label: 'Fri', value: 22 },
   { label: 'Sat', value: 18 },
   { label: 'Sun', value: 14 },
-];
+]
 
 export default function DashboardPage() {
   return (
@@ -55,5 +55,6 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
+

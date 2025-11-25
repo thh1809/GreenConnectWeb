@@ -2,11 +2,26 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'https://api.example.com';
 
+const getCookieValue = (name: string) => {
+  if (typeof document === 'undefined') return null;
+  const value = document.cookie
+    .split('; ')
+    .find(row => row.startsWith(`${name}=`));
+  return value ? decodeURIComponent(value.split('=')[1]) : null;
+};
+
 const getAuthHeader = (): Record<string, string> => {
-  const token =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('authToken')
-      : process.env.API_TOKEN;
+  let token: string | null | undefined = undefined;
+
+  if (typeof window !== 'undefined') {
+    token = localStorage.getItem('authToken') ?? sessionStorage.getItem('authToken');
+    if (!token) {
+      token = getCookieValue('authToken');
+    }
+  } else {
+    token = process.env.API_TOKEN;
+  }
+
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -72,10 +87,12 @@ export const patch = <T>(endpoint: string, body?: any) =>
 export const del = <T>(endpoint: string) =>
   apiRequest<T>(endpoint, { method: 'DELETE' });
 
-export default {
+const apiClient = {
   get,
   post,
   put,
   patch,
   del,
 };
+
+export default apiClient;
