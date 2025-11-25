@@ -1,27 +1,32 @@
 export const adminRoutes = [
   {
     label: 'Dashboard',
-    href: '/dashboard',
+    href: '/admin/dashboard',
     icon: 'ChartSpline',
   },
   {
     label: 'Users',
-    href: '/users',
+    href: '/admin/users',
     icon: 'UserRound',
   },
   {
     label: 'Categories',
-    href: '/categories',
+    href: '/admin/categories',
     icon: 'Columns3',
   },
   {
     label: 'Complaints',
-    href: '/complaints',
+    href: '/admin/complaints',
     icon: 'BadgeAlert',
   },
   {
     label: 'Posts',
-    href: '/posts',
+    href: '/admin/posts',
     icon: 'Recycle',
+  },
+  {
+    label: 'Reward Items',
+    href: '/admin/reward-items',
+    icon: 'Gift',
   },
 ];

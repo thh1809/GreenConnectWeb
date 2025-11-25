@@ -8,6 +8,7 @@
   🌞 Light Theme (Variable CSS)
 =========================== */
 :root {
+  
   --light-dark-reverse: 0 0% 0%;
   --light-dark-default: 0 0% 100%;
   --background: 0 0% 96%;
@@ -35,6 +36,8 @@
 
   --gradient-primary: linear-gradient(to right, var(--color-gradient-primary-from), var(--color-gradient-primary-to));
   --gradient-secondary: linear-gradient(to right, var(--color-gradient-secondary-from), var(--color-gradient-secondary-to));
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
 
 }
 
@@ -68,6 +71,9 @@
 
   --gradient-primary: linear-gradient(to right, var(--color-gradient-primary-from), var(--color-gradient-primary-to));
   --gradient-secondary: linear-gradient(to bottom, var(--color-gradient-secondary-from), var(--color-gradient-secondary-to));
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 94%;
+
 }
 
 /* ===========================
@@ -144,6 +150,11 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
+
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
 }
 
 
