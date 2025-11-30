@@ -7,6 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { Input } from "@/components/ui/input"
@@ -41,6 +51,10 @@ export default function RewardItemsPage() {
   const [detailItem, setDetailItem] = useState<RewardItem | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
+
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null)
 
   const fetchRewardItems = useCallback(async () => {
     try {
@@ -147,14 +161,23 @@ export default function RewardItemsPage() {
     }
   }
 
-  const handleDeleteItem = async (id: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa vật phẩm đổi thưởng này?")) return
+  const handleDeleteClick = (id: number) => {
+    setItemToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (itemToDelete === null) return
 
     try {
-      await rewardItemsApi.delete(id)
+      await rewardItemsApi.delete(itemToDelete)
       await fetchRewardItems()
+      setDeleteDialogOpen(false)
+      setItemToDelete(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete reward item")
+      setDeleteDialogOpen(false)
+      setItemToDelete(null)
     }
   }
 
@@ -433,7 +456,7 @@ export default function RewardItemsPage() {
                               variant="destructive"
                               aria-label="Delete"
                               className="h-8 w-8"
-                              onClick={() => handleDeleteItem(item.rewardItemId)}
+                              onClick={() => handleDeleteClick(item.rewardItemId)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -587,6 +610,35 @@ export default function RewardItemsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open)
+          if (!open) {
+            setItemToDelete(null)
+          }
+        }}
+      >
+        <AlertDialogContent className="bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa vật phẩm đổi thưởng này? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

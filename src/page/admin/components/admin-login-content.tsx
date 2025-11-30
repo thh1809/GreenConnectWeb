@@ -64,26 +64,22 @@ export function AdminLoginContent() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-primary/5 via-background to-background px-4 py-10 text-foreground">
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute right-12 top-12 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute left-10 bottom-10 h-40 w-40 rounded-full bg-secondary/40 blur-3xl" />
-      </div>
-
-      <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
-        <section className="flex flex-col gap-6 rounded-3xl border border-border/70 bg-card/70 p-8 shadow-2xl shadow-primary/5 backdrop-blur">
+    <div className="min-h-screen bg-muted/30 px-4 py-10">
+      <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
+        {/* Left Panel - GreenConnect Admin Information */}
+        <section className="flex flex-col gap-6 rounded-2xl bg-card p-8 shadow-lg">
           <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <Image
                 src={Logo}
                 alt="GreenConnect Logo"
-                className="h-10 w-10"
+                className="h-8 w-8"
                 priority
               />
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Bảng điều khiển</p>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              <h1 className="text-2xl font-bold text-foreground">
                 GreenConnect Admin
               </h1>
             </div>
@@ -94,24 +90,24 @@ export function AdminLoginContent() {
             Đăng nhập an toàn với lớp bảo mật chuẩn hoá bởi nhóm GreenConnect.
           </p>
 
-          <div className="grid gap-4 rounded-2xl border border-border/70 bg-background/60 p-6">
+          <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <div className="rounded-xl bg-primary/15 p-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                 <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium">Bảo mật đa lớp</p>
+                <p className="text-sm font-semibold">Bảo mật đa lớp</p>
                 <p className="text-sm text-muted-foreground">
                   Phiên đăng nhập được mã hoá và ghi nhận nhật ký truy cập theo thời gian thực.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="rounded-xl bg-primary/15 p-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium">Giao diện thân thiện</p>
+                <p className="text-sm font-semibold">Giao diện thân thiện</p>
                 <p className="text-sm text-muted-foreground">
                   Tối ưu cho cả desktop và tablet, đồng thời tương thích chế độ tối/sáng.
                 </p>
@@ -119,33 +115,34 @@ export function AdminLoginContent() {
             </div>
           </div>
 
-          <div className="flex gap-6 text-sm">
+          <div className="flex gap-8">
             <div>
-              <p className="text-2xl font-semibold text-primary">+240</p>
-              <p className="text-muted-foreground">Điểm thu gom đang hoạt động</p>
+              <p className="text-3xl font-bold text-primary">+240</p>
+              <p className="text-sm text-muted-foreground">Điểm thu gom đang hoạt động</p>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-primary">99.95%</p>
-              <p className="text-muted-foreground">Thời gian sẵn sàng hệ thống</p>
+              <p className="text-3xl font-bold text-primary">99.95%</p>
+              <p className="text-sm text-muted-foreground">Thời gian sẵn sàng hệ thống</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Leaf className="h-4 w-4 text-primary" />
-            Cam kết vận hành xanh và minh bạch cùng GreenConnect.
+            <span>Cam kết vận hành xanh và minh bạch cùng GreenConnect.</span>
           </div>
         </section>
 
-        <Card className="flex flex-col border border-border/70 shadow-2xl shadow-primary/10 rounded-3xl lg:max-w-none">
-          <CardHeader className="space-y-2 text-center">
-            <CardTitle className="text-2xl font-semibold">Đăng nhập quản trị</CardTitle>
+        {/* Right Panel - Admin Login Form */}
+        <Card className="flex flex-col border shadow-lg rounded-2xl lg:max-w-none">
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-2xl font-bold">Đăng nhập quản trị</CardTitle>
             <CardDescription>
               Nhập thông tin tài khoản được cấp để truy cập bảng điều khiển.
             </CardDescription>
           </CardHeader>
 
           <CardContent>
-            <form className="space-y-6" onSubmit={onSubmit}>
+            <form className="space-y-5" onSubmit={onSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email tổ chức</Label>
                 <Input
@@ -155,6 +152,7 @@ export function AdminLoginContent() {
                   autoComplete="email"
                   value={email}
                   onChange={event => setEmail(event.target.value)}
+                  className="bg-muted/50"
                   required
                 />
               </div>
@@ -164,7 +162,7 @@ export function AdminLoginContent() {
                   <Label htmlFor="password">Mật khẩu</Label>
                   <Link
                     href="/quen-mat-khau"
-                    className="text-sm text-primary hover:opacity-80"
+                    className="text-sm text-primary hover:underline"
                   >
                     Quên mật khẩu?
                   </Link>
@@ -176,16 +174,17 @@ export function AdminLoginContent() {
                   autoComplete="current-password"
                   value={password}
                   onChange={event => setPassword(event.target.value)}
+                  className="bg-muted/50"
                   required
                 />
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/30 px-4 py-3">
-                <div className="flex flex-col">
+              <div className="flex items-center justify-between rounded-lg bg-muted/30 px-4 py-3">
+                <div className="space-y-0.5">
                   <span className="text-sm font-medium">Ghi nhớ đăng nhập</span>
-                  <span className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Chỉ bật trên thiết bị đáng tin cậy
-                  </span>
+                  </p>
                 </div>
                 <Switch
                   id="remember"
@@ -194,11 +193,11 @@ export function AdminLoginContent() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" variant="primary" disabled={isSubmitting}>
                 {isSubmitting ? "Đang xác thực..." : "Đăng nhập"}
               </Button>
 
-              <Button type="button" variant="outline" className="w-full gap-2">
+              <Button type="button" variant="outline" className="w-full gap-2 bg-muted/30">
                 <LogIn className="h-4 w-4" />
                 Đăng nhập nhanh bằng OTP
               </Button>
@@ -230,15 +229,15 @@ export function AdminLoginContent() {
             )}
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 text-center text-sm text-muted-foreground">
-            <p>
+          <CardFooter className="flex flex-col gap-3 text-center text-sm">
+            <p className="text-muted-foreground">
               Bạn chưa có tài khoản quản trị?{" "}
-              <Link href="/lien-he" className="font-medium text-primary">
+              <Link href="/lien-he" className="font-medium text-primary hover:underline">
                 Liên hệ nhóm GreenConnect
               </Link>
             </p>
-            <Link href="/" className="text-primary hover:opacity-80">
-              ← Quay về trang chủ
+            <Link href="/" className="text-primary hover:underline flex items-center justify-center gap-1">
+              <span>←</span> Quay về trang chủ
             </Link>
           </CardFooter>
         </Card>
@@ -246,4 +245,3 @@ export function AdminLoginContent() {
     </div>
   )
 }
-
