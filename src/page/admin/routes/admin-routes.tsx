@@ -1,47 +1,47 @@
 export const adminRoutes = [
   {
-    label: 'Dashboard',
+    label: 'Bảng thống kê',
     href: '/admin/dashboard',
     icon: 'ChartSpline',
   },
   {
-    label: 'Users',
+    label: 'Quản lý người dùng',
     href: '/admin/users',
     icon: 'UserRound',
   },
   {
-    label: 'Collector',
+    label: 'Quản lý người thu gom',
     href: '/admin/collector',
     icon: 'Briefcase',
   },
 
   {
-    label: 'Categories',
+    label: 'Danh mục',
     href: '/admin/categories',
     icon: 'Columns3',
   },
   {
-    label: 'Complaints',
+    label: 'Phàn nàn',
     href: '/admin/complaints',
     icon: 'BadgeAlert',
   },
   {
-    label: 'Posts',
+    label: 'Bài viết',
     href: '/admin/posts',
     icon: 'Recycle',
   },
   {
-    label: 'Reward Items',
+    label: 'Phần thưởng',
     href: '/admin/reward-items',
     icon: 'Gift',
   },
   {
-    label: 'Prices',
+    label: 'Giá cả',
     href: '/admin/prices',
     icon: 'DollarSign',
   },
   {
-    label:"Payment",
+    label:"Thanh toán",
     href: '/admin/payment',
     icon: 'CreditCard',
   }
