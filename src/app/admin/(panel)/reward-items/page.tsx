@@ -7,6 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { Input } from "@/components/ui/input"
@@ -31,6 +41,8 @@ export default function RewardItemsPage() {
   const [description, setDescription] = useState("")
   const [pointCost, setPointCost] = useState("")
   const [imageUrl, setImageUrl] = useState("")
+  const [type, setType] = useState("")
+  const [value, setValue] = useState("")
   const [stockQuantity, setStockQuantity] = useState("")
   const [isActive, setIsActive] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -42,6 +54,10 @@ export default function RewardItemsPage() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
 
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null)
+
   const fetchRewardItems = useCallback(async () => {
     try {
       setLoading(true)
@@ -50,9 +66,9 @@ export default function RewardItemsPage() {
         pageNumber: currentPage,
         pageSize,
       })
-      setRewardItemsData(response.data)
-      setTotalPages(response.pagination.totalPages)
-      setTotalRecords(response.pagination.totalRecords)
+      setRewardItemsData(Array.isArray(response.data) ? response.data : [])
+      setTotalPages(response.pagination?.totalPages || 1)
+      setTotalRecords(response.pagination?.totalRecords || 0)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load reward items")
     } finally {
@@ -71,6 +87,8 @@ export default function RewardItemsPage() {
       setDescription(item.description || "")
       setPointCost((item.pointsCost || item.pointCost || 0).toString())
       setImageUrl(item.imageUrl || "")
+      setType(item.type || "")
+      setValue(item.value || "")
       setStockQuantity(item.stockQuantity?.toString() || "")
       setIsActive(item.isActive ?? true)
     } else {
@@ -79,6 +97,8 @@ export default function RewardItemsPage() {
       setDescription("")
       setPointCost("")
       setImageUrl("")
+      setType("")
+      setValue("")
       setStockQuantity("")
       setIsActive(true)
     }
@@ -93,6 +113,8 @@ export default function RewardItemsPage() {
     setDescription("")
     setPointCost("")
     setImageUrl("")
+    setType("")
+    setValue("")
     setStockQuantity("")
     setIsActive(true)
     setDialogError(null)
@@ -123,6 +145,12 @@ export default function RewardItemsPage() {
       if (imageUrl.trim()) {
         payload.imageUrl = imageUrl.trim()
       }
+      if (type.trim()) {
+        payload.type = type.trim()
+      }
+      if (value.trim()) {
+        payload.value = value.trim()
+      }
       if (stockQuantity.trim()) {
         const stockNum = parseInt(stockQuantity)
         if (!isNaN(stockNum) && stockNum >= 0) {
@@ -147,14 +175,23 @@ export default function RewardItemsPage() {
     }
   }
 
-  const handleDeleteItem = async (id: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa vật phẩm đổi thưởng này?")) return
+  const handleDeleteClick = (id: number) => {
+    setItemToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (itemToDelete === null) return
 
     try {
-      await rewardItemsApi.delete(id)
+      await rewardItemsApi.delete(itemToDelete)
       await fetchRewardItems()
+      setDeleteDialogOpen(false)
+      setItemToDelete(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete reward item")
+      setDeleteDialogOpen(false)
+      setItemToDelete(null)
     }
   }
 
@@ -164,7 +201,7 @@ export default function RewardItemsPage() {
     }
   }
 
-  const filteredItems = rewardItemsData.filter(item =>
+  const filteredItems = (rewardItemsData || []).filter(item =>
     item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
@@ -279,6 +316,32 @@ export default function RewardItemsPage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="type" className="text-sm font-semibold">
+                  Loại
+                </Label>
+                <Input
+                  id="type"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  placeholder="Nhập loại (ví dụ: Credit, Package)"
+                  className="bg-background"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="value" className="text-sm font-semibold">
+                  Giá trị
+                </Label>
+                <Input
+                  id="value"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder="Nhập giá trị (tùy chọn)"
+                  className="bg-background"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="stock-quantity" className="text-sm font-semibold">
                   Số lượng tồn kho
                 </Label>
@@ -344,7 +407,7 @@ export default function RewardItemsPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Search Bar */}
-          <div className="relative w-full sm:max-w-xs">
+          <div className="relative w-full sm:max-w-md">
             <Input
               placeholder="Tìm kiếm theo tên..."
               value={searchQuery}
@@ -375,6 +438,7 @@ export default function RewardItemsPage() {
                   <TableHeader>
                     <TableRow className="border-b">
                       <TableHead className="h-12 px-4 font-semibold">ID</TableHead>
+                      <TableHead className="h-12 px-4 font-semibold">Hình ảnh</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Tên vật phẩm</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Điểm đổi</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Tồn kho</TableHead>
@@ -387,6 +451,24 @@ export default function RewardItemsPage() {
                       <TableRow key={item.rewardItemId} className="border-b">
                         <TableCell className="px-4 py-4 font-medium">
                           #{item.rewardItemId}
+                        </TableCell>
+                        <TableCell className="px-4 py-4">
+                          {item.imageUrl ? (
+                            <div className="relative h-12 w-12 overflow-hidden rounded-md border">
+                              <Image
+                                src={item.imageUrl}
+                                alt={item.itemName}
+                                width={48}
+                                height={48}
+                                className="object-cover"
+                                unoptimized
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-md border bg-muted text-xs text-muted-foreground">
+                              Không có
+                            </div>
+                          )}
                         </TableCell>
                         <TableCell className="px-4 py-4 font-medium">
                           {item.itemName}
@@ -433,7 +515,7 @@ export default function RewardItemsPage() {
                               variant="destructive"
                               aria-label="Delete"
                               className="h-8 w-8"
-                              onClick={() => handleDeleteItem(item.rewardItemId)}
+                              onClick={() => handleDeleteClick(item.rewardItemId)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -555,6 +637,20 @@ export default function RewardItemsPage() {
                   </div>
                 </div>
 
+                {detailItem.type && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-muted-foreground">Loại</Label>
+                    <div className="text-base">{detailItem.type}</div>
+                  </div>
+                )}
+
+                {detailItem.value && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-muted-foreground">Giá trị</Label>
+                    <div className="text-base">{detailItem.value}</div>
+                  </div>
+                )}
+
                 {detailItem.stockQuantity !== null && detailItem.stockQuantity !== undefined && (
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold text-muted-foreground">Số lượng tồn kho</Label>
@@ -587,6 +683,35 @@ export default function RewardItemsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open)
+          if (!open) {
+            setItemToDelete(null)
+          }
+        }}
+      >
+        <AlertDialogContent className="bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa vật phẩm đổi thưởng này? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

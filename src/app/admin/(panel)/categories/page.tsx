@@ -1,11 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { Input } from "@/components/ui/input"
@@ -30,7 +40,11 @@ export default function CategoriesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dialogError, setDialogError] = useState<string | null>(null)
 
-  const fetchCategories = async () => {
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null)
+
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -46,11 +60,11 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, pageSize])
 
   useEffect(() => {
     fetchCategories()
-  }, [currentPage])
+  }, [fetchCategories])
 
   const handleOpenDialog = (category?: ScrapCategory) => {
     if (category) {
@@ -104,14 +118,23 @@ export default function CategoriesPage() {
     }
   }
 
-  const handleDeleteCategory = async (id: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return
+  const handleDeleteClick = (id: number) => {
+    setCategoryToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (categoryToDelete === null) return
 
     try {
-      await categoriesApi.delete(id)
+      await categoriesApi.delete(categoryToDelete)
       await fetchCategories()
+      setDeleteDialogOpen(false)
+      setCategoryToDelete(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete category")
+      setDeleteDialogOpen(false)
+      setCategoryToDelete(null)
     }
   }
 
@@ -227,7 +250,7 @@ export default function CategoriesPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Search Bar */}
-          <div className="relative w-full sm:max-w-xs">
+          <div className="relative w-full sm:max-w-md">
             <Input
               placeholder="Tìm kiếm theo tên..."
               value={searchQuery}
@@ -291,7 +314,7 @@ export default function CategoriesPage() {
                               variant="destructive"
                               aria-label="Delete"
                               className="h-8 w-8"
-                              onClick={() => handleDeleteCategory(category.scrapCategoryId)}
+                              onClick={() => handleDeleteClick(category.scrapCategoryId)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -348,6 +371,35 @@ export default function CategoriesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open)
+          if (!open) {
+            setCategoryToDelete(null)
+          }
+        }}
+      >
+        <AlertDialogContent className="bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa danh mục này? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

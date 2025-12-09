@@ -10,6 +10,12 @@ export const adminRoutes = [
     icon: 'UserRound',
   },
   {
+    label: 'Collector',
+    href: '/admin/collector',
+    icon: 'Briefcase',
+  },
+
+  {
     label: 'Categories',
     href: '/admin/categories',
     icon: 'Columns3',
@@ -29,4 +35,14 @@ export const adminRoutes = [
     href: '/admin/reward-items',
     icon: 'Gift',
   },
+  {
+    label: 'Prices',
+    href: '/admin/prices',
+    icon: 'DollarSign',
+  },
+  {
+    label:"Payment",
+    href: '/admin/payment',
+    icon: 'CreditCard',
+  }
 ];

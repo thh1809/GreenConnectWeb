@@ -1,14 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
 } from '@/components/ui/pagination'
 import {
   Select,
@@ -26,33 +23,34 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Spinner } from '@/components/ui/spinner'
-import { VerifyUserDialog } from '@/page/admin/components/verify-user-dialog'
-import { getAdminVerifications, type AdminVerificationItem, type AdminVerificationStatus } from '@/lib/api/verifications'
-import { ArrowDownToLine, AlertCircle, CheckCircle2, Clock8, Search, XCircle } from 'lucide-react'
+import { users, type User } from '@/lib/api/user-api'
+import { AlertCircle, Search, ChevronLeft, ChevronRight, Ban, Unlock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const PAGE_SIZE = 10
-const statusOptions: { label: string; value: 'all' | AdminVerificationStatus }[] = [
+const statusOptions: { label: string; value: 'all' | string }[] = [
   { label: 'Tất cả trạng thái', value: 'all' },
-  { label: 'Pending Review', value: 'PendingReview' },
-  { label: 'Approved', value: 'Approved' },
-  { label: 'Rejected', value: 'Rejected' },
+  { label: 'Active', value: 'Active' },
+  { label: 'Blocked', value: 'Blocked' },
 ]
 
-const statusBadgeStyles: Record<AdminVerificationStatus, string> = {
-  PendingReview: 'bg-warning/20 text-warning-update',
-  Approved: 'bg-primary text-primary-foreground',
-  Rejected: 'bg-danger text-white',
-}
-
-const statusIconMap: Record<AdminVerificationStatus, JSX.Element> = {
-  PendingReview: <Clock8 className="h-3.5 w-3.5" />,
-  Approved: <CheckCircle2 className="h-3.5 w-3.5" />,
-  Rejected: <XCircle className="h-3.5 w-3.5" />,
+const statusBadgeStyles: Record<string, string> = {
+  Active: 'bg-primary text-primary-foreground',
+  Blocked: 'bg-danger text-white',
 }
 
 export default function UsersPage() {
-  const [verifications, setVerifications] = useState<AdminVerificationItem[]>([])
-  const [statusFilter, setStatusFilter] = useState<'all' | AdminVerificationStatus>('all')
+  const [userList, setUserList] = useState<User[]>([])
+  const [statusFilter, setStatusFilter] = useState<'all' | string>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
@@ -60,46 +58,20 @@ export default function UsersPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [nextPage, setNextPage] = useState<number | null>(null)
   const [prevPage, setPrevPage] = useState<number | null>(null)
-  const [refreshToken, setRefreshToken] = useState(0)
+  const [banDialogOpen, setBanDialogOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isBanning, setIsBanning] = useState(false)
 
-  useEffect(() => {
-    const fetchVerifications = async () => {
-      setIsLoading(true)
-      setError(null)
 
-      try {
-        const response = await getAdminVerifications({
-          pageNumber: page,
-          pageSize: PAGE_SIZE,
-          sortBySubmittedAt: true,
-        })
-        setVerifications(response.data)
-        setTotalRecords(response.pagination.totalRecords)
-        setTotalPages(response.pagination.totalPages)
-        setNextPage(response.pagination.nextPage)
-        setPrevPage(response.pagination.prevPage)
-      } catch (fetchError) {
-        setError(
-          fetchError instanceof Error
-            ? fetchError.message
-            : 'Không thể tải danh sách xác minh. Vui lòng thử lại.',
-        )
-      } finally {
-        setIsLoading(false)
-      }
+  const filteredUsers = useMemo(() => {
+    let filtered = userList
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(user => user.status === statusFilter)
     }
+    return filtered
+  }, [userList, statusFilter])
 
-    fetchVerifications()
-  }, [page, refreshToken])
-
-  const filteredVerifications = useMemo(() => {
-    if (statusFilter === 'all') {
-      return verifications
-    }
-    return verifications.filter(item => item.status === statusFilter)
-  }, [verifications, statusFilter])
-
-  const formatSubmittedAt = (dateString: string) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return isNaN(date.getTime())
       ? '—'
@@ -112,41 +84,97 @@ export default function UsersPage() {
         })
   }
 
-  const handlePrev = (event: React.MouseEvent) => {
-    event.preventDefault()
-    if (prevPage) {
-      setPage(prevPage)
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage)
     }
   }
 
-  const handleNext = (event: React.MouseEvent) => {
-    event.preventDefault()
-    if (nextPage) {
-      setPage(nextPage)
+  const fetchUsers = async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await users.getAll({
+        pageIndex: page,
+        pageSize: PAGE_SIZE,
+        fullName: searchQuery || undefined,
+      })
+      setUserList(response.data)
+      setTotalRecords(response.pagination.totalRecords)
+      setTotalPages(response.pagination.totalPages)
+      setNextPage(response.pagination.nextPage)
+      setPrevPage(response.pagination.prevPage)
+    } catch (fetchError) {
+      setError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : 'Không thể tải danh sách người dùng. Vui lòng thử lại.',
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchUsers()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, searchQuery])
+
+  const handleOpenBanDialog = (user: User) => {
+    setSelectedUser(user)
+    setBanDialogOpen(true)
+  }
+
+  const handleCloseBanDialog = () => {
+    setBanDialogOpen(false)
+    setSelectedUser(null)
+  }
+
+  const handleBanToggle = async () => {
+    if (!selectedUser) return
+
+    try {
+      setIsBanning(true)
+      await users.banToggle(selectedUser.id)
+      await fetchUsers() // Refresh danh sách
+      handleCloseBanDialog()
+    } catch (banError) {
+      setError(
+        banError instanceof Error
+          ? banError.message
+          : 'Không thể thay đổi trạng thái tài khoản. Vui lòng thử lại.',
+      )
+    } finally {
+      setIsBanning(false)
     }
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Users</h1>
+        <h1 className="text-3xl font-bold">Người dùng </h1>
         <p className="text-sm text-muted-foreground">
-          Manage user accounts, verification, and access control
+          Xem danh sách người dùng của hệ thống 
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Verification Requests</CardTitle>
+          <CardTitle>Danh sách người dùng</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-xs">
+            <div className="relative w-full sm:max-w-md">
               <input
                 placeholder="Tìm theo tên hoặc số điện thoại"
+                value={searchQuery}
+                onChange={e => {
+                  setSearchQuery(e.target.value)
+                  setPage(1) // Reset về trang 1 khi search
+                }}
                 className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-ring"
-                disabled
               />
               <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
@@ -183,64 +211,77 @@ export default function UsersPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tên / Điện thoại</TableHead>
-                <TableHead>Hạng</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead>Ngày gửi</TableHead>
-                <TableHead className="text-right">Hành động</TableHead>
+                    <TableHead>Hạng</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Điểm</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày tạo</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredVerifications.length === 0 ? (
+                  {filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                        Không có hồ sơ phù hợp bộ lọc hiện tại.
+                      <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
+                        Không có người dùng phù hợp bộ lọc hiện tại.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredVerifications.map(item => (
-                      <TableRow key={item.userId}>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-foreground">{item.user.fullName}</span>
-                    <span className="text-xs text-muted-foreground">{item.user.phoneNumber}</span>
-                  </div>
-                </TableCell>
-                <TableCell>{item.user.rank}</TableCell>
-                <TableCell>
-                  {item.user.roles?.length ? (
-                    <div className="flex flex-wrap gap-1">
-                      {item.user.roles.map(role => (
-                        <span
-                          key={role}
-                          className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
-                        >
-                          {role}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Chưa gán</span>
-                  )}
-                </TableCell>
+                    filteredUsers.map(user => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-foreground">{user.fullName}</span>
+                            <span className="text-xs text-muted-foreground">{user.phoneNumber}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{user.rank}</TableCell>
+                        <TableCell>
+                          {user.roles?.length ? (
+                            <div className="flex flex-wrap gap-1">
+                              {user.roles.map(role => (
+                                <span
+                                  key={role}
+                                  className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+                                >
+                                  {role}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Chưa gán</span>
+                          )}
+                        </TableCell>
+                        <TableCell>{user.pointBalance.toLocaleString('vi-VN')}</TableCell>
                         <TableCell>
                           <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeStyles[item.status]}`}
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              statusBadgeStyles[user.status] || 'bg-secondary text-secondary-foreground'
+                            }`}
                           >
-                            {statusIconMap[item.status]}
-                            {item.status}
+                            {user.status}
                           </span>
                         </TableCell>
-                        <TableCell>{formatSubmittedAt(item.submittedAt)}</TableCell>
+                        <TableCell>{formatDate(user.createdAt)}</TableCell>
                         <TableCell className="text-right">
-                          {item.status === "PendingReview" ? (
-                            <VerifyUserDialog
-                              request={item}
-                              onCompleted={() => setRefreshToken(prev => prev + 1)}
-                            />
-                          ) : (
-                            <span className="text-xs text-muted-foreground italic">Đã xử lý</span>
-                          )}
+                          <Button
+                            variant={user.status === 'Blocked' ? 'outline' : 'destructive'}
+                            size="sm"
+                            onClick={() => handleOpenBanDialog(user)}
+                            className="gap-1"
+                          >
+                            {user.status === 'Blocked' ? (
+                              <>
+                                <Unlock className="h-4 w-4" />
+                                Mở khóa
+                              </>
+                            ) : (
+                              <>
+                                <Ban className="h-4 w-4" />
+                                Cấm
+                              </>
+                            )}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))
@@ -249,28 +290,40 @@ export default function UsersPage() {
               </Table>
 
               {/* Footer */}
-              <div className="flex flex-col items-center justify-between gap-3 pt-2 text-xs text-muted-foreground sm:flex-row">
-                <div>
-                  Hiển thị {filteredVerifications.length} / {totalRecords} hồ sơ
+              <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
+                <div className="text-sm text-muted-foreground">
+                  Hiển thị {filteredUsers.length} / {totalRecords} người dùng
                 </div>
-                <Pagination className="justify-end">
+                <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={handlePrev}
-                        className={!prevPage ? 'pointer-events-none opacity-50' : ''}
-                      />
-                    </PaginationItem>
-                    <PaginationItem className="px-2 py-1 text-sm text-foreground">
-                      Trang {page} / {totalPages}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page === 1}
+                        className="gap-1"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        <span>Previous</span>
+                      </Button>
                     </PaginationItem>
                     <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={handleNext}
-                        className={!nextPage ? 'pointer-events-none opacity-50' : ''}
-                      />
+                      <span className="px-4 text-sm">
+                        Trang {page} / {totalPages}
+                      </span>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page === totalPages}
+                        className="gap-1"
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
@@ -279,6 +332,51 @@ export default function UsersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Ban/Unban Dialog */}
+      <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selectedUser?.status === 'Blocked' ? 'Mở khóa tài khoản' : 'Cấm tài khoản'}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedUser?.status === 'Blocked' ? (
+                <>
+                  Bạn có chắc chắn muốn mở khóa tài khoản của <strong>{selectedUser?.fullName}</strong> không?
+                  Người dùng này sẽ có thể đăng nhập và sử dụng hệ thống trở lại.
+                </>
+              ) : (
+                <>
+                  Bạn có chắc chắn muốn cấm tài khoản của <strong>{selectedUser?.fullName}</strong> không?
+                  Người dùng này sẽ không thể đăng nhập vào hệ thống.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseBanDialog} disabled={isBanning}>
+              Hủy
+            </Button>
+            <Button
+              variant={selectedUser?.status === 'Blocked' ? 'primary' : 'destructive'}
+              onClick={handleBanToggle}
+              disabled={isBanning}
+            >
+              {isBanning ? (
+                <>
+                  <Spinner className="mr-2 h-4 w-4" />
+                  Đang xử lý...
+                </>
+              ) : selectedUser?.status === 'Blocked' ? (
+                'Mở khóa'
+              ) : (
+                'Cấm tài khoản'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
