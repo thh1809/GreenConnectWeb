@@ -360,7 +360,7 @@ export default function PricesPage() {
         <CardContent className="space-y-5">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-xs">
+            <div className="relative w-full sm:max-w-md">
               <Input
                 placeholder="Tìm kiếm theo danh mục, giá hoặc ID..."
                 value={searchQuery}

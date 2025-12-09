@@ -250,7 +250,7 @@ export default function CategoriesPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Search Bar */}
-          <div className="relative w-full sm:max-w-xs">
+          <div className="relative w-full sm:max-w-md">
             <Input
               placeholder="Tìm kiếm theo tên..."
               value={searchQuery}

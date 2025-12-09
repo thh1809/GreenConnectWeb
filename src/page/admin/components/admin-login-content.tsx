@@ -132,116 +132,116 @@ export function AdminLoginContent() {
           </div>
         </section>
 
-        {/* Right Panel - Admin Login Form */}
-        <Card className="flex flex-col border shadow-lg rounded-2xl lg:max-w-none">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-2xl font-bold">Đăng nhập quản trị</CardTitle>
-            <CardDescription>
-              Nhập thông tin tài khoản được cấp để truy cập bảng điều khiển.
-            </CardDescription>
-          </CardHeader>
+          {/* Right Panel - Admin Login Form */}
+          <Card className="flex flex-col border shadow-lg rounded-2xl lg:max-w-none">
+            <CardHeader className="space-y-2">
+              <CardTitle className="text-2xl font-bold">Đăng nhập quản trị</CardTitle>
+              <CardDescription>
+                Nhập thông tin tài khoản được cấp để truy cập bảng điều khiển.
+              </CardDescription>
+            </CardHeader>
 
-          <CardContent>
-            <form className="space-y-5" onSubmit={onSubmit}>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email tổ chức</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@greenconnect.vn"
-                  autoComplete="email"
-                  value={email}
-                  onChange={event => setEmail(event.target.value)}
-                  className="bg-muted/50"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Mật khẩu</Label>
-                  <Link
-                    href="/quen-mat-khau"
-                    className="text-sm text-primary hover:underline"
-                  >
-                    Quên mật khẩu?
-                  </Link>
+            <CardContent>
+              <form className="space-y-5" onSubmit={onSubmit}>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email tổ chức</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@greenconnect.vn"
+                    autoComplete="email"
+                    value={email}
+                    onChange={event => setEmail(event.target.value)}
+                    className="bg-muted/50"
+                    required
+                  />
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Nhập mật khẩu"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={event => setPassword(event.target.value)}
-                  className="bg-muted/50"
-                  required
-                />
-              </div>
 
-              <div className="flex items-center justify-between rounded-lg bg-muted/30 px-4 py-3">
-                <div className="space-y-0.5">
-                  <span className="text-sm font-medium">Ghi nhớ đăng nhập</span>
-                  <p className="text-xs text-muted-foreground">
-                    Chỉ bật trên thiết bị đáng tin cậy
-                  </p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Mật khẩu</Label>
+                    <Link
+                      href="/quen-mat-khau"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Quên mật khẩu?
+                    </Link>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Nhập mật khẩu"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={event => setPassword(event.target.value)}
+                    className="bg-muted/50"
+                    required
+                  />
                 </div>
-                <Switch
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={checked => setRememberMe(Boolean(checked))}
-                />
-              </div>
 
-              <Button type="submit" className="w-full" variant="primary" disabled={isSubmitting}>
-                {isSubmitting ? "Đang xác thực..." : "Đăng nhập"}
-              </Button>
-
-              <Button type="button" variant="outline" className="w-full gap-2 bg-muted/30">
-                <LogIn className="h-4 w-4" />
-                Đăng nhập nhanh bằng OTP
-              </Button>
-            </form>
-
-            {errorMessage && (
-              <div className="mt-4 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-                {errorMessage}
-              </div>
-            )}
-
-            {responseData && (
-              <div className="mt-4 space-y-3 rounded-xl border border-border bg-muted/30 p-4 text-left text-xs text-foreground">
-                <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-wide text-muted-foreground">
-                  <span>Response 200</span>
-                  <span>/api/v1/auth/admin-login</span>
+                <div className="flex items-center justify-between rounded-lg bg-muted/30 px-4 py-3">
+                  <div className="space-y-0.5">
+                    <span className="text-sm font-medium">Ghi nhớ đăng nhập</span>
+                    <p className="text-xs text-muted-foreground">
+                      Chỉ bật trên thiết bị đáng tin cậy
+                    </p>
+                  </div>
+                  <Switch
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={checked => setRememberMe(Boolean(checked))}
+                  />
                 </div>
-                <div className="rounded-lg bg-background/80 p-3 font-mono text-[0.75rem]">
-                  <div className="mb-2 font-semibold text-primary">accessToken</div>
-                  <p className="break-all text-muted-foreground">{responseData.accessToken}</p>
-                </div>
-                <div className="rounded-lg bg-background/80 p-3 font-mono text-[0.75rem]">
-                  <div className="mb-1 font-semibold text-primary">user</div>
-                  <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-muted-foreground">
-                    {JSON.stringify(responseData.user, null, 2)}
-                  </pre>
-                </div>
-              </div>
-            )}
-          </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 text-center text-sm">
-            <p className="text-muted-foreground">
-              Bạn chưa có tài khoản quản trị?{" "}
-              <Link href="/lien-he" className="font-medium text-primary hover:underline">
-                Liên hệ nhóm GreenConnect
+                <Button type="submit" className="w-full" variant="primary" disabled={isSubmitting}>
+                  {isSubmitting ? "Đang xác thực..." : "Đăng nhập"}
+                </Button>
+
+                <Button type="button" variant="outline" className="w-full gap-2 bg-muted/30">
+                  <LogIn className="h-4 w-4" />
+                  Đăng nhập nhanh bằng OTP
+                </Button>
+              </form>
+
+              {errorMessage && (
+                <div className="mt-4 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+                  {errorMessage}
+                </div>
+              )}
+
+              {responseData && (
+                <div className="mt-4 space-y-3 rounded-xl border border-border bg-muted/30 p-4 text-left text-xs text-foreground">
+                  <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-wide text-muted-foreground">
+                    <span>Response 200</span>
+                    <span>/api/v1/auth/admin-login</span>
+                  </div>
+                  <div className="rounded-lg bg-background/80 p-3 font-mono text-[0.75rem]">
+                    <div className="mb-2 font-semibold text-primary">accessToken</div>
+                    <p className="break-all text-muted-foreground">{responseData.accessToken}</p>
+                  </div>
+                  <div className="rounded-lg bg-background/80 p-3 font-mono text-[0.75rem]">
+                    <div className="mb-1 font-semibold text-primary">user</div>
+                    <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-muted-foreground">
+                      {JSON.stringify(responseData.user, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+
+            <CardFooter className="flex flex-col gap-3 text-center text-sm">
+              <p className="text-muted-foreground">
+                Bạn chưa có tài khoản quản trị?{" "}
+                <Link href="/lien-he" className="font-medium text-primary hover:underline">
+                  Liên hệ nhóm GreenConnect
+                </Link>
+              </p>
+              <Link href="/" className="text-primary hover:underline flex items-center justify-center gap-1">
+                <span>←</span> Quay về trang chủ
               </Link>
-            </p>
-            <Link href="/" className="text-primary hover:underline flex items-center justify-center gap-1">
-              <span>←</span> Quay về trang chủ
-            </Link>
-          </CardFooter>
-        </Card>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
-    </div>
   )
 }

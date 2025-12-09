@@ -166,7 +166,7 @@ export default function UsersPage() {
         <CardContent className="space-y-4">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-xs">
+            <div className="relative w-full sm:max-w-md">
               <input
                 placeholder="Tìm theo tên hoặc số điện thoại"
                 value={searchQuery}

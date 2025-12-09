@@ -41,6 +41,8 @@ export default function RewardItemsPage() {
   const [description, setDescription] = useState("")
   const [pointCost, setPointCost] = useState("")
   const [imageUrl, setImageUrl] = useState("")
+  const [type, setType] = useState("")
+  const [value, setValue] = useState("")
   const [stockQuantity, setStockQuantity] = useState("")
   const [isActive, setIsActive] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -64,9 +66,9 @@ export default function RewardItemsPage() {
         pageNumber: currentPage,
         pageSize,
       })
-      setRewardItemsData(response.data)
-      setTotalPages(response.pagination.totalPages)
-      setTotalRecords(response.pagination.totalRecords)
+      setRewardItemsData(Array.isArray(response.data) ? response.data : [])
+      setTotalPages(response.pagination?.totalPages || 1)
+      setTotalRecords(response.pagination?.totalRecords || 0)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load reward items")
     } finally {
@@ -85,6 +87,8 @@ export default function RewardItemsPage() {
       setDescription(item.description || "")
       setPointCost((item.pointsCost || item.pointCost || 0).toString())
       setImageUrl(item.imageUrl || "")
+      setType(item.type || "")
+      setValue(item.value || "")
       setStockQuantity(item.stockQuantity?.toString() || "")
       setIsActive(item.isActive ?? true)
     } else {
@@ -93,6 +97,8 @@ export default function RewardItemsPage() {
       setDescription("")
       setPointCost("")
       setImageUrl("")
+      setType("")
+      setValue("")
       setStockQuantity("")
       setIsActive(true)
     }
@@ -107,6 +113,8 @@ export default function RewardItemsPage() {
     setDescription("")
     setPointCost("")
     setImageUrl("")
+    setType("")
+    setValue("")
     setStockQuantity("")
     setIsActive(true)
     setDialogError(null)
@@ -136,6 +144,12 @@ export default function RewardItemsPage() {
       }
       if (imageUrl.trim()) {
         payload.imageUrl = imageUrl.trim()
+      }
+      if (type.trim()) {
+        payload.type = type.trim()
+      }
+      if (value.trim()) {
+        payload.value = value.trim()
       }
       if (stockQuantity.trim()) {
         const stockNum = parseInt(stockQuantity)
@@ -187,7 +201,7 @@ export default function RewardItemsPage() {
     }
   }
 
-  const filteredItems = rewardItemsData.filter(item =>
+  const filteredItems = (rewardItemsData || []).filter(item =>
     item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
@@ -302,6 +316,32 @@ export default function RewardItemsPage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="type" className="text-sm font-semibold">
+                  Loại
+                </Label>
+                <Input
+                  id="type"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  placeholder="Nhập loại (ví dụ: Credit, Package)"
+                  className="bg-background"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="value" className="text-sm font-semibold">
+                  Giá trị
+                </Label>
+                <Input
+                  id="value"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder="Nhập giá trị (tùy chọn)"
+                  className="bg-background"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="stock-quantity" className="text-sm font-semibold">
                   Số lượng tồn kho
                 </Label>
@@ -367,7 +407,7 @@ export default function RewardItemsPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Search Bar */}
-          <div className="relative w-full sm:max-w-xs">
+          <div className="relative w-full sm:max-w-md">
             <Input
               placeholder="Tìm kiếm theo tên..."
               value={searchQuery}
@@ -398,6 +438,7 @@ export default function RewardItemsPage() {
                   <TableHeader>
                     <TableRow className="border-b">
                       <TableHead className="h-12 px-4 font-semibold">ID</TableHead>
+                      <TableHead className="h-12 px-4 font-semibold">Hình ảnh</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Tên vật phẩm</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Điểm đổi</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Tồn kho</TableHead>
@@ -410,6 +451,24 @@ export default function RewardItemsPage() {
                       <TableRow key={item.rewardItemId} className="border-b">
                         <TableCell className="px-4 py-4 font-medium">
                           #{item.rewardItemId}
+                        </TableCell>
+                        <TableCell className="px-4 py-4">
+                          {item.imageUrl ? (
+                            <div className="relative h-12 w-12 overflow-hidden rounded-md border">
+                              <Image
+                                src={item.imageUrl}
+                                alt={item.itemName}
+                                width={48}
+                                height={48}
+                                className="object-cover"
+                                unoptimized
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-md border bg-muted text-xs text-muted-foreground">
+                              Không có
+                            </div>
+                          )}
                         </TableCell>
                         <TableCell className="px-4 py-4 font-medium">
                           {item.itemName}
@@ -577,6 +636,20 @@ export default function RewardItemsPage() {
                     {detailItem.pointsCost || detailItem.pointCost || 0} điểm
                   </div>
                 </div>
+
+                {detailItem.type && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-muted-foreground">Loại</Label>
+                    <div className="text-base">{detailItem.type}</div>
+                  </div>
+                )}
+
+                {detailItem.value && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-muted-foreground">Giá trị</Label>
+                    <div className="text-base">{detailItem.value}</div>
+                  </div>
+                )}
 
                 {detailItem.stockQuantity !== null && detailItem.stockQuantity !== undefined && (
                   <div className="space-y-2">
