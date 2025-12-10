@@ -61,11 +61,14 @@ export default function AdminLayout({ items, logo, children }: any) {
       >
         {/* Logo + Name */}
         <div
-          className={`flex items-center gap-2 px-2 mb-6 ${
+          className={`flex items-center gap-2 px-2 mb-6 cursor-pointer${
             isCollapsed ? 'justify-center' : ''
           }`}
+          onClick={() => {
+            router.push('/');
+          }}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full text-primary-foreground font-bold text-lg">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full text-primary-foreground font-bold text-lg ">
             <Image src={logo} alt="Green Connect Logo" />
           </div>
           {!isCollapsed && (
