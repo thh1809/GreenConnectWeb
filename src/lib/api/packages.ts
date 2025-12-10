@@ -1,17 +1,27 @@
 import { get, post, patch } from './client';
 
-export interface PaymentPackage {
-  packageId: string; // UUID
+// PaymentPackage for GET list response (without connectionAmount and isActive)
+export interface PaymentPackageListItem {
+  packageId: string;
   name: string;
   description: string;
   price: number;
-  connectionAmount?: number; // Optional in GET list response, required in GET by ID
-  isActive?: boolean; // Optional in GET list response, required in GET by ID
+  packageType: 'Freemium' | 'Paid';
+}
+
+// PaymentPackage for GET by ID response (with connectionAmount and isActive)
+export interface PaymentPackage {
+  packageId: string;
+  name: string;
+  description: string;
+  price: number;
+  connectionAmount: number;
+  isActive: boolean;
   packageType: 'Freemium' | 'Paid';
 }
 
 export interface PackagesResponse {
-  data: PaymentPackage[];
+  data: PaymentPackageListItem[];
   pagination: {
     totalRecords: number;
     currentPage: number;

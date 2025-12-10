@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -72,7 +72,7 @@ export default function ComplaintsPage() {
   const [totalRecords, setTotalRecords] = useState(0)
   const [statusFilter, setStatusFilter] = useState<ComplaintStatus | "all">("all")
 
-  const fetchComplaints = async () => {
+  const fetchComplaints = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -94,11 +94,11 @@ export default function ComplaintsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, pageSize, statusFilter])
 
   useEffect(() => {
     fetchComplaints()
-  }, [currentPage, statusFilter])
+  }, [fetchComplaints])
 
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value as ComplaintStatus | "all")
@@ -121,25 +121,25 @@ export default function ComplaintsPage() {
         </p>
       </div>
 
-      {/* Filter Section */}
-      <div className="flex items-center gap-3">
-        <label className="text-sm font-medium">Lọc theo trạng thái:</label>
-        <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-          <SelectTrigger className="w-40 border-primary">
-            <SelectValue placeholder="Tất cả trạng thái" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả trạng thái</SelectItem>
-            <SelectItem value="Submitted">Đang chờ</SelectItem>
-            <SelectItem value="InProgress">Đang xử lý</SelectItem>
-            <SelectItem value="Resolved">Đã giải quyết</SelectItem>
-            <SelectItem value="Rejected">Đã từ chối</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Complaints Table */}
       <Card className="shadow-sm">
+        <CardHeader className="pb-4 border-b">
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium">Lọc theo trạng thái:</label>
+            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+              <SelectTrigger className="w-40 border-primary select-text">
+                <SelectValue placeholder="Tất cả trạng thái" className="select-text" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                <SelectItem value="Submitted">Đang chờ</SelectItem>
+                <SelectItem value="InProgress">Đang xử lý</SelectItem>
+                <SelectItem value="Resolved">Đã giải quyết</SelectItem>
+                <SelectItem value="Rejected">Đã từ chối</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
         <CardContent className="p-0">
           {loading ? (
             <div className="space-y-4 p-4">
@@ -228,8 +228,8 @@ export default function ComplaintsPage() {
 
           {/* Pagination Footer */}
           {!loading && !error && complaintsData.length > 0 && (
-            <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex flex-col items-center gap-4 border-t pt-4 sm:flex-row sm:justify-end">
+              <div className="text-sm text-muted-foreground sm:mr-auto">
                 Hiển thị {complaintsData.length} / {totalRecords} hồ sơ
               </div>
               <Pagination>

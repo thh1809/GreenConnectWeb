@@ -48,6 +48,20 @@ export async function apiRequest<T>(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+    
+    // Handle 401 Unauthorized - redirect to login
+    if (response.status === 401) {
+      if (typeof window !== 'undefined') {
+        // Clear auth tokens
+        localStorage.removeItem('authToken');
+        sessionStorage.removeItem('authToken');
+        document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+        
+        // Redirect to login page
+        window.location.href = '/admin/login';
+      }
+    }
+    
     throw new Error(
       `API Error: ${response.status} - ${
         response.statusText

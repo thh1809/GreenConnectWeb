@@ -11,23 +11,40 @@ import { NavigationLink } from '@/components/navigation-link';
 export default function AdminLayout({ items, logo, children }: any) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('sidebar-collapsed') === 'true';
-  });
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('theme') === 'dark';
-  });
-
+  // Load from localStorage after mount to avoid hydration mismatch
   useEffect(() => {
-    if (isDark) {
+    // Read from localStorage
+    const savedCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+    const savedTheme = localStorage.getItem('theme') === 'dark';
+    
+    // Apply theme immediately (external system update)
+    if (savedTheme) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [isDark]);
+    
+    // Defer state updates to next tick to avoid cascading renders
+    Promise.resolve().then(() => {
+      setMounted(true);
+      setIsCollapsed(savedCollapsed);
+      setIsDark(savedTheme);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [isDark, mounted]);
 
   const toggleCollapse = () => {
     const newValue = !isCollapsed;
@@ -147,7 +164,7 @@ export default function AdminLayout({ items, logo, children }: any) {
             onClick={toggleTheme}
             className="rounded-full p-2 hover:bg-muted transition"
           >
-            {isDark ? (
+            {mounted && isDark ? (
               <Moon className="h-5 w-5 text-muted-foreground" />
             ) : (
               <Sun className="h-5 w-5 text-muted-foreground" />

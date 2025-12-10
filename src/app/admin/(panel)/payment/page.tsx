@@ -49,10 +49,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { packages as packagesApi, type PaymentPackage, type CreatePackageRequest, type UpdatePackageRequest } from '@/lib/api/packages'
+import { packages as packagesApi, type PaymentPackage, type PaymentPackageListItem, type CreatePackageRequest, type UpdatePackageRequest } from '@/lib/api/packages'
 
 export default function PaymentPage() {
-  const [packagesData, setPackagesData] = useState<PaymentPackage[]>([])
+  const [packagesData, setPackagesData] = useState<PaymentPackageListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -61,11 +61,10 @@ export default function PaymentPage() {
   const [totalRecords, setTotalRecords] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
   const [packageTypeFilter, setPackageTypeFilter] = useState<'all' | 'Freemium' | 'Paid'>('all')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [sortByPrice, setSortByPrice] = useState<boolean | undefined>(undefined)
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingPackage, setEditingPackage] = useState<PaymentPackage | null>(null)
+  const [editingPackage, setEditingPackage] = useState<PaymentPackageListItem | null>(null)
   const [packageName, setPackageName] = useState('')
   const [price, setPrice] = useState('')
   const [connectionAmount, setConnectionAmount] = useState('')
@@ -111,15 +110,8 @@ export default function PaymentPage() {
       }
 
       const response = await packagesApi.getAll(params)
-      // Filter by status on client side
-      let filteredData = response.data
-      if (statusFilter === 'active') {
-        filteredData = filteredData.filter(pkg => pkg.isActive !== false)
-      } else if (statusFilter === 'inactive') {
-        filteredData = filteredData.filter(pkg => pkg.isActive === false)
-      }
       
-      setPackagesData(filteredData)
+      setPackagesData(response.data)
       setTotalPages(response.pagination.totalPages)
       setTotalRecords(response.pagination.totalRecords)
     } catch (err) {
@@ -131,20 +123,33 @@ export default function PaymentPage() {
     } finally {
       setLoading(false)
     }
-  }, [currentPage, pageSize, sortByPrice, packageTypeFilter, searchQuery, statusFilter])
+  }, [currentPage, pageSize, sortByPrice, packageTypeFilter, searchQuery])
 
   useEffect(() => {
     fetchPackages()
   }, [fetchPackages])
 
-  const handleOpenDialog = (pkg?: PaymentPackage) => {
+  const handleOpenDialog = async (pkg?: PaymentPackageListItem) => {
     if (pkg) {
-      setEditingPackage(pkg)
-      setPackageName(pkg.name)
-      setPrice(pkg.price.toString())
-      setConnectionAmount(pkg.connectionAmount?.toString() || '')
-      setDescription(pkg.description || '')
-      setPackageType(pkg.packageType)
+      try {
+        setIsSubmitting(true)
+        // Fetch full package details to get connectionAmount and isActive
+        const fullPackage = await packagesApi.getById(pkg.packageId)
+        setEditingPackage(pkg)
+        setPackageName(fullPackage.name)
+        setPrice(fullPackage.price.toString())
+        setConnectionAmount(fullPackage.connectionAmount.toString())
+        setDescription(fullPackage.description || '')
+        setPackageType(fullPackage.packageType)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Không thể tải thông tin gói'
+        toast.error('Lỗi', {
+          description: errorMessage,
+        })
+        return
+      } finally {
+        setIsSubmitting(false)
+      }
     } else {
       setEditingPackage(null)
       setPackageName('')
@@ -228,7 +233,7 @@ export default function PaymentPage() {
     }
   }
 
-  const handleViewDetail = async (pkg: PaymentPackage) => {
+  const handleViewDetail = async (pkg: PaymentPackageListItem) => {
     setDetailDialogOpen(true)
     setDetailLoading(true)
     setDetailError(null)
@@ -239,9 +244,19 @@ export default function PaymentPage() {
       setDetailPackage(packageDetail)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Không thể tải thông tin chi tiết gói thanh toán'
-      setDetailError(errorMessage)
+      
+      // Check if it's a 401 error
+      if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+        setDetailError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+        // API client will handle redirect automatically
+      } else {
+        setDetailError(errorMessage)
+      }
+      
       toast.error('Lỗi', {
-        description: errorMessage,
+        description: errorMessage.includes('401') || errorMessage.includes('Unauthorized')
+          ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+          : errorMessage,
       })
     } finally {
       setDetailLoading(false)
@@ -266,6 +281,13 @@ export default function PaymentPage() {
       setIsInactivating(true)
       await packagesApi.inactivate(packageToInactivate)
       setInactivateDialogOpen(false)
+      
+      // Refresh detail dialog if it's open for the same package
+      if (detailDialogOpen && detailPackage?.packageId === packageToInactivate) {
+        const updatedDetail = await packagesApi.getById(packageToInactivate)
+        setDetailPackage(updatedDetail)
+      }
+      
       setPackageToInactivate(null)
       // Refresh data after inactivate
       await fetchPackages()
@@ -311,7 +333,7 @@ export default function PaymentPage() {
       setCurrentPage(1)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [packageTypeFilter, sortByPrice, statusFilter])
+  }, [packageTypeFilter, sortByPrice])
 
   return (
     <div className="space-y-6">
@@ -479,19 +501,6 @@ export default function PaymentPage() {
             </div>
             <div className="flex gap-2">
               <Select
-                value={statusFilter}
-                onValueChange={value => setStatusFilter(value as typeof statusFilter)}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Lọc theo trạng thái" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="active">Đang hoạt động</SelectItem>
-                  <SelectItem value="inactive">Đã ngưng</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
                 value={packageTypeFilter}
                 onValueChange={value => setPackageTypeFilter(value as typeof packageTypeFilter)}
               >
@@ -532,13 +541,12 @@ export default function PaymentPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Tên gói</TableHead>
-                    <TableHead>Giá</TableHead>
-                    <TableHead>Loại gói</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    <TableHead>Mô tả</TableHead>
-                    <TableHead className="text-right">Hành động</TableHead>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Tên gói</TableHead>
+                      <TableHead>Giá</TableHead>
+                      <TableHead>Loại gói</TableHead>
+                      <TableHead>Mô tả</TableHead>
+                      <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -547,7 +555,6 @@ export default function PaymentPage() {
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
@@ -558,7 +565,7 @@ export default function PaymentPage() {
             </div>
           ) : packagesData.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              {searchQuery || packageTypeFilter !== 'all' || statusFilter !== 'all'
+              {searchQuery || packageTypeFilter !== 'all'
                 ? 'Không tìm thấy gói thanh toán nào'
                 : 'Chưa có gói thanh toán nào'}
             </div>
@@ -573,7 +580,6 @@ export default function PaymentPage() {
                       <TableHead className="h-12 px-4 font-semibold">Tên gói</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Giá</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Loại gói</TableHead>
-                      <TableHead className="h-12 px-4 font-semibold">Trạng thái</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Mô tả</TableHead>
                       <TableHead className="h-12 px-4 text-right font-semibold">Hành động</TableHead>
                     </TableRow>
@@ -597,17 +603,6 @@ export default function PaymentPage() {
                             }`}
                           >
                             {pkg.packageType === 'Paid' ? 'Trả phí' : 'Miễn phí'}
-                          </span>
-                        </TableCell>
-                        <TableCell className="px-4 py-4">
-                          <span
-                            className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
-                              pkg.isActive !== false
-                                ? 'bg-success/10 text-success'
-                                : 'bg-muted text-muted-foreground'
-                            }`}
-                          >
-                            {pkg.isActive !== false ? 'Đang hoạt động' : 'Đã ngưng'}
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-4 text-muted-foreground">
@@ -651,26 +646,6 @@ export default function PaymentPage() {
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
-                            {pkg.isActive !== false && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="icon-sm"
-                                      variant="outline"
-                                      aria-label="Inactivate"
-                                      className="h-8 w-8 text-warning hover:text-warning"
-                                      onClick={() => handleInactivateClick(pkg.packageId)}
-                                    >
-                                      <PowerOff className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Ngưng hoạt động</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -680,8 +655,8 @@ export default function PaymentPage() {
               </div>
 
               {/* Pagination Footer */}
-              <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col items-center gap-4 border-t pt-4 sm:flex-row sm:justify-end">
+                <div className="text-sm text-muted-foreground sm:mr-auto">
                   Hiển thị {packagesData.length} / {totalRecords} gói thanh toán
                 </div>
                 <Pagination>
@@ -838,6 +813,19 @@ export default function PaymentPage() {
           ) : null}
 
           <DialogFooter className="pt-4">
+            {detailPackage?.isActive && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  handleCloseDetailDialog()
+                  handleInactivateClick(detailPackage.packageId)
+                }}
+                className="text-warning hover:text-warning"
+              >
+                <PowerOff className="mr-2 h-4 w-4" />
+                Ngưng hoạt động
+              </Button>
+            )}
             <Button variant="outline" onClick={handleCloseDetailDialog}>
               Đóng
             </Button>

@@ -602,8 +602,8 @@ export default function RewardItemsPage() {
 
               {/* Pagination Footer */}
               {!searchQuery && (
-                <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex flex-col items-center gap-4 border-t pt-4 sm:flex-row sm:justify-end">
+                  <div className="text-sm text-muted-foreground sm:mr-auto">
                     Hiển thị {rewardItemsData.length} / {totalRecords} vật phẩm
                   </div>
                   <Pagination>

@@ -554,8 +554,8 @@ export default function PricesPage() {
 
               {/* Pagination Footer */}
               {!searchQuery && (
-                <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex flex-col items-center gap-4 border-t pt-4 sm:flex-row sm:justify-end">
+                  <div className="text-sm text-muted-foreground sm:mr-auto">
                     Hiển thị {pricesData.length} / {totalRecords} giá tham khảo
                   </div>
                   <Pagination>

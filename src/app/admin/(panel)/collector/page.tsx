@@ -29,7 +29,6 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -38,8 +37,8 @@ import {
   type AdminVerificationItem,
   type AdminVerificationStatus,
 } from '@/lib/api/verifications'
-import { VerifyUserDialog } from '@/page/admin/components/verify-user-dialog'
 import { AlertCircle, Search, ChevronLeft, ChevronRight, Clock8, CheckCircle2, XCircle, Eye } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   Dialog,
   DialogContent,
@@ -215,8 +214,8 @@ export default function CollectorPage() {
             </div>
             <div className="flex gap-2">
               <Select value={statusFilter} onValueChange={value => setStatusFilter(value as typeof statusFilter)}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Tất cả trạng thái" />
+                <SelectTrigger className="w-48 select-text">
+                  <SelectValue placeholder="Tất cả trạng thái" className="select-text" />
                 </SelectTrigger>
                 <SelectContent>
                   {statusOptions.map(option => (
@@ -250,7 +249,7 @@ export default function CollectorPage() {
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-24 rounded-full" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                      <TableCell className="text-right"><Skeleton className="h-8 w-32 ml-auto" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -273,7 +272,7 @@ export default function CollectorPage() {
                 <TableBody>
                   {filteredVerifications.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
+                      <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                         Không có đơn xác minh phù hợp bộ lọc hiện tại.
                       </TableCell>
                     </TableRow>
@@ -311,34 +310,24 @@ export default function CollectorPage() {
                         </TableCell>
                         <TableCell>{formatSubmittedAt(item.submittedAt)}</TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2 min-w-[140px]">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleOpenDetailDialog(item)}
-                                    className="gap-1"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                    Xem
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Xem chi tiết đơn xác minh</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            {item.status === 'PendingReview' ? (
-                              <VerifyUserDialog
-                                request={item}
-                                onCompleted={() => setRefreshToken(prev => prev + 1)}
-                              />
-                            ) : (
-                              <div className="w-9 h-9" /> // Placeholder để giữ layout đều
-                            )}
-                          </div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleOpenDetailDialog(item)}
+                                  className="gap-1"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  Xem
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Xem chi tiết đơn xác minh</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </TableCell>
                       </TableRow>
                     ))
@@ -347,8 +336,8 @@ export default function CollectorPage() {
               </Table>
 
               {/* Footer */}
-              <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col items-center gap-4 border-t pt-4 sm:flex-row sm:justify-end">
+                <div className="text-sm text-muted-foreground sm:mr-auto">
                   Hiển thị {filteredVerifications.length} / {totalRecords} đơn xác minh
                 </div>
                 <Pagination>
@@ -427,23 +416,23 @@ export default function CollectorPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Tên người dùng</div>
-                  <div className="text-sm font-semibold">{selectedVerification.user.fullName}</div>
+                  <div className="text-sm font-semibold dialog-value">{selectedVerification.user.fullName}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Số điện thoại</div>
-                  <div className="text-sm font-semibold">{selectedVerification.user.phoneNumber}</div>
+                  <div className="text-sm font-semibold dialog-value">{selectedVerification.user.phoneNumber}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Hạng</div>
-                  <div className="text-sm font-semibold">{selectedVerification.user.rank}</div>
+                  <div className="text-sm font-semibold dialog-value">{selectedVerification.user.rank}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Điểm</div>
-                  <div className="text-sm font-semibold">{selectedVerification.user.pointBalance.toLocaleString('vi-VN')}</div>
+                  <div className="text-sm font-semibold dialog-value">{selectedVerification.user.pointBalance.toLocaleString('vi-VN')}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Vai trò</div>
-                  <div className="text-sm font-semibold">
+                  <div className="text-sm font-semibold dialog-value">
                     {selectedVerification.user.roles?.join(', ') || 'Chưa gán'}
                   </div>
                 </div>
@@ -456,7 +445,7 @@ export default function CollectorPage() {
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Ngày gửi</div>
-                  <div className="text-sm font-semibold">{formatSubmittedAt(selectedVerification.submittedAt)}</div>
+                  <div className="text-sm font-semibold dialog-value">{formatSubmittedAt(selectedVerification.submittedAt)}</div>
                 </div>
               </div>
               <div className="space-y-2">
