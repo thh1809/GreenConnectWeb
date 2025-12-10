@@ -73,7 +73,7 @@ const Header = () => {
             <div className="hidden md:block">
               <Button
                 size="lg"
-                variant="primary"
+                variant="default"
                 className="font-semibold tracking-wide shadow-md hover:shadow-lg transition-all"
               >
                 Tải ứng dụng
