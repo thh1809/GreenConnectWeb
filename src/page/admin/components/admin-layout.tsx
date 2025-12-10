@@ -4,9 +4,9 @@ import type { LucideIcon } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { LogOut, Moon, PanelLeftClose, PanelLeftOpen, Sun } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { NavigationLink } from '@/components/navigation-link';
 
 export default function AdminLayout({ items, logo, children }: any) {
   const pathname = usePathname();
@@ -88,7 +88,7 @@ export default function AdminLayout({ items, logo, children }: any) {
               | undefined;
 
             return (
-              <Link
+              <NavigationLink
                 key={it.label}
                 href={it.href}
                 className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
@@ -110,7 +110,7 @@ export default function AdminLayout({ items, logo, children }: any) {
                 )}
 
                 {!isCollapsed && <span>{it.label}</span>}
-              </Link>
+              </NavigationLink>
             );
           })}
         </nav>

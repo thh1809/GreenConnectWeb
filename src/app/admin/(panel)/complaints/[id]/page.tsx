@@ -27,13 +27,13 @@ const getStatusColor = (status: ComplaintStatus) => {
 const formatStatus = (status: ComplaintStatus): string => {
   switch (status) {
     case 'Submitted':
-      return 'Pending'
+      return 'Đang chờ'
     case 'InProgress':
-      return 'In Progress'
+      return 'Đang xử lý'
     case 'Resolved':
-      return 'Resolved'
+      return 'Đã giải quyết'
     case 'Rejected':
-      return 'Rejected'
+      return 'Đã từ chối'
     default:
       return status
   }
@@ -67,7 +67,7 @@ export default function ComplaintDetailPage({
       const data = await complaints.getById(id)
       setComplaint(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load complaint')
+      setError(err instanceof Error ? err.message : 'Không thể tải thông tin khiếu nại')
     } finally {
       setLoading(false)
     }
@@ -106,7 +106,7 @@ export default function ComplaintDetailPage({
       <div className="space-y-6">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold">
-            {error ? 'Error Loading Complaint' : 'Complaint Not Found'}
+            {error ? 'Lỗi tải khiếu nại' : 'Không tìm thấy khiếu nại'}
           </h1>
           {error && (
             <p className="text-sm text-danger">{error}</p>
@@ -114,7 +114,7 @@ export default function ComplaintDetailPage({
           <Link href="/admin/complaints">
             <Button variant="ghost" size="sm" className="mt-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Complaints
+              Quay lại danh sách khiếu nại
             </Button>
           </Link>
         </div>
@@ -134,12 +134,12 @@ export default function ComplaintDetailPage({
               className="mb-2 -ml-2 text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Complaints
+              Quay lại danh sách khiếu nại
             </Button>
           </Link>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold leading-tight">
-              Complaint Details
+              Chi tiết khiếu nại
             </h1>
             <span
               className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
@@ -150,22 +150,22 @@ export default function ComplaintDetailPage({
             </span>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            reported by {complaint.complainant.fullName} on{' '}
+            Được báo cáo bởi {complaint.complainant.fullName} vào{' '}
             {formatDate(complaint.createdAt)}
           </p>
         </div>
         <Button
-          variant="primary"
+          variant="default"
           className="shrink-0"
           onClick={() => setMediateDialogOpen(true)}
         >
-          Mediate
+          Hòa giải
         </Button>
       </div>
 
       {/* Complaint Description */}
       <div className="space-y-2">
-        <label className="text-sm font-semibold">Complaint Reason</label>
+        <label className="text-sm font-semibold">Lý do khiếu nại </label>
         <div className="rounded-md border border-border bg-muted/30 p-4 text-sm">
           {complaint.reason}
         </div>
@@ -175,7 +175,7 @@ export default function ComplaintDetailPage({
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Complainant */}
         <div className="rounded-md border border-border bg-muted/30 p-4">
-          <h3 className="mb-3 text-sm font-semibold">Người khiếu nại (Complainant)</h3>
+          <h3 className="mb-3 text-sm font-semibold">Người khiếu nại</h3>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-muted-foreground" />
@@ -190,7 +190,7 @@ export default function ComplaintDetailPage({
               <span>{complaint.complainant.rank}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">Role:</span>
+              <span className="text-muted-foreground">Vai trò:</span>
               <span>
                 {complaint.complainant.roles?.length
                   ? complaint.complainant.roles.join(', ')
@@ -202,7 +202,7 @@ export default function ComplaintDetailPage({
 
         {/* Accused */}
         <div className="rounded-md border border-border bg-muted/30 p-4">
-          <h3 className="mb-3 text-sm font-semibold">Người bị tố cáo (Accused)</h3>
+          <h3 className="mb-3 text-sm font-semibold">Người bị tố cáo</h3>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-muted-foreground" />
@@ -217,7 +217,7 @@ export default function ComplaintDetailPage({
               <span>{complaint.accused.rank}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">Role:</span>
+              <span className="text-muted-foreground">Vai trò:</span>
               <span>
                 {complaint.accused.roles?.length
                   ? complaint.accused.roles.join(', ')
@@ -231,11 +231,11 @@ export default function ComplaintDetailPage({
       {/* Transaction Information */}
       {complaint.transaction && (
         <div className="rounded-md border border-border bg-muted/30 p-4">
-          <h3 className="mb-3 text-sm font-semibold">Thông tin giao dịch (Transaction)</h3>
+          <h3 className="mb-3 text-sm font-semibold">Thông tin giao dịch</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2 text-sm">
               <div>
-                <span className="text-muted-foreground">Transaction ID:</span>{' '}
+                <span className="text-muted-foreground">Mã giao dịch:</span>{' '}
                 <span className="font-mono text-xs">
                   {complaint.transaction.transactionId}
                 </span>
@@ -255,7 +255,7 @@ export default function ComplaintDetailPage({
               )}
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Created:</span>
+                <span className="text-muted-foreground">Ngày tạo:</span>
                 <span>
                   {complaint.transaction.createdAt
                     ? formatDate(complaint.transaction.createdAt)
@@ -265,12 +265,12 @@ export default function ComplaintDetailPage({
             </div>
             <div className="space-y-2 text-sm">
               <div>
-                <span className="text-muted-foreground">Status:</span>{' '}
+                <span className="text-muted-foreground">Trạng thái:</span>{' '}
                 <span>{complaint.transaction.status}</span>
               </div>
               {complaint.transaction.totalPrice !== undefined && (
                 <div>
-                  <span className="text-muted-foreground">Total Price:</span>{' '}
+                  <span className="text-muted-foreground">Tổng giá:</span>{' '}
                   <span>{complaint.transaction.totalPrice.toLocaleString()} VNĐ</span>
                 </div>
               )}
@@ -282,8 +282,8 @@ export default function ComplaintDetailPage({
       {/* Tabs */}
       <Tabs defaultValue="evidence">
         <TabsList>
-          <TabsTrigger value="evidence">Evidence</TabsTrigger>
-          <TabsTrigger value="transaction">Transaction Details</TabsTrigger>
+          <TabsTrigger value="evidence">Bằng chứng</TabsTrigger>
+          <TabsTrigger value="transaction">Chi tiết giao dịch</TabsTrigger>
         </TabsList>
 
         <TabsContent value="evidence" className="mt-4">
@@ -291,7 +291,7 @@ export default function ComplaintDetailPage({
             <div className="space-y-3">
               <div className="rounded-md border border-border bg-muted/30 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Evidence File</span>
+                  <span className="text-sm font-medium">Tệp bằng chứng</span>
                   <a
                     href={complaint.evidenceUrl}
                     target="_blank"
@@ -299,14 +299,14 @@ export default function ComplaintDetailPage({
                     className="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1.5 text-sm text-primary hover:bg-primary/20"
                   >
                     <Download className="h-4 w-4" />
-                    Download Evidence
+                    Tải bằng chứng
                   </a>
                 </div>
               </div>
             </div>
           ) : (
             <div className="rounded-md border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-              No evidence uploaded yet.
+              Chưa có bằng chứng được tải lên.
             </div>
           )}
         </TabsContent>
@@ -315,7 +315,7 @@ export default function ComplaintDetailPage({
           {complaint.transaction ? (
             <div className="space-y-4 rounded-md border border-border bg-muted/30 p-4">
               <div className="text-sm">
-                <div className="mb-2 font-semibold">Offer Details:</div>
+                <div className="mb-2 font-semibold">Chi tiết đề xuất:</div>
                 {complaint.transaction.offer?.offerDetails?.length > 0 ? (
                   <div className="space-y-2">
                     {complaint.transaction.offer.offerDetails.map((detail, idx) => (
@@ -323,28 +323,28 @@ export default function ComplaintDetailPage({
                         key={idx}
                         className="rounded-md bg-background p-2 text-xs"
                       >
-                        Category ID: {detail.scrapCategoryId} - Price:{' '}
+                        Mã danh mục: {detail.scrapCategoryId} - Giá:{' '}
                         {detail.pricePerUnit.toLocaleString()} VNĐ/{detail.unit}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-muted-foreground">No offer details available</div>
+                  <div className="text-muted-foreground">Không có chi tiết đề xuất</div>
                 )}
               </div>
               {complaint.transaction.offer?.scheduleProposals?.length > 0 && (
                 <div className="text-sm">
-                  <div className="mb-2 font-semibold">Schedule Proposals:</div>
+                  <div className="mb-2 font-semibold">Đề xuất lịch trình:</div>
                   <div className="space-y-2">
                     {complaint.transaction.offer.scheduleProposals.map((proposal, idx) => (
                       <div
                         key={idx}
                         className="rounded-md bg-background p-2 text-xs"
                       >
-                        <div>Proposed Time: {formatDate(proposal.proposedTime)}</div>
-                        <div>Status: {proposal.status}</div>
+                        <div>Thời gian đề xuất: {formatDate(proposal.proposedTime)}</div>
+                        <div>Trạng thái: {proposal.status}</div>
                         {proposal.responseMessage && (
-                          <div>Response: {proposal.responseMessage}</div>
+                          <div>Phản hồi: {proposal.responseMessage}</div>
                         )}
                       </div>
                     ))}
@@ -354,7 +354,7 @@ export default function ComplaintDetailPage({
             </div>
           ) : (
             <div className="rounded-md border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-              No transaction details available.
+              Không có chi tiết giao dịch.
             </div>
           )}
         </TabsContent>

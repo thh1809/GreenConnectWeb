@@ -4,7 +4,15 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/ui/pagination'
 import {
   Dialog,
   DialogContent,
@@ -27,8 +35,12 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
 import { Search, Pencil, Plus, ChevronLeft, ChevronRight, Eye, PowerOff } from 'lucide-react'
 import {
   Select,
@@ -111,7 +123,11 @@ export default function PaymentPage() {
       setTotalPages(response.pagination.totalPages)
       setTotalRecords(response.pagination.totalRecords)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải danh sách gói thanh toán')
+      const errorMessage = err instanceof Error ? err.message : 'Không thể tải danh sách gói thanh toán'
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setLoading(false)
     }
@@ -194,14 +210,19 @@ export default function PaymentPage() {
       handleCloseDialog()
       // Refresh data after save
       await fetchPackages()
+      toast.success('Thành công', {
+        description: editingPackage ? 'Đã cập nhật gói thanh toán thành công' : 'Đã tạo gói thanh toán thành công',
+      })
     } catch (err) {
-      setDialogError(
-        err instanceof Error
-          ? err.message
-          : editingPackage
-            ? 'Không thể cập nhật gói thanh toán'
-            : 'Không thể tạo gói thanh toán'
-      )
+      const errorMessage = err instanceof Error
+        ? err.message
+        : editingPackage
+          ? 'Không thể cập nhật gói thanh toán'
+          : 'Không thể tạo gói thanh toán'
+      setDialogError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -217,7 +238,11 @@ export default function PaymentPage() {
       const packageDetail = await packagesApi.getById(pkg.packageId)
       setDetailPackage(packageDetail)
     } catch (err) {
-      setDetailError(err instanceof Error ? err.message : 'Không thể tải thông tin chi tiết gói thanh toán')
+      const errorMessage = err instanceof Error ? err.message : 'Không thể tải thông tin chi tiết gói thanh toán'
+      setDetailError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setDetailLoading(false)
     }
@@ -244,8 +269,15 @@ export default function PaymentPage() {
       setPackageToInactivate(null)
       // Refresh data after inactivate
       await fetchPackages()
+      toast.success('Thành công', {
+        description: 'Đã ngưng hoạt động gói thanh toán thành công',
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể ngưng hoạt động gói thanh toán')
+      const errorMessage = err instanceof Error ? err.message : 'Không thể ngưng hoạt động gói thanh toán'
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setIsInactivating(false)
     }
@@ -302,12 +334,12 @@ export default function PaymentPage() {
           }}
         >
           <DialogTrigger asChild>
-            <Button variant="primary" className="gap-2 shrink-0">
+            <Button variant="default" className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               Thêm gói mới
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-card">
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-background dark:bg-background border-2 border-border dark:border-border">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-bold">
                 {editingPackage ? 'Chỉnh sửa gói thanh toán' : 'Thêm gói thanh toán mới'}
@@ -374,8 +406,8 @@ export default function PaymentPage() {
                     <SelectValue placeholder="Chọn loại gói" />
                   </SelectTrigger>
                   <SelectContent position="popper" sideOffset={4}>
-                    <SelectItem value="Freemium">Freemium</SelectItem>
-                    <SelectItem value="Paid">Paid</SelectItem>
+                    <SelectItem value="Freemium">Miễn phí</SelectItem>
+                    <SelectItem value="Paid">Trả phí</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -410,7 +442,7 @@ export default function PaymentPage() {
                 </Button>
               </DialogClose>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={handleSavePackage}
                 disabled={!packageName.trim() || !price.trim() || !connectionAmount.trim() || isSubmitting}
               >
@@ -436,12 +468,12 @@ export default function PaymentPage() {
         <CardContent className="space-y-5">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-md">
+            <div className="relative w-full sm:max-w-2xl lg:max-w-3xl">
               <Input
                 placeholder="Tìm kiếm theo tên, số tiền hoặc ID..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="bg-background pl-9 pr-3"
+                className="pl-9 pr-3"
               />
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
@@ -496,12 +528,33 @@ export default function PaymentPage() {
 
           {/* Loading State */}
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner className="h-8 w-8" />
-            </div>
-          ) : error ? (
-            <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              {error}
+            <div className="space-y-4 p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Tên gói</TableHead>
+                    <TableHead>Giá</TableHead>
+                    <TableHead>Loại gói</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Mô tả</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : packagesData.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -543,7 +596,7 @@ export default function PaymentPage() {
                                 : 'bg-muted text-muted-foreground'
                             }`}
                           >
-                            {pkg.packageType}
+                            {pkg.packageType === 'Paid' ? 'Trả phí' : 'Miễn phí'}
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-4">
@@ -562,34 +615,61 @@ export default function PaymentPage() {
                         </TableCell>
                         <TableCell className="px-4 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              size="icon-sm"
-                              variant="outline"
-                              aria-label="View"
-                              className="h-8 w-8"
-                              onClick={() => handleViewDetail(pkg)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon-sm"
-                              variant="outline"
-                              aria-label="Edit"
-                              className="h-8 w-8"
-                              onClick={() => handleOpenDialog(pkg)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    aria-label="View"
+                                    className="h-8 w-8"
+                                    onClick={() => handleViewDetail(pkg)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Xem chi tiết</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    aria-label="Edit"
+                                    className="h-8 w-8"
+                                    onClick={() => handleOpenDialog(pkg)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Chỉnh sửa gói</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                             {pkg.isActive !== false && (
-                              <Button
-                                size="icon-sm"
-                                variant="outline"
-                                aria-label="Inactivate"
-                                className="h-8 w-8 text-warning hover:text-warning"
-                                onClick={() => handleInactivateClick(pkg.packageId)}
-                              >
-                                <PowerOff className="h-4 w-4" />
-                              </Button>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="icon-sm"
+                                      variant="outline"
+                                      aria-label="Inactivate"
+                                      className="h-8 w-8 text-warning hover:text-warning"
+                                      onClick={() => handleInactivateClick(pkg.packageId)}
+                                    >
+                                      <PowerOff className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Ngưng hoạt động</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             )}
                           </div>
                         </TableCell>
@@ -607,33 +687,56 @@ export default function PaymentPage() {
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="gap-1"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span>Previous</span>
-                      </Button>
+                      <PaginationPrevious
+                        href="#"
+                        size="default"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (currentPage > 1) handlePageChange(currentPage - 1)
+                        }}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                      />
                     </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                      if (
+                        pageNum === 1 ||
+                        pageNum === totalPages ||
+                        (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                      ) {
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationLink
+                              href="#"
+                              size="icon"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(pageNum)
+                              }}
+                              isActive={pageNum === currentPage}
+                            >
+                              {pageNum}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        )
+                      }
+                      return null
+                    })}
                     <PaginationItem>
-                      <span className="px-4 text-sm">
-                        Trang {currentPage} / {totalPages}
-                      </span>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="gap-1"
-                      >
-                        <span>Next</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                      <PaginationNext
+                        href="#"
+                        size="default"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (currentPage < totalPages) handlePageChange(currentPage + 1)
+                        }}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                      />
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
@@ -645,7 +748,7 @@ export default function PaymentPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-card">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-2xl font-bold">Chi tiết gói thanh toán</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -665,7 +768,7 @@ export default function PaymentPage() {
             <div className="space-y-6">
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-muted-foreground">ID</Label>
+                  <Label className="text-sm font-semibold text-muted-foreground dark:text-white/80">ID</Label>
                   <div className="text-base font-medium font-mono">#{detailPackage.packageId}</div>
                 </div>
 
@@ -711,7 +814,7 @@ export default function PaymentPage() {
                           : 'bg-muted text-muted-foreground'
                       }`}
                     >
-                      {detailPackage.packageType}
+                      {detailPackage.packageType === 'Paid' ? 'Trả phí' : 'Miễn phí'}
                     </span>
                   </div>
 
@@ -752,7 +855,7 @@ export default function PaymentPage() {
           }
         }}
       >
-        <AlertDialogContent className="bg-card">
+        <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận ngưng hoạt động</AlertDialogTitle>
             <AlertDialogDescription>

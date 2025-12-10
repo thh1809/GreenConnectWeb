@@ -5,40 +5,48 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
+import { toast } from "sonner"
 import { complaints, type ComplaintStatus, type ComplaintData } from "@/lib/api/complaints"
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
 } from "@/components/ui/pagination"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-const getStatusColor = (status: ComplaintStatus) => {
+const getStatusBadgeVariant = (status: ComplaintStatus): "default" | "secondary" | "destructive" | "outline" => {
   switch (status) {
     case "InProgress":
-      return "bg-primary text-primary-foreground"
+      return "default"
     case "Resolved":
-      return "bg-primary/60 text-white"
+      return "secondary"
     case "Rejected":
-      return "bg-danger text-white"
+      return "destructive"
     case "Submitted":
     default:
-      return "bg-warning/20 text-warning-update"
+      return "outline"
   }
 }
 
 const formatStatus = (status: ComplaintStatus): string => {
   switch (status) {
     case "Submitted":
-      return "Pending"
+      return "Đang chờ"
     case "InProgress":
-      return "In Progress"
+      return "Đang xử lý"
     case "Resolved":
-      return "Resolved"
+      return "Đã giải quyết"
     case "Rejected":
-      return "Rejected"
+      return "Đã từ chối"
     default:
       return status
   }
@@ -78,7 +86,11 @@ export default function ComplaintsPage() {
       setTotalPages(response.pagination.totalPages)
       setTotalRecords(response.pagination.totalRecords)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load complaints")
+      const errorMessage = err instanceof Error ? err.message : "Không thể tải danh sách khiếu nại"
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setLoading(false)
     }
@@ -103,25 +115,25 @@ export default function ComplaintsPage() {
     <div className="space-y-6">
       {/* Header Section */}
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold leading-tight">Complaints</h1>
+        <h1 className="text-3xl font-bold leading-tight">Khiếu nại</h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Manage and resolve user complaints
+          Quản lý và xử lý khiếu nại từ người dùng
         </p>
       </div>
 
       {/* Filter Section */}
       <div className="flex items-center gap-3">
-        <label className="text-sm font-medium">Filter by Status:</label>
+        <label className="text-sm font-medium">Lọc theo trạng thái:</label>
         <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
           <SelectTrigger className="w-40 border-primary">
-            <SelectValue placeholder="All Status" />
+            <SelectValue placeholder="Tất cả trạng thái" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="Submitted">Pending</SelectItem>
-            <SelectItem value="InProgress">In Progress</SelectItem>
-            <SelectItem value="Resolved">Resolved</SelectItem>
-            <SelectItem value="Rejected">Rejected</SelectItem>
+            <SelectItem value="all">Tất cả trạng thái</SelectItem>
+            <SelectItem value="Submitted">Đang chờ</SelectItem>
+            <SelectItem value="InProgress">Đang xử lý</SelectItem>
+            <SelectItem value="Resolved">Đã giải quyết</SelectItem>
+            <SelectItem value="Rejected">Đã từ chối</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -130,28 +142,47 @@ export default function ComplaintsPage() {
       <Card className="shadow-sm">
         <CardContent className="p-0">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner className="h-8 w-8" />
-            </div>
-          ) : error ? (
-            <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              {error}
+            <div className="space-y-4 p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tiêu đề</TableHead>
+                    <TableHead>Người bị tố cáo</TableHead>
+                    <TableHead>Người dùng</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày</TableHead>
+                    <TableHead>Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-16" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : complaintsData.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No complaints found
+              Không tìm thấy khiếu nại nào
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b">
-                    <TableHead className="h-12 px-4 font-semibold">Title</TableHead>
-                    <TableHead className="h-12 px-4 font-semibold">Accused</TableHead>
-                    <TableHead className="h-12 px-4 font-semibold">User</TableHead>
-                    <TableHead className="h-12 px-4 font-semibold">Status</TableHead>
-                    <TableHead className="h-12 px-4 font-semibold">Date</TableHead>
-                    <TableHead className="h-12 px-4 font-semibold">Action</TableHead>
+                    <TableHead className="h-12 px-4 font-semibold">Tiêu đề</TableHead>
+                    <TableHead className="h-12 px-4 font-semibold">Người bị tố cáo</TableHead>
+                    <TableHead className="h-12 px-4 font-semibold">Người dùng</TableHead>
+                    <TableHead className="h-12 px-4 font-semibold">Trạng thái</TableHead>
+                    <TableHead className="h-12 px-4 font-semibold">Ngày</TableHead>
+                    <TableHead className="h-12 px-4 font-semibold">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -161,27 +192,32 @@ export default function ComplaintsPage() {
                       <TableCell className="px-4 py-4">{complaint.accused.fullName}</TableCell>
                       <TableCell className="px-4 py-4">{complaint.complainant.fullName}</TableCell>
                       <TableCell className="px-4 py-4">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
-                            complaint.status
-                          )}`}
-                        >
+                        <Badge variant={getStatusBadgeVariant(complaint.status)}>
                           {formatStatus(complaint.status)}
-                        </span>
+                        </Badge>
                       </TableCell>
                       <TableCell className="px-4 py-4">
                         {formatDate(complaint.createdAt)}
                       </TableCell>
                       <TableCell className="px-4 py-4">
-                        <Link href={`/admin/complaints/${complaint.complaintId}`}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto p-0 text-primary hover:text-primary hover:underline"
-                          >
-                            View
-                          </Button>
-                        </Link>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link href={`/admin/complaints/${complaint.complaintId}`}>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-auto p-0 text-primary hover:text-primary hover:underline"
+                                >
+                                  Xem
+                                </Button>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Xem chi tiết khiếu nại</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -189,50 +225,73 @@ export default function ComplaintsPage() {
               </Table>
             </div>
           )}
+
+          {/* Pagination Footer */}
+          {!loading && !error && complaintsData.length > 0 && (
+            <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
+              <div className="text-sm text-muted-foreground">
+                Hiển thị {complaintsData.length} / {totalRecords} hồ sơ
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      size="default"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (currentPage > 1) handlePageChange(currentPage - 1)
+                      }}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={pageNum}>
+                          <PaginationLink
+                            href="#"
+                            size="icon"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handlePageChange(pageNum)
+                            }}
+                            isActive={pageNum === currentPage}
+                          >
+                            {pageNum}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                      return (
+                        <PaginationItem key={pageNum}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )
+                    }
+                    return null
+                  })}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      size="default"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (currentPage < totalPages) handlePageChange(currentPage + 1)
+                      }}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* Pagination */}
-      {!loading && !error && complaintsData.length > 0 && (
-        <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="text-xs text-muted-foreground">
-            Hiển thị {complaintsData.length} / {totalRecords} hồ sơ
-          </div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="gap-1"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span>Previous</span>
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <span className="px-4 text-sm">
-                  Trang {currentPage} / {totalPages}
-                </span>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="gap-1"
-                >
-                  <span>Next</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
     </div>
   )
 }
