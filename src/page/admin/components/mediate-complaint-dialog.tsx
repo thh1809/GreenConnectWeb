@@ -121,7 +121,7 @@ export function MediateComplaintDialog({ open, onOpenChange, onSubmit }: Mediate
             </Button>
           </DialogClose>
           <Button
-            variant="primary"
+            variant="default"
             onClick={handleSubmit}
             type="button"
             disabled={!action || !notes.trim() || isSubmitting}

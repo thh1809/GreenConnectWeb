@@ -48,7 +48,7 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
                 reported by {complaint.user} on {complaint.date}
               </p>
             </div>
-            <Button variant="primary" className="shrink-0">
+            <Button variant="default" className="shrink-0">
               Mediate
             </Button>
           </div>
