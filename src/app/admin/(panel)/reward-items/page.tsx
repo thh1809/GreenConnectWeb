@@ -5,7 +5,15 @@ import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -19,9 +27,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { toast } from "sonner"
 import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Eye } from "lucide-react"
 import { rewardItems as rewardItemsApi, type RewardItem } from "@/lib/api/reward-items"
 
@@ -70,7 +82,11 @@ export default function RewardItemsPage() {
       setTotalPages(response.pagination?.totalPages || 1)
       setTotalRecords(response.pagination?.totalRecords || 0)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load reward items")
+      const errorMessage = err instanceof Error ? err.message : "Không thể tải danh sách vật phẩm đổi thưởng"
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setLoading(false)
     }
@@ -188,8 +204,15 @@ export default function RewardItemsPage() {
       await fetchRewardItems()
       setDeleteDialogOpen(false)
       setItemToDelete(null)
+      toast.success('Thành công', {
+        description: 'Đã xóa vật phẩm thành công',
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete reward item")
+      const errorMessage = err instanceof Error ? err.message : "Không thể xóa vật phẩm đổi thưởng"
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
       setDeleteDialogOpen(false)
       setItemToDelete(null)
     }
@@ -213,7 +236,11 @@ export default function RewardItemsPage() {
       setDetailItem(item)
       setDetailDialogOpen(true)
     } catch (err) {
-      setDetailError(err instanceof Error ? err.message : "Failed to load item details")
+      const errorMessage = err instanceof Error ? err.message : "Không thể tải chi tiết vật phẩm"
+      setDetailError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setDetailLoading(false)
     }
@@ -230,7 +257,7 @@ export default function RewardItemsPage() {
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold leading-tight">Reward Items</h1>
+          <h1 className="text-3xl font-bold leading-tight">Vật phẩm đổi thưởng</h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Quản lý vật phẩm đổi thưởng
           </p>
@@ -243,12 +270,12 @@ export default function RewardItemsPage() {
           }
         }}>
           <DialogTrigger asChild>
-            <Button variant="primary" className="gap-2 shrink-0">
+            <Button variant="default" className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               Thêm vật phẩm mới
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-card">
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-background dark:bg-background border-2 border-border dark:border-border">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-bold">
                 {editingItem ? "Chỉnh sửa vật phẩm" : "Thêm vật phẩm mới"}
@@ -382,7 +409,7 @@ export default function RewardItemsPage() {
                 </Button>
               </DialogClose>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={handleSaveItem}
                 disabled={!itemName.trim() || !pointCost.trim() || isSubmitting}
               >
@@ -407,24 +434,43 @@ export default function RewardItemsPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Search Bar */}
-          <div className="relative w-full sm:max-w-md">
+          <div className="relative w-full sm:max-w-2xl lg:max-w-3xl">
             <Input
               placeholder="Tìm kiếm theo tên..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-background pl-9 pr-3"
+              className="pl-9 pr-3"
             />
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
 
           {/* Loading State */}
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner className="h-8 w-8" />
-            </div>
-          ) : error ? (
-            <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              {error}
+            <div className="space-y-4 p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Hình ảnh</TableHead>
+                    <TableHead>Tên vật phẩm</TableHead>
+                    <TableHead>Điểm đổi thưởng</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : filteredItems.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -492,33 +538,60 @@ export default function RewardItemsPage() {
                         </TableCell>
                         <TableCell className="px-4 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              size="icon-sm"
-                              variant="outline"
-                              aria-label="View"
-                              className="h-8 w-8"
-                              onClick={() => handleViewDetail(item.rewardItemId)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon-sm"
-                              variant="outline"
-                              aria-label="Edit"
-                              className="h-8 w-8"
-                              onClick={() => handleOpenDialog(item)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon-sm"
-                              variant="destructive"
-                              aria-label="Delete"
-                              className="h-8 w-8"
-                              onClick={() => handleDeleteClick(item.rewardItemId)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    aria-label="View"
+                                    className="h-8 w-8"
+                                    onClick={() => handleViewDetail(item.rewardItemId)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Xem chi tiết</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    aria-label="Edit"
+                                    className="h-8 w-8"
+                                    onClick={() => handleOpenDialog(item)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Chỉnh sửa vật phẩm</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="destructive"
+                                    aria-label="Delete"
+                                    className="h-8 w-8"
+                                    onClick={() => handleDeleteClick(item.rewardItemId)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Xóa vật phẩm</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -536,33 +609,56 @@ export default function RewardItemsPage() {
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className="gap-1"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          <span>Previous</span>
-                        </Button>
+                        <PaginationPrevious
+                          href="#"
+                          size="default"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage > 1) handlePageChange(currentPage - 1)
+                          }}
+                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                        />
                       </PaginationItem>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                        if (
+                          pageNum === 1 ||
+                          pageNum === totalPages ||
+                          (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={pageNum}>
+                              <PaginationLink
+                                href="#"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  handlePageChange(pageNum)
+                                }}
+                                isActive={pageNum === currentPage}
+                              >
+                                {pageNum}
+                              </PaginationLink>
+                            </PaginationItem>
+                          )
+                        } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                          return (
+                            <PaginationItem key={pageNum}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )
+                        }
+                        return null
+                      })}
                       <PaginationItem>
-                        <span className="px-4 text-sm">
-                          Trang {currentPage} / {totalPages}
-                        </span>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                          className="gap-1"
-                        >
-                          <span>Next</span>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
+                        <PaginationNext
+                          href="#"
+                          size="default"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage < totalPages) handlePageChange(currentPage + 1)
+                          }}
+                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                        />
                       </PaginationItem>
                     </PaginationContent>
                   </Pagination>
@@ -575,7 +671,7 @@ export default function RewardItemsPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-card">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-2xl font-bold">Chi tiết vật phẩm đổi thưởng</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -612,7 +708,7 @@ export default function RewardItemsPage() {
               {/* Item Details */}
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-muted-foreground">ID</Label>
+                  <Label className="text-sm font-semibold text-muted-foreground dark:text-white/80">ID</Label>
                   <div className="text-base font-medium">#{detailItem.rewardItemId}</div>
                 </div>
 
@@ -694,7 +790,7 @@ export default function RewardItemsPage() {
           }
         }}
       >
-        <AlertDialogContent className="bg-card">
+        <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription>

@@ -76,15 +76,31 @@ export default function DashboardPage() {
     fetchReport()
   }
 
+  // Format transaction status to Vietnamese
+  const formatTransactionStatus = (status: string): string => {
+    switch (status) {
+      case 'Scheduled':
+        return 'Đã lên lịch'
+      case 'Completed':
+        return 'Hoàn thành'
+      case 'Failed':
+        return 'Thất bại'
+      case 'Success':
+        return 'Thành công'
+      default:
+        return status
+    }
+  }
+
   // Prepare chart data from transaction status
   const transactionChartData = reportData?.transactionStatus.map((status, index) => ({
-    label: status.transactionStatus,
+    label: formatTransactionStatus(status.transactionStatus),
     value: status.totalTransactionStatus,
   })) || []
 
   // Prepare pie chart data
   const pieChartData = reportData?.transactionStatus.map((status, index) => ({
-    label: status.transactionStatus,
+    label: formatTransactionStatus(status.transactionStatus),
     value: status.totalTransactionStatus,
   })) || []
 
@@ -92,7 +108,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold">Bảng điều khiển</h1>
           <p className="text-sm text-muted-foreground">
             Báo cáo tổng hợp hệ thống
           </p>
@@ -250,7 +266,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">
-                        {status.transactionStatus}
+                        {formatTransactionStatus(status.transactionStatus)}
                       </p>
                       <p className="text-2xl font-bold">{status.totalTransactionStatus}</p>
                     </div>

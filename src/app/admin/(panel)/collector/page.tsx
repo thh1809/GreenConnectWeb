@@ -6,6 +6,10 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
 } from '@/components/ui/pagination'
 import {
   Select,
@@ -23,7 +27,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Spinner } from '@/components/ui/spinner'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
 import {
   getAdminVerifications,
   type AdminVerificationItem,
@@ -42,15 +51,34 @@ import {
 const PAGE_SIZE = 10
 const statusOptions: { label: string; value: 'all' | AdminVerificationStatus }[] = [
   { label: 'Tất cả trạng thái', value: 'all' },
-  { label: 'Pending Review', value: 'PendingReview' },
-  { label: 'Approved', value: 'Approved' },
-  { label: 'Rejected', value: 'Rejected' },
+  { label: 'Đang chờ xem xét', value: 'PendingReview' },
+  { label: 'Đã duyệt', value: 'Approved' },
+  { label: 'Đã từ chối', value: 'Rejected' },
 ]
 
-const statusBadgeStyles: Record<AdminVerificationStatus, string> = {
-  PendingReview: 'bg-warning/20 text-warning-update',
-  Approved: 'bg-primary text-primary-foreground',
-  Rejected: 'bg-danger text-white',
+const formatVerificationStatus = (status: AdminVerificationStatus): string => {
+  switch (status) {
+    case 'PendingReview':
+      return 'Đang chờ xem xét'
+    case 'Approved':
+      return 'Đã duyệt'
+    case 'Rejected':
+      return 'Đã từ chối'
+    default:
+      return status
+  }
+}
+
+const getStatusBadgeVariant = (status: AdminVerificationStatus): "default" | "secondary" | "destructive" | "outline" => {
+  switch (status) {
+    case 'Approved':
+      return 'default'
+    case 'Rejected':
+      return 'destructive'
+    case 'PendingReview':
+    default:
+      return 'outline'
+  }
 }
 
 const statusIconMap: Record<AdminVerificationStatus, JSX.Element> = {
@@ -90,11 +118,13 @@ export default function CollectorPage() {
       setNextPage(response.pagination.nextPage)
       setPrevPage(response.pagination.prevPage)
     } catch (fetchError) {
-      setError(
-        fetchError instanceof Error
-          ? fetchError.message
-          : 'Không thể tải danh sách đơn xác minh. Vui lòng thử lại.',
-      )
+      const errorMessage = fetchError instanceof Error
+        ? fetchError.message
+        : 'Không thể tải danh sách đơn xác minh. Vui lòng thử lại.'
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setIsLoading(false)
     }
@@ -158,7 +188,7 @@ export default function CollectorPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Collector</h1>
+        <h1 className="text-3xl font-bold">Người thu gom</h1>
         <p className="text-sm text-muted-foreground">
           Quản lý đơn xác minh người thu gom
         </p>
@@ -171,17 +201,17 @@ export default function CollectorPage() {
         <CardContent className="space-y-4">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-md">
-              <input
+            <div className="relative w-full sm:max-w-2xl lg:max-w-3xl">
+              <Input
                 placeholder="Tìm theo tên hoặc số điện thoại"
                 value={searchQuery}
-                onChange={e => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setSearchQuery(e.target.value)
                   setPage(1) // Reset về trang 1 khi search
                 }}
-                className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-ring"
+                className="pl-9 pr-3"
               />
-              <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
             <div className="flex gap-2">
               <Select value={statusFilter} onValueChange={value => setStatusFilter(value as typeof statusFilter)}>
@@ -200,14 +230,31 @@ export default function CollectorPage() {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-16 text-muted-foreground">
-              <Spinner className="mr-3 h-5 w-5" />
-              Đang tải dữ liệu...
-            </div>
-          ) : error ? (
-            <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              <AlertCircle className="h-4 w-4" />
-              {error}
+            <div className="space-y-4 p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tên / Điện thoại</TableHead>
+                    <TableHead>Hạng</TableHead>
+                    <TableHead>Vai trò</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày gửi</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-24 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-32 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <>
@@ -217,7 +264,7 @@ export default function CollectorPage() {
                   <TableRow>
                     <TableHead>Tên / Điện thoại</TableHead>
                     <TableHead>Hạng</TableHead>
-                    <TableHead>Role</TableHead>
+                    <TableHead>Vai trò</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead>Ngày gửi</TableHead>
                     <TableHead className="w-[180px] text-right">Hành động</TableHead>
@@ -257,25 +304,32 @@ export default function CollectorPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeStyles[item.status]}`}
-                          >
+                          <Badge variant={getStatusBadgeVariant(item.status)} className="gap-1">
                             {statusIconMap[item.status]}
-                            {item.status}
-                          </span>
+                            {formatVerificationStatus(item.status)}
+                          </Badge>
                         </TableCell>
                         <TableCell>{formatSubmittedAt(item.submittedAt)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2 min-w-[140px]">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleOpenDetailDialog(item)}
-                              className="gap-1"
-                            >
-                              <Eye className="h-4 w-4" />
-                              Xem
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleOpenDetailDialog(item)}
+                                    className="gap-1"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    Xem
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Xem chi tiết đơn xác minh</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                             {item.status === 'PendingReview' ? (
                               <VerifyUserDialog
                                 request={item}
@@ -300,33 +354,56 @@ export default function CollectorPage() {
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePageChange(page - 1)}
-                        disabled={page === 1}
-                        className="gap-1"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span>Previous</span>
-                      </Button>
+                      <PaginationPrevious
+                        href="#"
+                        size="default"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (page > 1) handlePageChange(page - 1)
+                        }}
+                        className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                      />
                     </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                      if (
+                        pageNum === 1 ||
+                        pageNum === totalPages ||
+                        (pageNum >= page - 1 && pageNum <= page + 1)
+                      ) {
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationLink
+                              href="#"
+                              size="icon"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(pageNum)
+                              }}
+                              isActive={pageNum === page}
+                            >
+                              {pageNum}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      } else if (pageNum === page - 2 || pageNum === page + 2) {
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        )
+                      }
+                      return null
+                    })}
                     <PaginationItem>
-                      <span className="px-4 text-sm">
-                        Trang {page} / {totalPages}
-                      </span>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePageChange(page + 1)}
-                        disabled={page === totalPages}
-                        className="gap-1"
-                      >
-                        <span>Next</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                      <PaginationNext
+                        href="#"
+                        size="default"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (page < totalPages) handlePageChange(page + 1)
+                        }}
+                        className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
+                      />
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
@@ -338,7 +415,7 @@ export default function CollectorPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
           <DialogHeader>
             <DialogTitle>Chi tiết đơn xác minh</DialogTitle>
             <DialogDescription>
@@ -365,19 +442,17 @@ export default function CollectorPage() {
                   <div className="text-sm font-semibold">{selectedVerification.user.pointBalance.toLocaleString('vi-VN')}</div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">Role</div>
+                  <div className="text-sm font-medium text-muted-foreground">Vai trò</div>
                   <div className="text-sm font-semibold">
                     {selectedVerification.user.roles?.join(', ') || 'Chưa gán'}
                   </div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Trạng thái</div>
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeStyles[selectedVerification.status]}`}
-                  >
+                  <Badge variant={getStatusBadgeVariant(selectedVerification.status)} className="gap-1">
                     {statusIconMap[selectedVerification.status]}
-                    {selectedVerification.status}
-                  </span>
+                    {formatVerificationStatus(selectedVerification.status)}
+                  </Badge>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Ngày gửi</div>

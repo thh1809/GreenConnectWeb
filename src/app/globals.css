@@ -217,3 +217,24 @@
 .animate-wave {
   animation: wave 1s ease-in-out;
 }
+
+/* ===========================
+  📅 DateTime Local Input Styling
+=========================== */
+/* Force text color for datetime-local inputs */
+input[type="datetime-local"] {
+  color: hsl(var(--foreground)) !important;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+  cursor: pointer;
+}
+
+.dark input[type="datetime-local"] {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

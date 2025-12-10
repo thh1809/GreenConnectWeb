@@ -4,7 +4,15 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/ui/pagination'
 import {
   Dialog,
   DialogContent,
@@ -27,7 +35,11 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
 import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import { prices as pricesApi, type ReferencePrice } from '@/lib/api/prices'
 import { categories as categoriesApi, type ScrapCategory } from '@/lib/api/categories'
@@ -90,7 +102,11 @@ export default function PricesPage() {
       setTotalPages(response.pagination.totalPages)
       setTotalRecords(response.pagination.totalRecords)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải danh sách giá')
+      const errorMessage = err instanceof Error ? err.message : 'Không thể tải danh sách giá'
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setLoading(false)
     }
@@ -162,8 +178,15 @@ export default function PricesPage() {
 
       await fetchPrices()
       handleCloseDialog()
+      toast.success('Thành công', {
+        description: editingPrice ? 'Đã cập nhật giá tham khảo thành công' : 'Đã tạo giá tham khảo thành công',
+      })
     } catch (err) {
-      setDialogError(err instanceof Error ? err.message : 'Không thể lưu giá tham khảo')
+      const errorMessage = err instanceof Error ? err.message : 'Không thể lưu giá tham khảo'
+      setDialogError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -182,8 +205,15 @@ export default function PricesPage() {
       await fetchPrices()
       setDeleteDialogOpen(false)
       setPriceToDelete(null)
+      toast.success('Thành công', {
+        description: 'Đã xóa giá tham khảo thành công',
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể xóa giá tham khảo')
+      const errorMessage = err instanceof Error ? err.message : 'Không thể xóa giá tham khảo'
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
       setDeleteDialogOpen(false)
       setPriceToDelete(null)
     }
@@ -197,7 +227,11 @@ export default function PricesPage() {
       setDetailPrice(price)
       setDetailDialogOpen(true)
     } catch (err) {
-      setDetailError(err instanceof Error ? err.message : 'Không thể tải chi tiết giá tham khảo')
+      const errorMessage = err instanceof Error ? err.message : 'Không thể tải chi tiết giá tham khảo'
+      setDetailError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setDetailLoading(false)
     }
@@ -246,12 +280,12 @@ export default function PricesPage() {
           }}
         >
           <DialogTrigger asChild>
-            <Button variant="primary" className="gap-2 shrink-0">
+            <Button variant="default" className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               Thêm giá mới
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-card">
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-background dark:bg-background border-2 border-border dark:border-border">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-bold">
                 {editingPrice ? 'Chỉnh sửa giá tham khảo' : 'Thêm giá tham khảo mới'}
@@ -334,7 +368,7 @@ export default function PricesPage() {
                 </Button>
               </DialogClose>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={handleSavePrice}
                 disabled={!categoryId || !pricePerKg.trim() || isSubmitting}
               >
@@ -360,12 +394,12 @@ export default function PricesPage() {
         <CardContent className="space-y-5">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-md">
+            <div className="relative w-full sm:max-w-2xl lg:max-w-3xl">
               <Input
                 placeholder="Tìm kiếm theo danh mục, giá hoặc ID..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="bg-background pl-9 pr-3"
+                className="pl-9 pr-3"
               />
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
@@ -387,12 +421,29 @@ export default function PricesPage() {
 
           {/* Loading State */}
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner className="h-8 w-8" />
-            </div>
-          ) : error ? (
-            <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              {error}
+            <div className="space-y-4 p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Danh mục</TableHead>
+                    <TableHead>Giá mỗi kg (VNĐ)</TableHead>
+                    <TableHead>Cập nhật lần cuối</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : filteredPrices.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -439,33 +490,60 @@ export default function PricesPage() {
                         </TableCell>
                         <TableCell className="px-4 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              size="icon-sm"
-                              variant="outline"
-                              aria-label="View"
-                              className="h-8 w-8"
-                              onClick={() => handleViewDetail(priceItem.referencePriceId)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon-sm"
-                              variant="outline"
-                              aria-label="Edit"
-                              className="h-8 w-8"
-                              onClick={() => handleOpenDialog(priceItem)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon-sm"
-                              variant="destructive"
-                              aria-label="Delete"
-                              className="h-8 w-8"
-                              onClick={() => handleDeleteClick(priceItem.referencePriceId)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    aria-label="View"
+                                    className="h-8 w-8"
+                                    onClick={() => handleViewDetail(priceItem.referencePriceId)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Xem chi tiết</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    aria-label="Edit"
+                                    className="h-8 w-8"
+                                    onClick={() => handleOpenDialog(priceItem)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Chỉnh sửa giá</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="destructive"
+                                    aria-label="Delete"
+                                    className="h-8 w-8"
+                                    onClick={() => handleDeleteClick(priceItem.referencePriceId)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Xóa giá tham khảo</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -483,33 +561,56 @@ export default function PricesPage() {
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className="gap-1"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          <span>Previous</span>
-                        </Button>
+                        <PaginationPrevious
+                          href="#"
+                          size="default"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage > 1) handlePageChange(currentPage - 1)
+                          }}
+                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                        />
                       </PaginationItem>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                        if (
+                          pageNum === 1 ||
+                          pageNum === totalPages ||
+                          (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={pageNum}>
+                              <PaginationLink
+                                href="#"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  handlePageChange(pageNum)
+                                }}
+                                isActive={pageNum === currentPage}
+                              >
+                                {pageNum}
+                              </PaginationLink>
+                            </PaginationItem>
+                          )
+                        } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                          return (
+                            <PaginationItem key={pageNum}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )
+                        }
+                        return null
+                      })}
                       <PaginationItem>
-                        <span className="px-4 text-sm">
-                          Trang {currentPage} / {totalPages}
-                        </span>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                          className="gap-1"
-                        >
-                          <span>Next</span>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
+                        <PaginationNext
+                          href="#"
+                          size="default"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage < totalPages) handlePageChange(currentPage + 1)
+                          }}
+                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                        />
                       </PaginationItem>
                     </PaginationContent>
                   </Pagination>
@@ -522,7 +623,7 @@ export default function PricesPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-card">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-2xl font-bold">Chi tiết giá tham khảo</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -543,7 +644,7 @@ export default function PricesPage() {
               {/* Price Details */}
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-muted-foreground">ID</Label>
+                  <Label className="text-sm font-semibold text-muted-foreground dark:text-white/80">ID</Label>
                   <div className="text-base font-medium font-mono">{detailPrice.referencePriceId}</div>
                 </div>
 
@@ -633,7 +734,7 @@ export default function PricesPage() {
           }
         }}
       >
-        <AlertDialogContent className="bg-card">
+        <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription>

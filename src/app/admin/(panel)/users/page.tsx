@@ -2,10 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
 } from '@/components/ui/pagination'
 import {
   Select,
@@ -23,9 +28,14 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Spinner } from '@/components/ui/spinner'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { users, type User } from '@/lib/api/user-api'
-import { AlertCircle, Search, ChevronLeft, ChevronRight, Ban, Unlock } from 'lucide-react'
+import { AlertCircle, Search, ChevronLeft, ChevronRight, Ban, Unlock, Eye, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
+import { useLoading } from '@/contexts/loading-context'
 import {
   Dialog,
   DialogContent,
@@ -38,16 +48,34 @@ import {
 const PAGE_SIZE = 10
 const statusOptions: { label: string; value: 'all' | string }[] = [
   { label: 'Tất cả trạng thái', value: 'all' },
-  { label: 'Active', value: 'Active' },
-  { label: 'Blocked', value: 'Blocked' },
+  { label: 'Đang hoạt động', value: 'Active' },
+  { label: 'Đã chặn', value: 'Blocked' },
 ]
 
-const statusBadgeStyles: Record<string, string> = {
-  Active: 'bg-primary text-primary-foreground',
-  Blocked: 'bg-danger text-white',
+const formatUserStatus = (status: string): string => {
+  switch (status) {
+    case 'Active':
+      return 'Đang hoạt động'
+    case 'Blocked':
+      return 'Đã chặn'
+    default:
+      return status
+  }
+}
+
+const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+  switch (status) {
+    case 'Active':
+      return 'default'
+    case 'Blocked':
+      return 'destructive'
+    default:
+      return 'secondary'
+  }
 }
 
 export default function UsersPage() {
+  const { startLoading, stopLoading } = useLoading()
   const [userList, setUserList] = useState<User[]>([])
   const [statusFilter, setStatusFilter] = useState<'all' | string>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -93,6 +121,7 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     setIsLoading(true)
     setError(null)
+    startLoading("Đang tải danh sách người dùng...")
 
     try {
       const response = await users.getAll({
@@ -106,13 +135,16 @@ export default function UsersPage() {
       setNextPage(response.pagination.nextPage)
       setPrevPage(response.pagination.prevPage)
     } catch (fetchError) {
-      setError(
-        fetchError instanceof Error
-          ? fetchError.message
-          : 'Không thể tải danh sách người dùng. Vui lòng thử lại.',
-      )
+      const errorMessage = fetchError instanceof Error
+        ? fetchError.message
+        : 'Không thể tải danh sách người dùng. Vui lòng thử lại.'
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setIsLoading(false)
+      stopLoading()
     }
   }
 
@@ -136,17 +168,26 @@ export default function UsersPage() {
 
     try {
       setIsBanning(true)
+      startLoading(selectedUser.status === 'Blocked' ? 'Đang mở khóa tài khoản...' : 'Đang cấm tài khoản...')
       await users.banToggle(selectedUser.id)
       await fetchUsers() // Refresh danh sách
       handleCloseBanDialog()
+      toast.success('Thành công', {
+        description: selectedUser.status === 'Blocked' 
+          ? 'Đã mở khóa tài khoản thành công' 
+          : 'Đã cấm tài khoản thành công',
+      })
     } catch (banError) {
-      setError(
-        banError instanceof Error
-          ? banError.message
-          : 'Không thể thay đổi trạng thái tài khoản. Vui lòng thử lại.',
-      )
+      const errorMessage = banError instanceof Error
+        ? banError.message
+        : 'Không thể thay đổi trạng thái tài khoản. Vui lòng thử lại.'
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setIsBanning(false)
+      stopLoading()
     }
   }
 
@@ -166,17 +207,17 @@ export default function UsersPage() {
         <CardContent className="space-y-4">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-md">
-              <input
+            <div className="relative w-full sm:max-w-2xl lg:max-w-3xl">
+              <Input
                 placeholder="Tìm theo tên hoặc số điện thoại"
                 value={searchQuery}
                 onChange={e => {
                   setSearchQuery(e.target.value)
                   setPage(1) // Reset về trang 1 khi search
                 }}
-                className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-ring"
+                className="pl-9 pr-3"
               />
-              <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
             <div className="flex gap-2">
               <Select value={statusFilter} onValueChange={value => setStatusFilter(value as typeof statusFilter)}>
@@ -195,14 +236,33 @@ export default function UsersPage() {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-16 text-muted-foreground">
-              <Spinner className="mr-3 h-5 w-5" />
-              Đang tải dữ liệu...
-            </div>
-          ) : error ? (
-            <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              <AlertCircle className="h-4 w-4" />
-              {error}
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tên / Điện thoại</TableHead>
+                    <TableHead>Hạng</TableHead>
+                    <TableHead>Vai trò</TableHead>
+                    <TableHead>Điểm</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày tạo</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <>
@@ -212,7 +272,7 @@ export default function UsersPage() {
                   <TableRow>
                     <TableHead>Tên / Điện thoại</TableHead>
                     <TableHead>Hạng</TableHead>
-                    <TableHead>Role</TableHead>
+                    <TableHead>Vai trò</TableHead>
                     <TableHead>Điểm</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead>Ngày tạo</TableHead>
@@ -254,34 +314,41 @@ export default function UsersPage() {
                         </TableCell>
                         <TableCell>{user.pointBalance.toLocaleString('vi-VN')}</TableCell>
                         <TableCell>
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              statusBadgeStyles[user.status] || 'bg-secondary text-secondary-foreground'
-                            }`}
-                          >
-                            {user.status}
-                          </span>
+                          <Badge variant={getStatusBadgeVariant(user.status)}>
+                            {formatUserStatus(user.status)}
+                          </Badge>
                         </TableCell>
                         <TableCell>{formatDate(user.createdAt)}</TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant={user.status === 'Blocked' ? 'outline' : 'destructive'}
-                            size="sm"
-                            onClick={() => handleOpenBanDialog(user)}
-                            className="gap-1"
-                          >
-                            {user.status === 'Blocked' ? (
-                              <>
-                                <Unlock className="h-4 w-4" />
-                                Mở khóa
-                              </>
-                            ) : (
-                              <>
-                                <Ban className="h-4 w-4" />
-                                Cấm
-                              </>
-                            )}
-                          </Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleOpenBanDialog(user)}
+                                  className={user.status === 'Blocked' 
+                                    ? "gap-1 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 border-black dark:border-white" 
+                                    : "gap-1 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 border-black dark:border-white"}
+                                >
+                                  {user.status === 'Blocked' ? (
+                                    <>
+                                      <Unlock className="h-4 w-4" />
+                                      Mở khóa
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Ban className="h-4 w-4" />
+                                      Cấm
+                                    </>
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{user.status === 'Blocked' ? 'Mở khóa tài khoản' : 'Cấm tài khoản'}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </TableCell>
                       </TableRow>
                     ))
@@ -297,33 +364,56 @@ export default function UsersPage() {
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePageChange(page - 1)}
-                        disabled={page === 1}
-                        className="gap-1"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span>Previous</span>
-                      </Button>
+                      <PaginationPrevious
+                        href="#"
+                        size="default"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (page > 1) handlePageChange(page - 1)
+                        }}
+                        className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                      />
                     </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                      if (
+                        pageNum === 1 ||
+                        pageNum === totalPages ||
+                        (pageNum >= page - 1 && pageNum <= page + 1)
+                      ) {
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationLink
+                              href="#"
+                              size="icon"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(pageNum)
+                              }}
+                              isActive={pageNum === page}
+                            >
+                              {pageNum}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      } else if (pageNum === page - 2 || pageNum === page + 2) {
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        )
+                      }
+                      return null
+                    })}
                     <PaginationItem>
-                      <span className="px-4 text-sm">
-                        Trang {page} / {totalPages}
-                      </span>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePageChange(page + 1)}
-                        disabled={page === totalPages}
-                        className="gap-1"
-                      >
-                        <span>Next</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                      <PaginationNext
+                        href="#"
+                        size="default"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (page < totalPages) handlePageChange(page + 1)
+                        }}
+                        className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
+                      />
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
@@ -335,33 +425,47 @@ export default function UsersPage() {
 
       {/* Ban/Unban Dialog */}
       <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-foreground dark:text-foreground text-xl font-bold">
               {selectedUser?.status === 'Blocked' ? 'Mở khóa tài khoản' : 'Cấm tài khoản'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-foreground/80 dark:text-foreground/80 text-base leading-relaxed">
               {selectedUser?.status === 'Blocked' ? (
                 <>
-                  Bạn có chắc chắn muốn mở khóa tài khoản của <strong>{selectedUser?.fullName}</strong> không?
-                  Người dùng này sẽ có thể đăng nhập và sử dụng hệ thống trở lại.
+                  Bạn có chắc chắn muốn mở khóa tài khoản của <strong className="text-foreground dark:text-foreground font-semibold">{selectedUser?.fullName}</strong> không?
+                  <br />
+                  <span className="text-sm text-muted-foreground dark:text-muted-foreground">
+                    Người dùng này sẽ có thể đăng nhập và sử dụng hệ thống trở lại.
+                  </span>
                 </>
               ) : (
                 <>
-                  Bạn có chắc chắn muốn cấm tài khoản của <strong>{selectedUser?.fullName}</strong> không?
-                  Người dùng này sẽ không thể đăng nhập vào hệ thống.
+                  Bạn có chắc chắn muốn cấm tài khoản của <strong className="text-foreground dark:text-foreground font-semibold">{selectedUser?.fullName}</strong> không?
+                  <br />
+                  <span className="text-sm text-muted-foreground dark:text-muted-foreground">
+                    Người dùng này sẽ không thể đăng nhập vào hệ thống.
+                  </span>
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseBanDialog} disabled={isBanning}>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleCloseBanDialog} 
+              disabled={isBanning}
+              className="border-2 border-border dark:border-border text-foreground dark:text-foreground hover:bg-accent dark:hover:bg-accent"
+            >
               Hủy
             </Button>
             <Button
-              variant={selectedUser?.status === 'Blocked' ? 'primary' : 'destructive'}
+              variant={selectedUser?.status === 'Blocked' ? 'default' : 'destructive'}
               onClick={handleBanToggle}
               disabled={isBanning}
+              className={selectedUser?.status === 'Blocked' 
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary dark:text-primary-foreground"
+                : "bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive dark:text-white"}
             >
               {isBanning ? (
                 <>

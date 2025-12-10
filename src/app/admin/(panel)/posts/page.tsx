@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -25,11 +26,24 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ConfirmRemoveDialog } from '@/page/admin/components/confirm-remove-dialog'
-import { Flag, MoreVertical, Search, Trash2 } from 'lucide-react'
+import { Flag, MoreVertical, Search, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 
 type PostStatus = 'Pending' | 'Approved' | 'Flagged'
+
+const formatPostStatus = (status: PostStatus): string => {
+  switch (status) {
+    case 'Pending':
+      return 'Đang chờ'
+    case 'Approved':
+      return 'Đã duyệt'
+    case 'Flagged':
+      return 'Đã gắn cờ'
+    default:
+      return status
+  }
+}
 
 type Post = {
   id: string
@@ -129,33 +143,33 @@ export default function PostsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Posts</h1>
+        <h1 className="text-3xl font-bold">Bài đăng</h1>
         <p className="text-sm text-muted-foreground">
-          Manage and moderate user posts, reviews, and content
+          Quản lý và kiểm duyệt bài đăng, đánh giá và nội dung từ người dùng
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Posts Management</CardTitle>
+          <CardTitle>Quản lý bài đăng</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-xs">
-              <input
-                placeholder="Search by keywords or author..."
-                className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-ring"
+            <div className="relative w-full sm:max-w-2xl lg:max-w-3xl">
+              <Input
+                placeholder="Tìm kiếm theo từ khóa hoặc tác giả..."
+                className="pl-9 pr-3"
               />
-              <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
             <div className="flex flex-wrap gap-2">
               <Select>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All Location" />
+                  <SelectValue placeholder="Tất cả địa điểm" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Location</SelectItem>
+                  <SelectItem value="all">Tất cả địa điểm</SelectItem>
                   <SelectItem value="hcm">Ho Chi Minh City</SelectItem>
                   <SelectItem value="hanoi">Hanoi</SelectItem>
                   <SelectItem value="danang">Da Nang</SelectItem>
@@ -167,14 +181,14 @@ export default function PostsPage() {
           {/* Bulk Actions */}
           {(selectedCount > 0 || flaggedCount > 0) && (
             <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/50 p-3">
-              <span className="text-sm font-medium">Bulk Actions:</span>
+              <span className="text-sm font-medium">Hành động hàng loạt:</span>
               {selectedCount > 0 && (
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={handleRemoveSelected}
                 >
-                  Remove Selected ({selectedCount})
+                  Xóa đã chọn ({selectedCount})
                 </Button>
               )}
               {flaggedCount > 0 && (
@@ -183,7 +197,7 @@ export default function PostsPage() {
                   size="sm"
                   onClick={handleRemoveFlagged}
                 >
-                  Remove All Flagged ({flaggedCount})
+                  Xóa tất cả đã gắn cờ ({flaggedCount})
                 </Button>
               )}
             </div>
@@ -201,14 +215,14 @@ export default function PostsPage() {
                     className="h-4 w-4 cursor-pointer rounded border-input"
                   />
                 </TableHead>
-                <TableHead>Image</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Reports</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead>Hình ảnh</TableHead>
+                <TableHead>Tiêu đề</TableHead>
+                <TableHead>Tác giả</TableHead>
+                <TableHead>Địa điểm</TableHead>
+                <TableHead>Trạng thái</TableHead>
+                <TableHead>Báo cáo</TableHead>
+                <TableHead>Ngày</TableHead>
+                <TableHead className="text-right">Hành động</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -246,7 +260,7 @@ export default function PostsPage() {
                         post.status
                       )}`}
                     >
-                      {post.status}
+                      {formatPostStatus(post.status)}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -264,14 +278,14 @@ export default function PostsPage() {
                     <Button
                       size="icon-sm"
                       variant="outline"
-                      aria-label="More options"
+                      aria-label="Thêm tùy chọn"
                     >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                     <Button
                       size="icon-sm"
                       variant="destructive"
-                      aria-label="Delete"
+                      aria-label="Xóa"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -284,15 +298,36 @@ export default function PostsPage() {
           {/* Footer */}
           <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
             <div className="text-xs text-muted-foreground">
-              Show 10 of 100 posts
+              Hiển thị 10 / 100 bài đăng
             </div>
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious href="#" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1"
+                    disabled
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span>Trước</span>
+                  </Button>
                 </PaginationItem>
                 <PaginationItem>
-                  <PaginationNext href="#" />
+                  <span className="px-4 text-sm">
+                    Trang 1 / 1
+                  </span>
+                </PaginationItem>
+                <PaginationItem>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1"
+                    disabled
+                  >
+                    <span>Sau</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </PaginationItem>
               </PaginationContent>
             </Pagination>

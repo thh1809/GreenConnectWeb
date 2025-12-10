@@ -4,7 +4,15 @@ import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -18,8 +26,12 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
 import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { categories as categoriesApi, type ScrapCategory } from "@/lib/api/categories"
 
@@ -56,7 +68,11 @@ export default function CategoriesPage() {
       setTotalPages(response.pagination.totalPages)
       setTotalRecords(response.pagination.totalRecords)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load categories")
+      const errorMessage = err instanceof Error ? err.message : "Không thể tải danh sách danh mục"
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setLoading(false)
     }
@@ -111,8 +127,15 @@ export default function CategoriesPage() {
       
       await fetchCategories()
       handleCloseDialog()
+      toast.success('Thành công', {
+        description: editingCategory ? 'Đã cập nhật danh mục thành công' : 'Đã tạo danh mục thành công',
+      })
     } catch (err) {
-      setDialogError(err instanceof Error ? err.message : "Không thể lưu danh mục")
+      const errorMessage = err instanceof Error ? err.message : "Không thể lưu danh mục"
+      setDialogError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -131,8 +154,15 @@ export default function CategoriesPage() {
       await fetchCategories()
       setDeleteDialogOpen(false)
       setCategoryToDelete(null)
+      toast.success('Thành công', {
+        description: 'Đã xóa danh mục thành công',
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete category")
+      const errorMessage = err instanceof Error ? err.message : "Không thể xóa danh mục"
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
       setDeleteDialogOpen(false)
       setCategoryToDelete(null)
     }
@@ -153,7 +183,7 @@ export default function CategoriesPage() {
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold leading-tight">Scrap Categories</h1>
+          <h1 className="text-3xl font-bold leading-tight">Danh mục</h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Quản lý danh mục ve chai và phế liệu
           </p>
@@ -166,12 +196,12 @@ export default function CategoriesPage() {
           }
         }}>
           <DialogTrigger asChild>
-            <Button variant="primary" className="gap-2 shrink-0">
+            <Button variant="default" className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               Thêm danh mục mới
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-card">
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-background dark:bg-background border-2 border-border dark:border-border">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-bold">
                 {editingCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
@@ -225,7 +255,7 @@ export default function CategoriesPage() {
                 </Button>
               </DialogClose>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={handleSaveCategory}
                 disabled={!categoryName.trim() || isSubmitting}
               >
@@ -250,24 +280,39 @@ export default function CategoriesPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Search Bar */}
-          <div className="relative w-full sm:max-w-md">
+          <div className="relative w-full sm:max-w-2xl lg:max-w-3xl">
             <Input
               placeholder="Tìm kiếm theo tên..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-background pl-9 pr-3"
+              className="pl-9 pr-3"
             />
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
 
           {/* Loading State */}
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner className="h-8 w-8" />
-            </div>
-          ) : error ? (
-            <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              {error}
+            <div className="space-y-4 p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Tên danh mục</TableHead>
+                    <TableHead>Mô tả</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : filteredCategories.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -279,45 +324,63 @@ export default function CategoriesPage() {
               <div className="overflow-x-auto -mx-6 px-6">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b">
-                      <TableHead className="h-12 px-4 font-semibold">ID</TableHead>
-                      <TableHead className="h-12 px-4 font-semibold">Tên danh mục</TableHead>
-                      <TableHead className="h-12 px-4 font-semibold">Mô tả</TableHead>
-                      <TableHead className="h-12 px-4 text-right font-semibold">Hành động</TableHead>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Tên danh mục</TableHead>
+                      <TableHead>Mô tả</TableHead>
+                      <TableHead className="text-right">Hành động</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredCategories.map((category) => (
-                      <TableRow key={category.scrapCategoryId} className="border-b">
-                        <TableCell className="px-4 py-4 font-medium">
+                      <TableRow key={category.scrapCategoryId}>
+                        <TableCell className="font-medium">
                           #{category.scrapCategoryId}
                         </TableCell>
-                        <TableCell className="px-4 py-4 font-medium">
+                        <TableCell className="font-medium">
                           {category.categoryName}
                         </TableCell>
-                        <TableCell className="px-4 py-4 text-muted-foreground">
+                        <TableCell className="text-muted-foreground">
                           {category.description || "-"}
                         </TableCell>
-                        <TableCell className="px-4 py-4">
+                        <TableCell>
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              size="icon-sm"
-                              variant="outline"
-                              aria-label="Edit"
-                              className="h-8 w-8"
-                              onClick={() => handleOpenDialog(category)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon-sm"
-                              variant="destructive"
-                              aria-label="Delete"
-                              className="h-8 w-8"
-                              onClick={() => handleDeleteClick(category.scrapCategoryId)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    aria-label="Edit"
+                                    className="h-8 w-8"
+                                    onClick={() => handleOpenDialog(category)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Chỉnh sửa danh mục</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="destructive"
+                                    aria-label="Delete"
+                                    className="h-8 w-8"
+                                    onClick={() => handleDeleteClick(category.scrapCategoryId)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Xóa danh mục</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -335,33 +398,56 @@ export default function CategoriesPage() {
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className="gap-1"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          <span>Previous</span>
-                        </Button>
+                        <PaginationPrevious
+                          href="#"
+                          size="default"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage > 1) handlePageChange(currentPage - 1)
+                          }}
+                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                        />
                       </PaginationItem>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                        if (
+                          pageNum === 1 ||
+                          pageNum === totalPages ||
+                          (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={pageNum}>
+                              <PaginationLink
+                                href="#"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  handlePageChange(pageNum)
+                                }}
+                                isActive={pageNum === currentPage}
+                              >
+                                {pageNum}
+                              </PaginationLink>
+                            </PaginationItem>
+                          )
+                        } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                          return (
+                            <PaginationItem key={pageNum}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )
+                        }
+                        return null
+                      })}
                       <PaginationItem>
-                        <span className="px-4 text-sm">
-                          Trang {currentPage} / {totalPages}
-                        </span>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                          className="gap-1"
-                        >
-                          <span>Next</span>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
+                        <PaginationNext
+                          href="#"
+                          size="default"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage < totalPages) handlePageChange(currentPage + 1)
+                          }}
+                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                        />
                       </PaginationItem>
                     </PaginationContent>
                   </Pagination>
@@ -382,7 +468,7 @@ export default function CategoriesPage() {
           }
         }}
       >
-        <AlertDialogContent className="bg-card">
+        <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription>
