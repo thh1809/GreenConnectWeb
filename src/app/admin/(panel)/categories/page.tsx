@@ -105,24 +105,34 @@ export default function CategoriesPage() {
   }
 
   const handleSaveCategory = async () => {
-    if (!categoryName.trim()) return
+    const trimmedName = categoryName.trim()
+    const trimmedDescription = description.trim()
+    
+    if (!trimmedName) {
+      setDialogError('Tên danh mục không được để trống')
+      return
+    }
+
+    if (!trimmedDescription) {
+      setDialogError('Mô tả không được để trống')
+      return
+    }
 
     try {
       setIsSubmitting(true)
       setDialogError(null)
       
+      const payload = {
+        categoryName: trimmedName,
+        description: trimmedDescription,
+      }
+      
       if (editingCategory) {
         // Update existing category (PUT)
-        await categoriesApi.update(editingCategory.scrapCategoryId, {
-          categoryName: categoryName.trim(),
-          description: description.trim() || undefined,
-        })
+        await categoriesApi.update(editingCategory.scrapCategoryId, payload)
       } else {
         // Create new category (POST)
-        await categoriesApi.create({
-          categoryName: categoryName.trim(),
-          description: description.trim() || undefined,
-        })
+        await categoriesApi.create(payload)
       }
       
       await fetchCategories()
@@ -229,13 +239,13 @@ export default function CategoriesPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="category-description" className="text-sm font-semibold">
-                  Mô tả
+                  Mô tả <span className="text-danger">*</span>
                 </Label>
                 <Textarea
                   id="category-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Nhập mô tả (tùy chọn)"
+                  placeholder="Nhập mô tả"
                   className="min-h-[100px] resize-none bg-background"
                 />
               </div>
@@ -391,8 +401,8 @@ export default function CategoriesPage() {
 
               {/* Pagination Footer */}
               {!searchQuery && (
-                <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex flex-col items-center gap-4 border-t pt-4 sm:flex-row sm:justify-end">
+                  <div className="text-sm text-muted-foreground sm:mr-auto">
                     Hiển thị {categoriesData.length} / {totalRecords} danh mục
                   </div>
                   <Pagination>

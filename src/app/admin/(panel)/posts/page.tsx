@@ -1,13 +1,16 @@
 'use client'
 
+import { useEffect, useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
+  PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationEllipsis,
 } from '@/components/ui/pagination'
 import {
   Select,
@@ -25,118 +28,227 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ConfirmRemoveDialog } from '@/page/admin/components/confirm-remove-dialog'
-import { Flag, MoreVertical, Search, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from 'sonner'
+import { Search, MoreVertical, Trash2, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import Image from 'next/image'
-import { useState } from 'react'
+import { posts as postsApi, type ScrapPost, type ScrapPostFull } from '@/lib/api/posts'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
-type PostStatus = 'Pending' | 'Approved' | 'Flagged'
+type PostStatus = 'Open' | 'PartiallyBooked' | 'FullyBooked' | 'Completed' | 'Canceled'
+
+const statusOptions: { label: string; value: PostStatus | 'all' }[] = [
+  { label: 'Tất cả trạng thái', value: 'all' },
+  { label: 'Mở', value: 'Open' },
+  { label: 'Đã đặt một phần', value: 'PartiallyBooked' },
+  { label: 'Đã đặt đầy', value: 'FullyBooked' },
+  { label: 'Hoàn thành', value: 'Completed' },
+  { label: 'Đã hủy', value: 'Canceled' },
+]
 
 const formatPostStatus = (status: PostStatus): string => {
   switch (status) {
-    case 'Pending':
-      return 'Đang chờ'
-    case 'Approved':
-      return 'Đã duyệt'
-    case 'Flagged':
-      return 'Đã gắn cờ'
+    case 'Open':
+      return 'Mở'
+    case 'PartiallyBooked':
+      return 'Đã đặt một phần'
+    case 'FullyBooked':
+      return 'Đã đặt đầy'
+    case 'Completed':
+      return 'Hoàn thành'
+    case 'Canceled':
+      return 'Đã hủy'
     default:
       return status
   }
 }
 
-type Post = {
-  id: string
-  image: string
-  title: string
-  author: string
-  location: string
-  status: PostStatus
-  reports: number
-  date: string
+const getStatusBadgeVariant = (status: PostStatus): "default" | "secondary" | "destructive" | "outline" => {
+  switch (status) {
+    case 'Open':
+      return 'default'
+    case 'Completed':
+      return 'secondary'
+    case 'Canceled':
+      return 'destructive'
+    default:
+      return 'outline'
+  }
 }
 
-const posts: Post[] = Array.from({ length: 10 }).map((_, i) => ({
-  id: `${i + 1}`,
-  image: '/hero-image.png',
-  title: `Eco-Friendly Initiative ${i + 1}`,
-  author: `User ${i + 1}`,
-  location:
-    i % 3 === 0 ? 'Ho Chi Minh City' : i % 3 === 1 ? 'Hanoi' : 'Da Nang',
-  status: i % 4 === 0 ? 'Flagged' : i % 4 === 1 ? 'Pending' : 'Approved',
-  reports: i % 3 === 0 ? 5 : i % 3 === 1 ? 2 : 0,
-  date: `15-${String(i + 1).padStart(2, '0')}-2026`,
-}))
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return isNaN(date.getTime())
+    ? '—'
+    : date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+}
+
+const PAGE_SIZE = 10
 
 export default function PostsPage() {
-  const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set())
-  const [selectAll, setSelectAll] = useState(false)
-  const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
-  const [removeType, setRemoveType] = useState<'selected' | 'flagged'>(
-    'selected'
-  )
+  const [postsData, setPostsData] = useState<ScrapPost[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [totalRecords, setTotalRecords] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [nextPage, setNextPage] = useState<number | null>(null)
+  const [prevPage, setPrevPage] = useState<number | null>(null)
+  
+  // Filters
+  const [categoryName, setCategoryName] = useState('')
+  const [statusFilter, setStatusFilter] = useState<PostStatus | 'all'>('all')
+  const [sortByLocation, setSortByLocation] = useState(false)
+  const [sortByCreateAt, setSortByCreateAt] = useState(false)
+  
+  // Detail dialog
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false)
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const [postDetail, setPostDetail] = useState<ScrapPostFull | null>(null)
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false)
+  const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null)
 
-  const handleSelectAll = (checked: boolean) => {
-    setSelectAll(checked)
-    if (checked) {
-      setSelectedPosts(new Set(posts.map(p => p.id)))
-    } else {
-      setSelectedPosts(new Set())
+  const fetchPosts = async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await postsApi.getAll({
+        categoryName: categoryName.trim() || undefined,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        sortByLocation: sortByLocation || undefined,
+        sortByCreateAt: sortByCreateAt || undefined,
+        pageNumber: page,
+        pageSize: PAGE_SIZE,
+      })
+      
+      setPostsData(response.data)
+      setTotalRecords(response.pagination.totalRecords)
+      setTotalPages(response.pagination.totalPages)
+      setNextPage(response.pagination.nextPage)
+      setPrevPage(response.pagination.prevPage)
+    } catch (fetchError) {
+      const errorMessage = fetchError instanceof Error
+        ? fetchError.message
+        : 'Không thể tải danh sách bài đăng. Vui lòng thử lại.'
+      setError(errorMessage)
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleSelectPost = (id: string, checked: boolean) => {
-    const newSelected = new Set(selectedPosts)
-    if (checked) {
-      newSelected.add(id)
-    } else {
-      newSelected.delete(id)
-    }
-    setSelectedPosts(newSelected)
-    setSelectAll(newSelected.size === posts.length)
-  }
+  useEffect(() => {
+    fetchPosts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, categoryName, statusFilter, sortByLocation, sortByCreateAt])
 
-  const flaggedCount = posts.filter(p => p.status === 'Flagged').length
-  const selectedCount = selectedPosts.size
-
-  const getStatusColor = (status: PostStatus) => {
-    switch (status) {
-      case 'Approved':
-        return 'bg-primary text-primary-foreground'
-      case 'Pending':
-        return 'bg-warning/20 text-warning-update'
-      case 'Flagged':
-        return 'bg-danger text-white'
-      default:
-        return 'bg-muted text-muted-foreground'
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage)
     }
   }
 
-  const handleRemoveSelected = () => {
-    setRemoveType('selected')
-    setRemoveDialogOpen(true)
-  }
-
-  const handleRemoveFlagged = () => {
-    setRemoveType('flagged')
-    setRemoveDialogOpen(true)
-  }
-
-  const handleConfirmRemove = (reason: string) => {
-    if (removeType === 'selected') {
-      setSelectedPosts(new Set())
-      setSelectAll(false)
-    } else {
-      posts.filter(p => p.status === 'Flagged').map(p => p.id)
+  const handleOpenDetailDialog = async (postId: string) => {
+    setSelectedPostId(postId)
+    setDetailDialogOpen(true)
+    setIsLoadingDetail(true)
+    
+    try {
+      const detail = await postsApi.getById(postId)
+      setPostDetail(detail)
+    } catch (err) {
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Không thể tải chi tiết bài đăng'
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
+      setDetailDialogOpen(false)
+    } finally {
+      setIsLoadingDetail(false)
     }
-    // TODO: call API
   }
 
-  const getRemoveCount = () => {
-    if (removeType === 'selected') {
-      return selectedPosts.size
-    } else {
-      return flaggedCount
+  const handleCloseDetailDialog = () => {
+    setDetailDialogOpen(false)
+    setSelectedPostId(null)
+    setPostDetail(null)
+    setDeletingCategoryId(null)
+    setDeleteConfirmOpen(false)
+    setCategoryToDelete(null)
+  }
+
+  const handleDeleteClick = (categoryId: number) => {
+    if (!postDetail) return
+
+    const detail = postDetail.scrapPostDetails.find(d => d.scrapCategoryId === categoryId)
+    if (!detail) return
+
+    if (detail.status !== 'Available') {
+      toast.error('Lỗi', {
+        description: 'Chỉ có thể xóa món hàng chưa được đặt mua (Available)',
+      })
+      return
+    }
+
+    setCategoryToDelete(categoryId)
+    setDeleteConfirmOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedPostId || !categoryToDelete) return
+
+    try {
+      setDeletingCategoryId(categoryToDelete)
+      await postsApi.deleteDetail(selectedPostId, categoryToDelete)
+      
+      // Refresh post detail
+      const updatedDetail = await postsApi.getById(selectedPostId)
+      setPostDetail(updatedDetail)
+      
+      toast.success('Thành công', {
+        description: 'Đã xóa món hàng khỏi bài đăng',
+      })
+    } catch (err) {
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Không thể xóa món hàng. Vui lòng thử lại.'
+      toast.error('Lỗi', {
+        description: errorMessage,
+      })
+    } finally {
+      setDeletingCategoryId(null)
+      setDeleteConfirmOpen(false)
+      setCategoryToDelete(null)
     }
   }
 
@@ -145,145 +257,162 @@ export default function PostsPage() {
       <div>
         <h1 className="text-3xl font-bold">Bài đăng</h1>
         <p className="text-sm text-muted-foreground">
-          Quản lý và kiểm duyệt bài đăng, đánh giá và nội dung từ người dùng
+          Quản lý và kiểm duyệt bài đăng thu gom từ người dùng
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Quản lý bài đăng</CardTitle>
+          <CardTitle>Danh sách bài đăng</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Toolbar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:max-w-2xl lg:max-w-3xl">
               <Input
-                placeholder="Tìm kiếm theo từ khóa hoặc tác giả..."
+                placeholder="Tìm kiếm theo tên danh mục..."
+                value={categoryName}
+                onChange={(e) => {
+                  setCategoryName(e.target.value)
+                  setPage(1) // Reset về trang 1 khi search
+                }}
                 className="pl-9 pr-3"
               />
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
             <div className="flex flex-wrap gap-2">
-              <Select>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Tất cả địa điểm" />
+              <Select 
+                value={statusFilter} 
+                onValueChange={(value) => {
+                  setStatusFilter(value as PostStatus | 'all')
+                  setPage(1)
+                }}
+              >
+                <SelectTrigger className="w-48 select-text">
+                  <SelectValue placeholder="Tất cả trạng thái" className="select-text" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tất cả địa điểm</SelectItem>
-                  <SelectItem value="hcm">Ho Chi Minh City</SelectItem>
-                  <SelectItem value="hanoi">Hanoi</SelectItem>
-                  <SelectItem value="danang">Da Nang</SelectItem>
+                  {statusOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Bulk Actions */}
-          {(selectedCount > 0 || flaggedCount > 0) && (
-            <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/50 p-3">
-              <span className="text-sm font-medium">Hành động hàng loạt:</span>
-              {selectedCount > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleRemoveSelected}
-                >
-                  Xóa đã chọn ({selectedCount})
-                </Button>
-              )}
-              {flaggedCount > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleRemoveFlagged}
-                >
-                  Xóa tất cả đã gắn cờ ({flaggedCount})
-                </Button>
-              )}
+          {isLoading ? (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Hình ảnh</TableHead>
+                    <TableHead>Tiêu đề</TableHead>
+                    <TableHead>Tác giả</TableHead>
+                    <TableHead>Thời gian có sẵn</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày tạo</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          )}
-
+          ) : error ? (
+            <div className="py-10 text-center text-sm text-muted-foreground">
+              {error}
+            </div>
+          ) : (
+            <>
           {/* Table */}
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12">
-                  <input
-                    type="checkbox"
-                    checked={selectAll}
-                    onChange={e => handleSelectAll(e.target.checked)}
-                    className="h-4 w-4 cursor-pointer rounded border-input"
-                  />
-                </TableHead>
                 <TableHead>Hình ảnh</TableHead>
                 <TableHead>Tiêu đề</TableHead>
                 <TableHead>Tác giả</TableHead>
-                <TableHead>Địa điểm</TableHead>
+                    <TableHead>Thời gian có sẵn</TableHead>
                 <TableHead>Trạng thái</TableHead>
-                <TableHead>Báo cáo</TableHead>
-                <TableHead>Ngày</TableHead>
+                    <TableHead>Ngày tạo</TableHead>
                 <TableHead className="text-right">Hành động</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {posts.map(post => (
-                <TableRow key={post.id}>
-                  <TableCell>
-                    <input
-                      type="checkbox"
-                      checked={selectedPosts.has(post.id)}
-                      onChange={e =>
-                        handleSelectPost(post.id, e.target.checked)
-                      }
-                      className="h-4 w-4 cursor-pointer rounded border-input"
-                    />
+                  {postsData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
+                        Không có bài đăng nào phù hợp bộ lọc hiện tại.
                   </TableCell>
+                    </TableRow>
+                  ) : (
+                    postsData.map(post => (
+                      <TableRow key={post.scrapPostId}>
                   <TableCell>
                     <div className="h-12 w-12 overflow-hidden rounded-md border border-border">
+                            {post.household.avatarUrl ? (
                       <Image
-                        src={post.image}
-                        alt={post.title}
+                                src={post.household.avatarUrl}
+                                alt={post.household.fullName}
                         width={48}
                         height={48}
                         className="h-full w-full object-cover"
                       />
+                            ) : (
+                              <div className="h-full w-full bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                                {post.household.fullName.charAt(0).toUpperCase()}
+                              </div>
+                            )}
                     </div>
                   </TableCell>
                   <TableCell className="font-medium max-w-xs truncate">
                     {post.title}
                   </TableCell>
-                  <TableCell>{post.author}</TableCell>
-                  <TableCell>{post.location}</TableCell>
                   <TableCell>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(
-                        post.status
-                      )}`}
-                    >
-                      {formatPostStatus(post.status)}
-                    </span>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-foreground">{post.household.fullName}</span>
+                            <span className="text-xs text-muted-foreground">{post.household.phoneNumber}</span>
+                          </div>
                   </TableCell>
+                        <TableCell className="text-sm">{post.availableTimeRange || '—'}</TableCell>
                   <TableCell>
-                    {post.reports > 0 ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger">
-                        <Flag className="h-3 w-3" />
-                        {post.reports}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">-</span>
-                    )}
+                          <Badge variant={getStatusBadgeVariant(post.status)}>
+                            {formatPostStatus(post.status)}
+                          </Badge>
                   </TableCell>
-                  <TableCell>{post.date}</TableCell>
+                        <TableCell className="text-sm">{formatDate(post.createdAt)}</TableCell>
                   <TableCell className="space-x-2 text-right">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
                     <Button
-                      size="icon-sm"
+                                  size="icon"
                       variant="outline"
-                      aria-label="Thêm tùy chọn"
+                                  onClick={() => handleOpenDetailDialog(post.scrapPostId)}
+                                  aria-label="Xem chi tiết"
                     >
-                      <MoreVertical className="h-4 w-4" />
+                                  <Eye className="h-4 w-4" />
                     </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Xem chi tiết bài đăng</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                     <Button
-                      size="icon-sm"
+                            size="icon"
                       variant="destructive"
                       aria-label="Xóa"
                     >
@@ -291,59 +420,261 @@ export default function PostsPage() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+                    ))
+                  )}
             </TableBody>
           </Table>
 
           {/* Footer */}
-          <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
-            <div className="text-xs text-muted-foreground">
-              Hiển thị 10 / 100 bài đăng
+              <div className="flex flex-col items-center gap-4 border-t pt-4 sm:flex-row sm:justify-end">
+                <div className="text-sm text-muted-foreground sm:mr-auto">
+                  Hiển thị {postsData.length} / {totalRecords} bài đăng
             </div>
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1"
-                    disabled
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    <span>Trước</span>
-                  </Button>
+                      <PaginationPrevious
+                        href="#"
+                        size="default"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (page > 1) handlePageChange(page - 1)
+                        }}
+                        className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                      if (
+                        pageNum === 1 ||
+                        pageNum === totalPages ||
+                        (pageNum >= page - 1 && pageNum <= page + 1)
+                      ) {
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationLink
+                              href="#"
+                              size="icon"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(pageNum)
+                              }}
+                              isActive={pageNum === page}
+                            >
+                              {pageNum}
+                            </PaginationLink>
                 </PaginationItem>
-                <PaginationItem>
-                  <span className="px-4 text-sm">
-                    Trang 1 / 1
-                  </span>
+                        )
+                      } else if (pageNum === page - 2 || pageNum === page + 2) {
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationEllipsis />
                 </PaginationItem>
+                        )
+                      }
+                      return null
+                    })}
                 <PaginationItem>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1"
-                    disabled
-                  >
-                    <span>Sau</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                      <PaginationNext
+                        href="#"
+                        size="default"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (page < totalPages) handlePageChange(page + 1)
+                        }}
+                        className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
+                      />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
-      {/* Confirm Remove Dialog */}
-      <ConfirmRemoveDialog
-        open={removeDialogOpen}
-        onOpenChange={setRemoveDialogOpen}
-        count={getRemoveCount()}
-        itemType="posts"
-        onConfirm={handleConfirmRemove}
-      />
+      {/* Detail Dialog */}
+      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background dark:bg-background border-2 border-border dark:border-border">
+          <DialogHeader>
+            <DialogTitle>Chi tiết bài đăng</DialogTitle>
+            <DialogDescription>
+              Thông tin đầy đủ về bài đăng thu gom
+            </DialogDescription>
+          </DialogHeader>
+          
+          {isLoadingDetail ? (
+            <div className="space-y-4 py-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          ) : postDetail ? (
+            <div className="space-y-6">
+              {/* Household Info */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Người đăng</div>
+                  <div className="text-sm font-semibold dialog-value">{postDetail.household.fullName}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Số điện thoại</div>
+                  <div className="text-sm font-semibold dialog-value">{postDetail.household.phoneNumber}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Hạng</div>
+                  <div className="text-sm font-semibold dialog-value">{postDetail.household.rank}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Điểm</div>
+                  <div className="text-sm font-semibold dialog-value">{postDetail.household.pointBalance.toLocaleString('vi-VN')}</div>
+                </div>
+              </div>
+
+              {/* Post Info */}
+              <div className="space-y-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Tiêu đề</div>
+                  <div className="text-base font-semibold dialog-value">{postDetail.title}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Mô tả</div>
+                  <div className="text-sm dialog-value whitespace-pre-wrap">{postDetail.description}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Địa chỉ</div>
+                  <div className="text-sm dialog-value">{postDetail.address}</div>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Thời gian có sẵn</div>
+                    <div className="text-sm dialog-value">{postDetail.availableTimeRange || '—'}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Trạng thái</div>
+                    <Badge variant={getStatusBadgeVariant(postDetail.status)}>
+                      {formatPostStatus(postDetail.status)}
+                    </Badge>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Ngày tạo</div>
+                    <div className="text-sm dialog-value">{formatDate(postDetail.createdAt)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">Bắt buộc mua trọn gói</div>
+                    <div className="text-sm dialog-value">
+                      {postDetail.mustTakeAll ? (
+                        <Badge variant="default">Có</Badge>
+                      ) : (
+                        <Badge variant="outline">Không</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scrap Details */}
+              <div className="space-y-4">
+                <div className="text-sm font-medium text-muted-foreground">Chi tiết ve chai</div>
+                {postDetail.scrapPostDetails.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">Không có chi tiết</div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {postDetail.scrapPostDetails.map((detail, index) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-2 relative">
+                        {detail.status === 'Available' && (
+                          <div className="absolute top-2 right-2">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="destructive"
+                                    onClick={() => handleDeleteClick(detail.scrapCategoryId)}
+                                    disabled={deletingCategoryId === detail.scrapCategoryId}
+                                    className="h-7 w-7"
+                                    aria-label="Xóa món hàng"
+                                  >
+                                    {deletingCategoryId === detail.scrapCategoryId ? (
+                                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    ) : (
+                                      <Trash2 className="h-3 w-3" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Xóa món hàng khỏi bài đăng</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        )}
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground">Danh mục</div>
+                          <div className="text-sm font-semibold dialog-value">{detail.scrapCategory.categoryName}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground">Khối lượng</div>
+                          <div className="text-sm dialog-value">{detail.amountDescription || '—'}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground">Trạng thái</div>
+                          <Badge variant={detail.status === 'Available' ? 'default' : 'secondary'}>
+                            {detail.status === 'Available' ? 'Có sẵn' : detail.status === 'Booked' ? 'Đã đặt' : 'Hoàn thành'}
+                          </Badge>
+                        </div>
+                        {detail.imageUrl && (
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground mb-2">Hình ảnh</div>
+                            <div className="h-32 w-full overflow-hidden rounded-md border border-border">
+                              <Image
+                                src={detail.imageUrl}
+                                alt={detail.scrapCategory.categoryName}
+                                width={200}
+                                height={128}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa món hàng "
+              {postDetail && categoryToDelete
+                ? postDetail.scrapPostDetails.find(d => d.scrapCategoryId === categoryToDelete)?.scrapCategory.categoryName || 'này'
+                : 'này'}
+              " khỏi bài đăng? Hành động này không thể hoàn tác.
+              {postDetail?.mustTakeAll && (
+                <span className="block mt-2 text-warning-update font-medium">
+                  Lưu ý: Bài đăng này có trạng thái "Bắt buộc mua trọn gói", việc xóa có thể bị hạn chế.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-danger text-white hover:bg-danger/90"
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
-

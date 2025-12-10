@@ -1,8 +1,6 @@
 export const adminRoutes = [
   {
 
-    label: 'Bảng điều khiển',
-
     label: 'Bảng thống kê',
 
     href: '/admin/dashboard',
@@ -11,8 +9,6 @@ export const adminRoutes = [
   {
 
     label: 'Người dùng',
-
-    label: 'Quản lý người dùng',
 
     href: '/admin/users',
     icon: 'UserRound',
@@ -34,9 +30,6 @@ export const adminRoutes = [
   {
 
     label: 'Khiếu nại',
-
-    label: 'Phàn nàn',
-
     href: '/admin/complaints',
     icon: 'BadgeAlert',
   },
@@ -44,14 +37,12 @@ export const adminRoutes = [
 
     label: 'Bài đăng',
 
-    label: 'Bài viết',
 
     href: '/admin/posts',
     icon: 'Recycle',
   },
   {
 
-    label: 'Vật phẩm đổi thưởng',
 
     label: 'Phần thưởng',
 
@@ -62,7 +53,6 @@ export const adminRoutes = [
 
     label: 'Giá tham khảo',
 
-    label: 'Giá cả',
 
     href: '/admin/prices',
     icon: 'DollarSign',
@@ -71,7 +61,7 @@ export const adminRoutes = [
 
     label: 'Gói thanh toán',
 
-    label:"Thanh toán",
+
 
     href: '/admin/payment',
     icon: 'CreditCard',

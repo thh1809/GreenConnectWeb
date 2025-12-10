@@ -220,9 +220,16 @@ export default function UsersPage() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
             <div className="flex gap-2">
-              <Select value={statusFilter} onValueChange={value => setStatusFilter(value as typeof statusFilter)}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Tất cả trạng thái" />
+              <Select
+                value={statusFilter}
+                defaultValue="all"
+                onValueChange={value => setStatusFilter(value as typeof statusFilter)}
+              >
+                <SelectTrigger className="w-48 select-text">
+                  <SelectValue
+                    placeholder="Tất cả trạng thái"
+                    className="select-text"
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {statusOptions.map(option => (
@@ -357,8 +364,8 @@ export default function UsersPage() {
               </Table>
 
               {/* Footer */}
-              <div className="flex flex-col items-center justify-between gap-4 border-t pt-4 sm:flex-row">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col items-center gap-4 border-t pt-4 sm:flex-row sm:justify-end">
+                <div className="text-sm text-muted-foreground sm:mr-auto">
                   Hiển thị {filteredUsers.length} / {totalRecords} người dùng
                 </div>
                 <Pagination>

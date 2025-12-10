@@ -19,7 +19,7 @@ export interface CategoriesResponse {
 
 export interface CreateCategoryRequest {
   categoryName: string;
-  description?: string;
+  description?: string; 
 }
 
 export interface UpdateCategoryRequest {
@@ -52,17 +52,28 @@ export const categories = {
   },
   
   create: (data: CreateCategoryRequest): Promise<ScrapCategory> => {
-    return post<ScrapCategory>('/api/v1/scrap-categories', data);
+    const searchParams = new URLSearchParams();
+    searchParams.append('categoryName', data.categoryName);
+    // Description is required by API, always send it
+    searchParams.append('description', data.description || '');
+    const queryString = searchParams.toString();
+    return post<ScrapCategory>(`/api/v1/scrap-categories?${queryString}`);
   },
   
   update: (id: number, data: UpdateCategoryRequest): Promise<ScrapCategory> => {
-    return put<ScrapCategory>(`/api/v1/scrap-categories/${id}`, data);
+    const searchParams = new URLSearchParams();
+    if (data.categoryName) {
+      searchParams.append('categoryName', data.categoryName);
+    }
+    if (data.description) {
+      searchParams.append('description', data.description);
+    }
+    const queryString = searchParams.toString();
+    return put<ScrapCategory>(`/api/v1/scrap-categories/${id}?${queryString}`);
   },
   
   delete: (id: number): Promise<void> => {
     return del<void>(`/api/v1/scrap-categories/${id}`);
   },
 };
-
-
 
