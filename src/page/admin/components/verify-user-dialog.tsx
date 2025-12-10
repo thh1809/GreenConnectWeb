@@ -62,7 +62,7 @@ export function VerifyUserDialog({ request, onCompleted }: VerifyUserDialogProps
       <DialogTrigger asChild>
         <Button
           size="icon-sm"
-          variant="default"
+          variant="primary"
           aria-label="Verify"
           disabled={request.status !== "PendingReview"}
         >
@@ -208,7 +208,7 @@ export function VerifyUserDialog({ request, onCompleted }: VerifyUserDialogProps
               </Button>
             </DialogClose>
             <Button
-              variant={decision === "approve" ? "default" : "destructive"}
+              variant={decision === "approve" ? "primary" : "destructive"}
               className="min-w-32"
               disabled={isSubmitting}
               onClick={handleSubmit}
