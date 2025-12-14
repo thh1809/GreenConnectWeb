@@ -1,61 +1,40 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import * as Icons from 'lucide-react';
 import { LogOut, Moon, PanelLeftClose, PanelLeftOpen, Sun } from 'lucide-react';
 import Image from 'next/image';
+import type { StaticImageData } from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { NavigationLink } from '@/components/navigation-link';
+import { useTheme } from '@/hooks/use-theme';
+import { adminRoutes, type AdminRoute } from '@/config/admin-routes';
+import { STORAGE_KEYS } from '@/lib/constants';
 
-export default function AdminLayout({ items, logo, children }: any) {
+interface AdminLayoutProps {
+  items?: AdminRoute[];
+  logo: string | StaticImageData;
+  children: ReactNode;
+}
+
+export default function AdminLayout({ items = adminRoutes, logo, children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  // Load from localStorage after mount to avoid hydration mismatch
-  useEffect(() => {
-    // Read from localStorage
-    const savedCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
-    const savedTheme = localStorage.getItem('theme') === 'dark';
-    
-    // Apply theme immediately (external system update)
-    if (savedTheme) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+  // Initialize from localStorage synchronously to avoid setState in effect
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(STORAGE_KEYS.SIDEBAR_COLLAPSED) === 'true';
     }
-    
-    // Defer state updates to next tick to avoid cascading renders
-    Promise.resolve().then(() => {
-      setMounted(true);
-      setIsCollapsed(savedCollapsed);
-      setIsDark(savedTheme);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
-  }, [isDark, mounted]);
+    return false;
+  });
+  const { isDark, toggleTheme, mounted } = useTheme();
 
   const toggleCollapse = () => {
     const newValue = !isCollapsed;
     setIsCollapsed(newValue);
-    localStorage.setItem('sidebar-collapsed', String(newValue));
-  };
-
-  const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-    localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
+    localStorage.setItem(STORAGE_KEYS.SIDEBAR_COLLAPSED, String(newValue));
   };
 
   const handleLogout = () => {
@@ -97,7 +76,7 @@ export default function AdminLayout({ items, logo, children }: any) {
 
         {/* Nav items */}
         <nav className="flex flex-1 flex-col gap-2">
-          {items.map((it: any) => {
+          {items.map((it) => {
             const active = pathname === it.href;
 
             const Icon = Icons[it.icon as keyof typeof Icons] as
@@ -180,3 +159,4 @@ export default function AdminLayout({ items, logo, children }: any) {
     </div>
   );
 }
+

@@ -48,3 +48,4 @@ export function BarChart({ data, height = 300, color = 'hsl(var(--primary))' }: 
   );
 }
 
+

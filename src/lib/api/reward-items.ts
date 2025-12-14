@@ -1,4 +1,5 @@
 import { get, post, put, patch, del } from './client';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 export interface RewardItem {
   rewardItemId: number;
@@ -63,7 +64,7 @@ export const rewardItems = {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/rewards${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `${API_ENDPOINTS.REWARD_ITEMS}${queryString ? `?${queryString}` : ''}`;
     
     // API returns array directly, not wrapped in { data, pagination }
     const response = await get<RewardItem[]>(endpoint);
@@ -88,19 +89,19 @@ export const rewardItems = {
   },
   
   getById: (id: number): Promise<RewardItem> => {
-    return get<RewardItem>(`/api/v1/reward-items/${id}`);
+    return get<RewardItem>(`${API_ENDPOINTS.REWARD_ITEMS_DETAIL}/${id}`);
   },
   
   create: (data: CreateRewardItemRequest): Promise<RewardItem> => {
-    return post<RewardItem>('/api/v1/rewards', data);
+    return post<RewardItem>(API_ENDPOINTS.REWARD_ITEMS, data);
   },
   
   update: (id: number, data: UpdateRewardItemRequest): Promise<RewardItem> => {
-    return put<RewardItem>(`/api/v1/rewards/${id}`, data);
+    return put<RewardItem>(`${API_ENDPOINTS.REWARD_ITEMS}/${id}`, data);
   },
   
   delete: (id: number): Promise<void> => {
-    return del<void>(`/api/v1/rewards/${id}`);
+    return del<void>(`${API_ENDPOINTS.REWARD_ITEMS}/${id}`);
   },
 };
 

@@ -1,4 +1,5 @@
 import { get, post, put, del } from './client';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 export interface ScrapCategory {
   scrapCategoryId: number;
@@ -42,13 +43,13 @@ export const categories = {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/scrap-categories${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `${API_ENDPOINTS.CATEGORIES}${queryString ? `?${queryString}` : ''}`;
     
     return get<CategoriesResponse>(endpoint);
   },
   
   getById: (id: number): Promise<ScrapCategory> => {
-    return get<ScrapCategory>(`/api/v1/scrap-categories/${id}`);
+    return get<ScrapCategory>(`${API_ENDPOINTS.CATEGORIES}/${id}`);
   },
   
   create: (data: CreateCategoryRequest): Promise<ScrapCategory> => {
@@ -57,7 +58,7 @@ export const categories = {
     // Description is required by API, always send it
     searchParams.append('description', data.description || '');
     const queryString = searchParams.toString();
-    return post<ScrapCategory>(`/api/v1/scrap-categories?${queryString}`);
+    return post<ScrapCategory>(`${API_ENDPOINTS.CATEGORIES}?${queryString}`);
   },
   
   update: (id: number, data: UpdateCategoryRequest): Promise<ScrapCategory> => {
@@ -69,11 +70,11 @@ export const categories = {
       searchParams.append('description', data.description);
     }
     const queryString = searchParams.toString();
-    return put<ScrapCategory>(`/api/v1/scrap-categories/${id}?${queryString}`);
+    return put<ScrapCategory>(`${API_ENDPOINTS.CATEGORIES}/${id}?${queryString}`);
   },
   
   delete: (id: number): Promise<void> => {
-    return del<void>(`/api/v1/scrap-categories/${id}`);
+    return del<void>(`${API_ENDPOINTS.CATEGORIES}/${id}`);
   },
 };
 

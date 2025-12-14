@@ -3,29 +3,12 @@ import { Button } from '@/components/ui/button';
 import Logo from '@public/Eco-Tech-logo-web-no-background.ico';
 import { Facebook, Instagram, Leaf, Moon, Sun, Twitter } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useTheme } from '@/hooks/use-theme';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('theme') === 'dark';
-  });
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark(prev => !prev);
-  };
+  const { isDark, toggleTheme } = useTheme();
   return (
     <footer className="bg-card text-warning">
       {/* CTA Section */}

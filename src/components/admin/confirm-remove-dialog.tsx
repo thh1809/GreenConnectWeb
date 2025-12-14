@@ -54,35 +54,35 @@ export function ConfirmRemoveDialog({
         showCloseButton={true}
       >
         <DialogHeader className="text-left space-y-1">
-          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-red-600">
-            <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-600" />
-            Confirm Removal
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-danger">
+            <AlertTriangle className="h-5 w-5 flex-shrink-0 text-danger" />
+            Xác nhận xóa
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            You are about to remove{" "}
+            Bạn sắp xóa{" "}
             <span className="font-medium">
-              {count} {itemType}
+              {count} {itemType === 'posts' ? 'bài đăng' : itemType}
             </span>
-            . This action cannot be undone.
+            . Hành động này không thể hoàn tác.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 pt-4">
           <label
             htmlFor="reason"
-            className="text-sm font-medium text-foreground"
+            className="text-sm font-medium text-popover-foreground"
           >
-            Reason for Removal
+            Lý do xóa
           </label>
           <Textarea
             id="reason"
-            placeholder="Enter the reason for removing these posts..."
+            placeholder="Nhập lý do xóa các bài đăng này..."
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             className="min-h-[100px] resize-none"
           />
           <p className="text-xs text-muted-foreground">
-            This reason will be logged for record keeping.
+            Lý do này sẽ được ghi lại để lưu trữ.
           </p>
         </div>
 
@@ -93,7 +93,7 @@ export function ConfirmRemoveDialog({
               className="min-w-24"
               type="button"
             >
-              Cancel
+              Hủy
             </Button>
           </DialogClose>
           <Button
@@ -103,7 +103,7 @@ export function ConfirmRemoveDialog({
             onClick={handleConfirm}
             disabled={!reason.trim()}
           >
-            Remove
+            Xóa
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,5 @@
 import { get, post, patch, del, apiRequest } from './client';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 export interface ReferencePrice {
   referencePriceId: string; // UUID
@@ -71,13 +72,13 @@ export const prices = {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/prices${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `${API_ENDPOINTS.PRICES}${queryString ? `?${queryString}` : ''}`;
     
     return get<PricesResponse>(endpoint);
   },
   
   getById: (id: string): Promise<ReferencePrice> => {
-    return get<ReferencePrice>(`/api/v1/prices/${id}`);
+    return get<ReferencePrice>(`${API_ENDPOINTS.PRICES}/${id}`);
   },
   
   create: (data: CreatePriceRequest): Promise<ReferencePrice> => {
@@ -86,7 +87,7 @@ export const prices = {
     searchParams.append('scrapCategoryId', data.scrapCategoryId.toString());
     searchParams.append('pricePerKg', data.pricePerKg.toString());
     
-    const endpoint = `/api/v1/prices?${searchParams.toString()}`;
+    const endpoint = `${API_ENDPOINTS.PRICES}?${searchParams.toString()}`;
     // Gọi post với endpoint có query params, không có body
     return apiRequest<ReferencePrice>(endpoint, { method: 'POST' });
   },
@@ -96,13 +97,13 @@ export const prices = {
     const searchParams = new URLSearchParams();
     searchParams.append('pricePerKg', data.pricePerKg.toString());
     
-    const endpoint = `/api/v1/prices/${id}?${searchParams.toString()}`;
+    const endpoint = `${API_ENDPOINTS.PRICES}/${id}?${searchParams.toString()}`;
     // Gọi apiRequest với method PATCH, không có body
     return apiRequest<ReferencePrice>(endpoint, { method: 'PATCH' });
   },
   
   delete: (id: string): Promise<void> => {
-    return del<void>(`/api/v1/prices/${id}`);
+    return del<void>(`${API_ENDPOINTS.PRICES}/${id}`);
   },
 };
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MediateComplaintDialog } from '@/page/admin/components/mediate-complaint-dialog'
+import { MediateComplaintDialog } from '@/components/admin/mediate-complaint-dialog'
 import { Spinner } from '@/components/ui/spinner'
 import { ArrowLeft, Download, User, Phone, Calendar, MapPin } from 'lucide-react'
 import Link from 'next/link'

@@ -1,4 +1,5 @@
 import { post } from "@/lib/api/client"
+import { API_ENDPOINTS } from "@/lib/constants"
 
 export type AdminLoginRequest = {
   email: string
@@ -19,5 +20,5 @@ export type AdminLoginResponse = {
 }
 
 export const adminLogin = (payload: AdminLoginRequest) =>
-  post<AdminLoginResponse>("/api/v1/auth/admin-login", payload)
+  post<AdminLoginResponse>(`${API_ENDPOINTS.AUTH}/admin-login`, payload)
 

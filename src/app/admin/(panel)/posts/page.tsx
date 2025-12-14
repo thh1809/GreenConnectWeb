@@ -494,7 +494,7 @@ export default function PostsPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background dark:bg-background border-2 border-border dark:border-border">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Chi tiết bài đăng</DialogTitle>
             <DialogDescription>

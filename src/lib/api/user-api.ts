@@ -1,4 +1,5 @@
 import { del, get, post, put, patch } from './client';
+import { API_ENDPOINTS, PAGINATION } from '@/lib/constants';
 
 export interface User {
   id: string; // UUID
@@ -36,7 +37,7 @@ export const users = {
     
     // Set default values nếu không có params
     const pageIndex = params?.pageIndex ?? 1;
-    const pageSize = params?.pageSize ?? 10;
+    const pageSize = params?.pageSize ?? PAGINATION.DEFAULT_PAGE_SIZE;
     
     searchParams.append('pageIndex', pageIndex.toString());
     searchParams.append('pageSize', pageSize.toString());
@@ -49,28 +50,28 @@ export const users = {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/users?${queryString}`;
+    const endpoint = `${API_ENDPOINTS.USERS}?${queryString}`;
     
     return get<UsersResponse>(endpoint);
   },
   
   getById: (id: string): Promise<User> => {
-    return get<User>(`/api/v1/users/${id}`);
+    return get<User>(`${API_ENDPOINTS.USERS}/${id}`);
   },
   
   create: (data: Partial<User>): Promise<User> => {
-    return post<User>('/api/v1/users', data);
+    return post<User>(API_ENDPOINTS.USERS, data);
   },
   
   update: (id: string, data: Partial<User>): Promise<User> => {
-    return put<User>(`/api/v1/users/${id}`, data);
+    return put<User>(`${API_ENDPOINTS.USERS}/${id}`, data);
   },
   
   delete: (id: string): Promise<void> => {
-    return del<void>(`/api/v1/users/${id}`);
+    return del<void>(`${API_ENDPOINTS.USERS}/${id}`);
   },
   
   banToggle: (id: string): Promise<string> => {
-    return patch<string>(`/api/v1/users/${id}/ban-toggle`);
+    return patch<string>(`${API_ENDPOINTS.USERS}/${id}/ban-toggle`);
   },
 };

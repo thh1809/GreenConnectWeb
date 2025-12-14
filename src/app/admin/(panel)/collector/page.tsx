@@ -404,7 +404,7 @@ export default function CollectorPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Chi tiết đơn xác minh</DialogTitle>
             <DialogDescription>

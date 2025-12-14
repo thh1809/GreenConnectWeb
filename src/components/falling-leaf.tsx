@@ -1,7 +1,8 @@
 'use client';
 
 import { Leaf } from 'lucide-react';
-import React, { use, useMemo, useState } from 'react';
+import { useState } from 'react';
+import type { LeafConfig } from '@/lib/api/leaf.types';
 
 const FallingLeaves = () => {
   const [leaves] = useState<LeafConfig[]>(() =>

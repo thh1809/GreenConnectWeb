@@ -38,18 +38,18 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <DialogClose asChild>
-                <Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground hover:text-light-dark-reverse">
+                <Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground hover:text-popover-foreground">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Complaints
+                  Quay lại danh sách khiếu nại
                 </Button>
               </DialogClose>
-              <DialogTitle className="text-2xl font-bold text-light-dark-reverse">{complaint.title}</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">{complaint.title}</DialogTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                reported by {complaint.user} on {complaint.date}
+                Được báo cáo bởi {complaint.user} vào {complaint.date}
               </p>
             </div>
             <Button variant="default" className="shrink-0">
-              Mediate
+              Xử lý
             </Button>
           </div>
         </DialogHeader>
@@ -57,8 +57,8 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
         <div className="space-y-6">
           {/* Complaint Description */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-light-dark-reverse">Complaint Description</label>
-            <div className="rounded-md border border-border bg-muted/30 p-4 text-sm">
+            <label className="text-sm font-semibold text-popover-foreground">Mô tả khiếu nại</label>
+            <div className="rounded-md border border-border bg-muted/30 p-4 text-sm text-popover-foreground">
               {complaint.description}
             </div>
           </div>
@@ -66,13 +66,13 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
           {/* Tabs */}
           <Tabs defaultValue="evidence">
             <TabsList>
-              <TabsTrigger value="evidence">Evidence</TabsTrigger>
-              <TabsTrigger value="chat">Chat Logs</TabsTrigger>
+              <TabsTrigger value="evidence">Bằng chứng</TabsTrigger>
+              <TabsTrigger value="chat">Nhật ký trò chuyện</TabsTrigger>
             </TabsList>
 
             <TabsContent value="evidence" className="mt-4">
               <div className="rounded-md border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-                No evidence uploaded yet.
+                Chưa có bằng chứng được tải lên.
               </div>
             </TabsContent>
 
@@ -81,11 +81,11 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
                 {complaint.chatLogs.map((msg) => (
                   <div key={msg.id} className="space-y-1">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="font-semibold text-light-dark-reverse">{msg.sender}</span>
+                      <span className="font-semibold text-popover-foreground">{msg.sender}</span>
                       <span>•</span>
                       <span>{msg.timestamp}</span>
                     </div>
-                    <p className="text-sm">{msg.message}</p>
+                    <p className="text-sm text-popover-foreground">{msg.message}</p>
                   </div>
                 ))}
               </div>
@@ -96,4 +96,5 @@ export function ComplaintDetailDialog({ open, onOpenChange, complaint }: Complai
     </Dialog>
   );
 }
+
 

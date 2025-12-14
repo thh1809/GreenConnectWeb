@@ -1,4 +1,5 @@
 import { get, post, patch } from './client';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 // PaymentPackage for GET list response (without connectionAmount and isActive)
 export interface PaymentPackageListItem {
@@ -76,25 +77,25 @@ export const packages = {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/packages${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `${API_ENDPOINTS.PACKAGES}${queryString ? `?${queryString}` : ''}`;
     
     return get<PackagesResponse>(endpoint);
   },
 
   create: (data: CreatePackageRequest): Promise<PaymentPackage> => {
-    return post<PaymentPackage>('/api/v1/packages', data);
+    return post<PaymentPackage>(API_ENDPOINTS.PACKAGES, data);
   },
 
   getById: (packageId: string): Promise<PaymentPackage> => {
-    return get<PaymentPackage>(`/api/v1/packages/${packageId}`);
+    return get<PaymentPackage>(`${API_ENDPOINTS.PACKAGES}/${packageId}`);
   },
 
   update: (packageId: string, data: UpdatePackageRequest): Promise<PaymentPackage> => {
-    return patch<PaymentPackage>(`/api/v1/packages/${packageId}`, data);
+    return patch<PaymentPackage>(`${API_ENDPOINTS.PACKAGES}/${packageId}`, data);
   },
 
   inactivate: (packageId: string): Promise<string> => {
-    return patch<string>(`/api/v1/packages/${packageId}/inactivate`, {});
+    return patch<string>(`${API_ENDPOINTS.PACKAGES}/${packageId}/inactivate`, {});
   },
 };
 

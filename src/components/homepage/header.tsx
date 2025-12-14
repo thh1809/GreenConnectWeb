@@ -4,6 +4,8 @@ import Logo from '@public/Eco-Tech-logo-web-no-background.ico';
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { useTheme } from '@/hooks/use-theme';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 const navLinks = [
   { name: 'Trang chủ', href: '#home' },

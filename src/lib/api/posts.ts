@@ -1,4 +1,5 @@
 import { get, del } from './client';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 export interface Household {
   id: string;
@@ -96,17 +97,17 @@ export const posts = {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/posts${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `${API_ENDPOINTS.POSTS}${queryString ? `?${queryString}` : ''}`;
     
     return get<PostsResponse>(endpoint);
   },
 
   getById: (id: string): Promise<ScrapPostFull> => {
-    return get<ScrapPostFull>(`/api/v1/posts/${id}`);
+    return get<ScrapPostFull>(`${API_ENDPOINTS.POSTS}/${id}`);
   },
 
   deleteDetail: (postId: string, categoryId: number): Promise<void> => {
-    return del<void>(`/api/v1/posts/${postId}/details/${categoryId}`);
+    return del<void>(`${API_ENDPOINTS.POSTS}/${postId}/details/${categoryId}`);
   },
 };
 

@@ -1,4 +1,5 @@
 import { get } from './client';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 export interface TransactionStatus {
   transactionStatus: string;
@@ -31,7 +32,7 @@ export const reports = {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/reports${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `${API_ENDPOINTS.REPORTS}${queryString ? `?${queryString}` : ''}`;
     
     return get<ReportResponse>(endpoint);
   },

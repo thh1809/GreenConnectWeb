@@ -35,14 +35,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Eye } from "lucide-react"
-import { rewardItems as rewardItemsApi, type RewardItem } from "@/lib/api/reward-items"
+import { rewardItems as rewardItemsApi, type RewardItem, type CreateRewardItemRequest, type UpdateRewardItemRequest } from "@/lib/api/reward-items"
+import { PAGINATION } from '@/lib/constants';
 
 export default function RewardItemsPage() {
   const [rewardItemsData, setRewardItemsData] = useState<RewardItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize] = useState(10)
+  const [pageSize] = useState(PAGINATION.DEFAULT_PAGE_SIZE)
   const [totalPages, setTotalPages] = useState(1)
   const [totalRecords, setTotalRecords] = useState(0)
   const [searchQuery, setSearchQuery] = useState("")
@@ -149,9 +150,9 @@ export default function RewardItemsPage() {
       setIsSubmitting(true)
       setDialogError(null)
       
-      const payload: any = {
+      const payload: CreateRewardItemRequest | UpdateRewardItemRequest = {
         itemName: itemName.trim(),
-        pointsCost: pointCostNum, // API uses pointsCost
+        pointsCost: pointCostNum,
         isActive,
       }
 
@@ -275,7 +276,7 @@ export default function RewardItemsPage() {
               Thêm vật phẩm mới
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-background dark:bg-background border-2 border-border dark:border-border">
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-bold">
                 {editingItem ? "Chỉnh sửa vật phẩm" : "Thêm vật phẩm mới"}
@@ -671,7 +672,7 @@ export default function RewardItemsPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-2xl font-bold">Chi tiết vật phẩm đổi thưởng</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -790,7 +791,7 @@ export default function RewardItemsPage() {
           }
         }}
       >
-        <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription>

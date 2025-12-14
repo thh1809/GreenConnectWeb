@@ -361,7 +361,7 @@ export default function PaymentPage() {
               Thêm gói mới
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-background dark:bg-background border-2 border-border dark:border-border">
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-bold">
                 {editingPackage ? 'Chỉnh sửa gói thanh toán' : 'Thêm gói thanh toán mới'}
@@ -723,7 +723,7 @@ export default function PaymentPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-2xl font-bold">Chi tiết gói thanh toán</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -843,7 +843,7 @@ export default function PaymentPage() {
           }
         }}
       >
-        <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận ngưng hoạt động</AlertDialogTitle>
             <AlertDialogDescription>

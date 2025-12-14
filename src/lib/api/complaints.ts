@@ -1,4 +1,5 @@
 import { get, patch } from './client';
+import { API_ENDPOINTS, COMPLAINT_STATUS } from '@/lib/constants';
 
 export type ComplaintStatus = 'Submitted' | 'InProgress' | 'Resolved' | 'Rejected';
 
@@ -12,10 +13,49 @@ export interface ComplaintUser {
   avatarUrl: string | null;
 }
 
+export interface ScrapPostDetail {
+  scrapPostDetailId: string;
+  scrapPostId: string;
+  scrapCategoryId: number;
+  quantity: number;
+  unit: string;
+}
+
+export interface ScrapCategory {
+  scrapCategoryId: number;
+  categoryName: string;
+  description?: string;
+}
+
+export interface TransactionDetail {
+  transactionDetailId: string;
+  transactionId: string;
+  scrapCategoryId: number;
+  quantity: number;
+  pricePerUnit: number;
+  totalPrice: number;
+}
+
+export interface ComplaintTransaction {
+  transactionId: string;
+  householdId: string;
+  household: ComplaintUser;
+  scrapCollectorId: string;
+  scrapCollector: ComplaintUser;
+  offerId: string;
+  status: number;
+  scheduledTime: string | null;
+  checkInTime: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  transactionDetails: TransactionDetail[];
+  totalPrice: number;
+}
+
 export interface ComplaintData {
   complaintId: string;
   transactionId: string;
-  transaction: any; // Complex nested structure
+  transaction: ComplaintTransaction | Record<string, unknown>;
   complainantId: string;
   complainant: ComplaintUser;
   accusedId: string;
@@ -44,59 +84,50 @@ export interface GetComplaintsParams {
   status?: ComplaintStatus;
 }
 
-export interface ComplaintDetail extends ComplaintData {
-  transaction: {
-    transactionId: string;
-    householdId: string;
-    household: ComplaintUser;
-    scrapCollectorId: string;
-    scrapCollector: ComplaintUser;
-    offerId: string;
-    offer: {
-      collectionOfferId: string;
-      scrapPostId: string;
-      scrapPost: {
-        scrapPostId: string;
-        title: string;
-        description: string;
-        address: string;
-        availableTimeRange: string | null;
-        status: string;
-        createdAt: string;
-        updatedAt: string | null;
-        householdId: string;
-        household: ComplaintUser | null;
-        mustTakeAll: boolean;
-        scrapPostDetails: any[];
-      };
-      status: string;
-      createdAt: string;
-      offerDetails: Array<{
-        offerDetailId: string;
-        collectionOfferId: string;
-        scrapCategoryId: number;
-        scrapCategory: any;
-        pricePerUnit: number;
-        unit: string;
-      }>;
-      scheduleProposals: Array<{
-        scheduleProposalId: string;
-        collectionOfferId: string;
-        collectionOffer: any;
-        proposedTime: string;
-        status: string;
-        createdAt: string;
-        responseMessage: string;
-      }>;
-    };
-    status: number;
-    scheduledTime: string | null;
-    checkInTime: string | null;
+export interface CollectionOffer {
+  collectionOfferId: string;
+  scrapPostId: string;
+  scrapPost: {
+    scrapPostId: string;
+    title: string;
+    description: string;
+    address: string;
+    availableTimeRange: string | null;
+    status: string;
     createdAt: string;
     updatedAt: string | null;
-    transactionDetails: any[];
-    totalPrice: number;
+    householdId: string;
+    household: ComplaintUser | null;
+    mustTakeAll: boolean;
+    scrapPostDetails: ScrapPostDetail[];
   };
+  status: string;
+  createdAt: string;
+  offerDetails: Array<{
+    offerDetailId: string;
+    collectionOfferId: string;
+    scrapCategoryId: number;
+    scrapCategory: ScrapCategory;
+    pricePerUnit: number;
+    unit: string;
+  }>;
+  scheduleProposals: Array<{
+    scheduleProposalId: string;
+    collectionOfferId: string;
+    collectionOffer: CollectionOffer;
+    proposedTime: string;
+    status: string;
+    createdAt: string;
+    responseMessage: string;
+  }>;
+}
+
+export interface ComplaintDetailTransaction extends ComplaintTransaction {
+  offer: CollectionOffer;
+}
+
+export interface ComplaintDetail extends Omit<ComplaintData, 'transaction'> {
+  transaction: ComplaintDetailTransaction;
 }
 
 export const complaints = {
@@ -117,13 +148,13 @@ export const complaints = {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/complaints${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `${API_ENDPOINTS.COMPLAINTS}${queryString ? `?${queryString}` : ''}`;
     
     return get<ComplaintsResponse>(endpoint);
   },
   
   getById: (id: string): Promise<ComplaintDetail> => {
-    return get<ComplaintDetail>(`/api/v1/complaints/${id}`);
+    return get<ComplaintDetail>(`${API_ENDPOINTS.COMPLAINTS}/${id}`);
   },
   
   processComplaint: (id: string, isAccept: boolean, reviewerNote?: string): Promise<string> => {
@@ -133,7 +164,7 @@ export const complaints = {
       searchParams.append('reviewerNote', reviewerNote);
     }
     
-    return patch<string>(`/api/v1/complaints/${id}/process?${searchParams.toString()}`);
+    return patch<string>(`${API_ENDPOINTS.COMPLAINTS}/${id}/process?${searchParams.toString()}`);
   },
 };
 

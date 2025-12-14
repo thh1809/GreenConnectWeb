@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { ReactNode } from 'react';
+import { PAGINATION } from '@/lib/constants';
 
 type StatCardProps = {
   title: string;
@@ -18,3 +19,4 @@ export function StatCard({ title, value, icon }: StatCardProps) {
     </Card>
   );
 }
+

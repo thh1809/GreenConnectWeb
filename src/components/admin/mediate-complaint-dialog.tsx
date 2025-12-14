@@ -31,7 +31,7 @@ export function MediateComplaintDialog({ open, onOpenChange, onSubmit }: Mediate
         setNotes("");
         onOpenChange(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to process complaint");
+        setError(err instanceof Error ? err.message : "Không thể xử lý khiếu nại");
       } finally {
         setIsSubmitting(false);
       }
@@ -59,7 +59,7 @@ export function MediateComplaintDialog({ open, onOpenChange, onSubmit }: Mediate
           {/* Action Field */}
           <div className="space-y-3">
             <label htmlFor="action" className="text-base font-semibold text-foreground">
-              Quyết định (Decision) <span className="text-danger">*</span>
+              Quyết định <span className="text-danger">*</span>
             </label>
             <Select value={action} onValueChange={setAction}>
               <SelectTrigger id="action" className="w-full h-12 text-base bg-background border border-input">
@@ -71,13 +71,13 @@ export function MediateComplaintDialog({ open, onOpenChange, onSubmit }: Mediate
                 sideOffset={8}
               >
                 <SelectItem value="accept" className="py-3 text-base">
-                  <span className="font-semibold text-primary">Chấp thuận (Accept)</span>
+                  <span className="font-semibold text-primary">Chấp thuận</span>
                   <span className="block text-xs text-muted-foreground mt-1">
                     Khiếu nại đúng, xử phạt người bị tố cáo
                   </span>
                 </SelectItem>
                 <SelectItem value="reject" className="py-3 text-base">
-                  <span className="font-semibold text-danger">Từ chối (Reject)</span>
+                  <span className="font-semibold text-danger">Từ chối</span>
                   <span className="block text-xs text-muted-foreground mt-1">
                     Khiếu nại sai, không đủ bằng chứng
                   </span>
@@ -89,7 +89,7 @@ export function MediateComplaintDialog({ open, onOpenChange, onSubmit }: Mediate
           {/* Resolution Notes Field */}
           <div className="space-y-3">
             <label htmlFor="notes" className="text-base font-semibold text-foreground">
-              Ghi chú xử lý (Reviewer Note) <span className="text-danger">*</span>
+              Ghi chú xử lý <span className="text-danger">*</span>
             </label>
             <Textarea
               id="notes"
@@ -141,4 +141,5 @@ export function MediateComplaintDialog({ open, onOpenChange, onSubmit }: Mediate
     </Dialog>
   );
 }
+
 

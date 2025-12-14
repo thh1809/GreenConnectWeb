@@ -1,4 +1,5 @@
 import { get, patch } from "./client"
+import { API_ENDPOINTS } from '@/lib/constants';
 
 export type AdminVerificationStatus = "PendingReview" | "Approved" | "Rejected"
 
@@ -54,7 +55,7 @@ export const getAdminVerifications = (params: AdminVerificationQuery = {}) => {
   }
 
   const queryString = searchParams.toString()
-  const endpoint = `/api/v1/admin/verifications${queryString ? `?${queryString}` : ""}`
+  const endpoint = `${API_ENDPOINTS.VERIFICATIONS}${queryString ? `?${queryString}` : ""}`
 
   return get<AdminVerificationResponse>(endpoint)
 }
@@ -74,6 +75,6 @@ export const updateAdminVerificationStatus = (
     searchParams.set("reviewerNote", payload.reviewerNote)
   }
 
-  return patch<string>(`/api/v1/admin/verifications/${userId}/status?${searchParams.toString()}`)
+  return patch<string>(`${API_ENDPOINTS.VERIFICATIONS}/${userId}/status?${searchParams.toString()}`)
 }
 

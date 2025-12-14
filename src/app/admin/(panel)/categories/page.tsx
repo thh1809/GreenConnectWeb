@@ -211,7 +211,7 @@ export default function CategoriesPage() {
               Thêm danh mục mới
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-background dark:bg-background border-2 border-border dark:border-border">
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-bold">
                 {editingCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
@@ -478,7 +478,7 @@ export default function CategoriesPage() {
           }
         }}
       >
-        <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription>

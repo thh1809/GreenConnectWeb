@@ -121,7 +121,7 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     setIsLoading(true)
     setError(null)
-    startLoading("Đang tải danh sách người dùng...")
+    // startLoading("Đang tải danh sách người dùng...")
 
     try {
       const response = await users.getAll({
@@ -144,7 +144,7 @@ export default function UsersPage() {
       })
     } finally {
       setIsLoading(false)
-      stopLoading()
+      // stopLoading()
     }
   }
 
@@ -330,14 +330,12 @@ export default function UsersPage() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleOpenBanDialog(user)}
-                                  className={user.status === 'Blocked' 
-                                    ? "gap-1 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 border-black dark:border-white" 
-                                    : "gap-1 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 border-black dark:border-white"}
-                                >
+                              <Button
+                                variant={user.status === 'Blocked' ? 'default' : 'destructive'}
+                                size="sm"
+                                onClick={() => handleOpenBanDialog(user)}
+                                className="gap-1"
+                              >
                                   {user.status === 'Blocked' ? (
                                     <>
                                       <Unlock className="h-4 w-4" />
@@ -346,7 +344,7 @@ export default function UsersPage() {
                                   ) : (
                                     <>
                                       <Ban className="h-4 w-4" />
-                                      Cấm
+                                      
                                     </>
                                   )}
                                 </Button>
@@ -491,4 +489,3 @@ export default function UsersPage() {
     </div>
   )
 }
-

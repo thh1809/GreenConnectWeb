@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ArrowDownToLine, Calendar, CheckCircle2, Clock, IdCard, User2, XCircle } from "lucide-react"
 
 import { type AdminVerificationItem, updateAdminVerificationStatus } from "@/lib/api/verifications"
+import { USER_STATUS } from "@/lib/constants"
 
 type VerifyUserDialogProps = {
   request: AdminVerificationItem
@@ -221,4 +222,5 @@ export function VerifyUserDialog({ request, onCompleted }: VerifyUserDialogProps
     </Dialog>
   )
 }
+
 

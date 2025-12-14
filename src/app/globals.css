@@ -507,3 +507,72 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   color: hsl(var(--foreground)) !important;
   stroke: currentColor !important;
 }
+/* ===========================
+  🔴 BUTTON DESTRUCTIVE - MUST BE LAST
+  Light mode: text đen, Dark mode: text trắng
+=========================== */
+
+/* Button Destructive - Text & Icons */
+/* Light mode: text đen */
+button[class*="destructive"],
+[data-slot="button"][class*="destructive"],
+button.bg-destructive,
+[data-slot="button"].bg-destructive {
+  color: #000000 !important;
+}
+
+/* Dark mode: text trắng */
+.dark button[class*="destructive"],
+.dark [data-slot="button"][class*="destructive"],
+.dark button.bg-destructive,
+.dark [data-slot="button"].bg-destructive {
+  color: #ffffff !important;
+}
+
+/* Tất cả children của button destructive */
+/* Light mode: text đen */
+button[class*="destructive"] *,
+[data-slot="button"][class*="destructive"] *,
+button.bg-destructive *,
+[data-slot="button"].bg-destructive *,
+button[class*="destructive"] span,
+[data-slot="button"][class*="destructive"] span {
+  color: #000000 !important;
+}
+
+/* Dark mode: text trắng */
+.dark button[class*="destructive"] *,
+.dark [data-slot="button"][class*="destructive"] *,
+.dark button.bg-destructive *,
+.dark [data-slot="button"].bg-destructive *,
+.dark button[class*="destructive"] span,
+.dark [data-slot="button"][class*="destructive"] span {
+  color: #ffffff !important;
+}
+
+/* Icons trong button destructive */
+/* Light mode: icon đen */
+button[class*="destructive"] svg,
+button[class*="destructive"] [class*="lucide"],
+[data-slot="button"][class*="destructive"] svg,
+[data-slot="button"][class*="destructive"] [class*="lucide"],
+button.bg-destructive svg,
+button.bg-destructive [class*="lucide"],
+[data-slot="button"].bg-destructive svg,
+[data-slot="button"].bg-destructive [class*="lucide"] {
+  color: #000000 !important;
+  stroke: currentColor !important;
+}
+
+/* Dark mode: icon trắng */
+.dark button[class*="destructive"] svg,
+.dark button[class*="destructive"] [class*="lucide"],
+.dark [data-slot="button"][class*="destructive"] svg,
+.dark [data-slot="button"][class*="destructive"] [class*="lucide"],
+.dark button.bg-destructive svg,
+.dark button.bg-destructive [class*="lucide"],
+.dark [data-slot="button"].bg-destructive svg,
+.dark [data-slot="button"].bg-destructive [class*="lucide"] {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}

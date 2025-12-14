@@ -1,7 +1,7 @@
 'use client'
 
-import AdminLayout from '@/page/admin/components/admin-layout'
-import { adminRoutes } from '@/page/admin/routes/admin-routes'
+import AdminLayout from '@/components/admin/admin-layout'
+import { adminRoutes } from '@/config/admin-routes'
 import Logo from '@public/Eco-Tech-logo-web-no-background.ico'
 import type { ReactNode } from 'react'
 import { LoadingProvider } from '@/contexts/loading-context'

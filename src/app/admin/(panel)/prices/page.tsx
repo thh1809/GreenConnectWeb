@@ -285,7 +285,7 @@ export default function PricesPage() {
               Thêm giá mới
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl bg-background dark:bg-background border-2 border-border dark:border-border">
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-bold">
                 {editingPrice ? 'Chỉnh sửa giá tham khảo' : 'Thêm giá tham khảo mới'}
@@ -623,7 +623,7 @@ export default function PricesPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-2xl font-bold">Chi tiết giá tham khảo</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -734,7 +734,7 @@ export default function PricesPage() {
           }
         }}
       >
-        <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription>

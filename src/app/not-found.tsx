@@ -14,8 +14,6 @@ export default function NotFound() {
   const [isWaving, setIsWaving] = useState(false);
 
   useEffect(() => {
-    // console.error('404 Error: User attempted to access a non-existent route');
-
     const waveInterval = setInterval(() => {
       setIsWaving(true);
       setTimeout(() => setIsWaving(false), 1000);

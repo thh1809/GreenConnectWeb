@@ -1,5 +1,5 @@
 import Loading from '@/app/loading';
-import { AdminLoginContent } from '@/page/admin/components/admin-login-content';
+import { AdminLoginContent } from '@/components/admin/admin-login-content';
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Đăng nhập quản trị | GreenConnect',
