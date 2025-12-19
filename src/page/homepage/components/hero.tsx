@@ -20,16 +20,16 @@ const Hero = () => {
       <div className="container relative z-10 px-6 mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* ========== Bên trái (Nội dung văn bản) ========== */}
-          <div className="space-y-6 text-light-dark-default font-roboto">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
+          <div className="space-y-6 font-roboto">
+            <h1 className="text-5xl text-light-dark-default md:text-6xl lg:text-7xl  font-bold leading-tight tracking-tight">
               Kết nối để hướng tới
               <br />
-              <span className="text-light-dark-default/90">
+              <span className="text-light-dark-default">
                 Tương lai xanh hơn
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-light-dark-default/85 leading-relaxed">
+            <p className="text-lg md:text-xl text-light-dark-default leading-relaxed">
               Bán phế liệu dễ dàng, nhận phần thưởng và góp phần bảo vệ môi
               trường.
             </p>
