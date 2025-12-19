@@ -1,5 +1,8 @@
+
 import { Providers } from '@/components/providers';
+import { RouteLoadingOverlay } from '@/components/route-loading-overlay';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
 import './globals.css';
@@ -31,7 +34,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            {/* <RouteLoadingOverlay /> */}
             {children}
+            <Toaster />
           </ThemeProvider>
         </Providers>
       </body>

@@ -1,19 +1,26 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export function middleware() {
-  // Add middleware logic here
+export function middleware(request: NextRequest) {
+  const { nextUrl, cookies } = request;
+  const authToken = cookies.get('authToken')?.value;
+  const isLoginPage = nextUrl.pathname === '/admin/login';
+  const isProtectedAdminRoute =
+    nextUrl.pathname.startsWith('/admin') && !isLoginPage;
+
+  if (isProtectedAdminRoute && !authToken) {
+    const loginUrl = new URL('/admin/login', nextUrl);
+    loginUrl.searchParams.set('redirect', nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (isLoginPage && authToken) {
+    return NextResponse.redirect(new URL('/admin/dashboard', nextUrl));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/admin/:path*'],
 };

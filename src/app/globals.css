@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'tailwindcss/theme';
 
 /* ===========================
   🎨 DEFINE THEME (v4)
@@ -8,6 +9,7 @@
   🌞 Light Theme (Variable CSS)
 =========================== */
 :root {
+
   --light-dark-reverse: 0 0% 0%;
   --light-dark-default: 0 0% 100%;
   --background: 0 0% 96%;
@@ -35,6 +37,8 @@
 
   --gradient-primary: linear-gradient(to right, var(--color-gradient-primary-from), var(--color-gradient-primary-to));
   --gradient-secondary: linear-gradient(to right, var(--color-gradient-secondary-from), var(--color-gradient-secondary-to));
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
 
 }
 
@@ -68,6 +72,9 @@
 
   --gradient-primary: linear-gradient(to right, var(--color-gradient-primary-from), var(--color-gradient-primary-to));
   --gradient-secondary: linear-gradient(to bottom, var(--color-gradient-secondary-from), var(--color-gradient-secondary-to));
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 94%;
+
 }
 
 /* ===========================
@@ -144,6 +151,11 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
+
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
 }
 
 
@@ -205,4 +217,84 @@
 
 .animate-wave {
   animation: wave 1s ease-in-out;
+}
+
+/* ===========================
+  🔔 Toast/Notification Styling
+  Đảm bảo notification hiển thị đúng màu khi chuyển theme
+=========================== */
+
+/* Toast notification - sử dụng CSS variables để tự động thay đổi theo theme */
+[data-sonner-toast],
+[data-sonner-toaster],
+.group.toast {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Toast description text */
+[data-sonner-toast] [data-description],
+.group.toast [data-description] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Toast title text */
+[data-sonner-toast] [data-title],
+.group.toast [data-title] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Toast success variant */
+[data-sonner-toast][data-type="success"],
+[data-sonner-toast][data-type="success"] [data-title],
+[data-sonner-toast][data-type="success"] [data-description] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Toast error variant */
+[data-sonner-toast][data-type="error"],
+[data-sonner-toast][data-type="error"] [data-title],
+[data-sonner-toast][data-type="error"] [data-description] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Toast info variant */
+[data-sonner-toast][data-type="info"],
+[data-sonner-toast][data-type="info"] [data-title],
+[data-sonner-toast][data-type="info"] [data-description] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Toast warning variant */
+[data-sonner-toast][data-type="warning"],
+[data-sonner-toast][data-type="warning"] [data-title],
+[data-sonner-toast][data-type="warning"] [data-description] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Toast action button */
+[data-sonner-toast] button[data-button],
+.group.toast button[data-button] {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Toast cancel button */
+[data-sonner-toast] button[data-cancel],
+.group.toast button[data-cancel] {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Toast close button */
+[data-sonner-toast] button[data-close-button] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Toast icon */
+[data-sonner-toast] svg,
+[data-sonner-toast] [class*="lucide"] {
+  color: hsl(var(--foreground)) !important;
+  stroke: currentColor !important;
 }

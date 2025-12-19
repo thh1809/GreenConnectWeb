@@ -2,31 +2,49 @@
 
 import type { LucideIcon } from 'lucide-react';
 import * as Icons from 'lucide-react';
-import { Moon, PanelLeftClose, PanelLeftOpen, Sun } from 'lucide-react';
+import { LogOut, Moon, PanelLeftClose, PanelLeftOpen, Sun } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { NavigationLink } from '@/components/navigation-link';
 
 export default function AdminLayout({ items, logo, children }: any) {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('sidebar-collapsed') === 'true';
-  });
+  const router = useRouter();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('theme') === 'dark';
-  });
-
+  // Load from localStorage after mount to avoid hydration mismatch
   useEffect(() => {
-    if (isDark) {
+    // Read from localStorage
+    const savedCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+    const savedTheme = localStorage.getItem('theme') === 'dark';
+    
+    // Apply theme immediately (external system update)
+    if (savedTheme) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [isDark]);
+    
+    // Defer state updates to next tick to avoid cascading renders
+    Promise.resolve().then(() => {
+      setMounted(true);
+      setIsCollapsed(savedCollapsed);
+      setIsDark(savedTheme);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [isDark, mounted]);
 
   const toggleCollapse = () => {
     const newValue = !isCollapsed;
@@ -40,21 +58,34 @@ export default function AdminLayout({ items, logo, children }: any) {
     localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
   };
 
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
+      document.cookie =
+        'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+      router.push('/admin/login');
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-background text-foreground transition-colors">
       {/* ===== Sidebar ===== */}
       <aside
         className={`${
           isCollapsed ? 'w-18' : 'w-64'
-        } border-r border-border bg-card px-4 py-4 transition-all duration-300`}
+        } border-r border-border bg-card px-4 py-4 transition-all duration-300 flex flex-col`}
       >
         {/* Logo + Name */}
         <div
-          className={`flex items-center gap-2 px-2 mb-6 ${
+          className={`flex items-center gap-2 px-2 mb-6 cursor-pointer${
             isCollapsed ? 'justify-center' : ''
           }`}
+          onClick={() => {
+            router.push('/');
+          }}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full text-primary-foreground font-bold text-lg">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full text-primary-foreground font-bold text-lg ">
             <Image src={logo} alt="Green Connect Logo" />
           </div>
           {!isCollapsed && (
@@ -65,7 +96,7 @@ export default function AdminLayout({ items, logo, children }: any) {
         </div>
 
         {/* Nav items */}
-        <nav className="flex flex-col gap-2">
+        <nav className="flex flex-1 flex-col gap-2">
           {items.map((it: any) => {
             const active = pathname === it.href;
 
@@ -74,7 +105,7 @@ export default function AdminLayout({ items, logo, children }: any) {
               | undefined;
 
             return (
-              <Link
+              <NavigationLink
                 key={it.label}
                 href={it.href}
                 className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
@@ -96,10 +127,22 @@ export default function AdminLayout({ items, logo, children }: any) {
                 )}
 
                 {!isCollapsed && <span>{it.label}</span>}
-              </Link>
+              </NavigationLink>
             );
           })}
         </nav>
+
+        <div className="mt-6 border-t border-border pt-4">
+          <button
+            onClick={handleLogout}
+            className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10 transition-colors ${
+              isCollapsed ? 'justify-center' : ''
+            }`}
+          >
+            <LogOut className="h-5 w-5" />
+            {!isCollapsed && <span>Đăng xuất</span>}
+          </button>
+        </div>
       </aside>
 
       {/* ===== Right Section ===== */}
@@ -121,7 +164,7 @@ export default function AdminLayout({ items, logo, children }: any) {
             onClick={toggleTheme}
             className="rounded-full p-2 hover:bg-muted transition"
           >
-            {isDark ? (
+            {mounted && isDark ? (
               <Moon className="h-5 w-5 text-muted-foreground" />
             ) : (
               <Sun className="h-5 w-5 text-muted-foreground" />
