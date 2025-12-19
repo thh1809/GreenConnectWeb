@@ -1,8 +1,31 @@
-# Green Connect Web
+<p align="center">
+	<img src="./public/Eco-Tech-logo-web-no-background.ico" alt="Green Connect Logo" width="120"/>
+</p>
 
-**Green Connect** is a modern web application built with **Next.js**, providing an **introductory landing page** and an **admin dashboard** for managing eco-friendly initiatives and sustainable communities.
+<h1 align="center">
+	<img src="./public/leaf_web_2.png" alt="Leaf Icon" width="30" />
+	Green Connect Web
+</h1>
 
-The application connects different user types: regular users, admins, and moderators.
+<p align="center">
+	<img src="https://img.shields.io/badge/platform-next.js-blue" />
+	<img src="https://img.shields.io/badge/ui-shadcn--ui-success" />
+	<img src="https://img.shields.io/badge/architecture-app--router-green" />
+	<img src="https://img.shields.io/badge/language-typescript-blueviolet" />
+	<img src="https://img.shields.io/badge/styling-tailwindcss-06b6d4" />
+</p>
+
+<p align="center">
+	<i><b>Green Connect</b> là nền tảng web hiện đại giúp kết nối cộng đồng vì môi trường xanh, với landing page giới thiệu và dashboard quản trị tiện lợi.</i>
+</p>
+
+<p align="center">
+	👥 <b>Kết nối:</b> ♻️ Người dùng  • 🛠️ Quản trị viên  • 🧑‍⚖️ Moderator
+</p>
+
+<p align="center">
+	🌱 Xây dựng với <b>Next.js</b> • <b>TypeScript</b> • <b>Tailwind CSS</b> • <b>Shadcn/UI</b>
+</p>
 
 ---
 
