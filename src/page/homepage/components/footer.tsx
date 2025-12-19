@@ -33,11 +33,11 @@ const Footer = () => {
         <div className="container mx-auto text-center text-light-dark-default">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Leaf className="w-8 h-8" />
-            <h2 className="text-3xl md:text-4xl font-bold">
+            <h2 className="text-3xl text-light-dark-default md:text-4xl font-bold">
               Sẵn sàng sống xanh?
             </h2>
           </div>
-          <p className="text-xl mb-8 text-light-dark-default/90">
+          <p className="text-xl mb-8 text-light-dark-default">
             Tải ứng dụng ngay hôm nay và bắt đầu tạo tác động tích cực
           </p>
 

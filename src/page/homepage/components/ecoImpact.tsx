@@ -74,13 +74,10 @@ const AnimatedCounter = ({ end, suffix }: { end: number; suffix: string }) => {
 
 const EcoImpact = () => {
   return (
-    <section
-      id="impact"
-      className="py-24 px-4 bg-gradient-to-b from-secondary/30 to-background"
-    >
+    <section id="impact" className="py-24 px-4 bg-background transition-colors duration-300">
       <div className="container mx-auto">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl text-foreground md:text-5xl font-bold mb-4">
             Tác động của chúng ta
           </h2>
           <p className="text-xl text-muted-foreground mx-auto">

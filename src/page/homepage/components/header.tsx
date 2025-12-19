@@ -3,21 +3,13 @@ import { Button } from '@/components/ui/button';
 import Logo from '@public/Eco-Tech-logo-web-no-background.ico';
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
-const navLinks = [
-  { name: 'Trang chủ', href: '#home' },
-  { name: 'Tính năng', href: '#features' },
-  { name: 'Cách hoạt động', href: '#how-it-works' },
-  { name: 'Tác động', href: '#impact' },
-  { name: 'Đánh giá', href: '#testimonials' },
-  { name: 'Liên hệ', href: '#contact' },
-];
+import { clientNavLinks } from '../routes/client-route';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -38,7 +30,7 @@ const Header = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <a href="#home" className="flex items-center gap-2 group">
+            <Link href="/" className="flex items-center gap-2 group">
               <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
                 <Image src={Logo} alt="logo" width={50} height={50} priority />
               </div>
@@ -49,11 +41,11 @@ const Header = () => {
               >
                 Green Connect
               </h3>
-            </a>
+            </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              {navLinks.map(link => (
+              {clientNavLinks.map(link => (
                 <a
                   key={link.name}
                   href={link.href}
@@ -119,7 +111,7 @@ const Header = () => {
           }`}
         >
           <nav className="flex flex-col gap-4 text-center">
-            {navLinks.map((link, index) => (
+            {clientNavLinks.map((link, index) => (
               <a
                 key={link.name}
                 href={link.href}
