@@ -14,9 +14,26 @@
 	<img src="https://img.shields.io/badge/architecture-app--router-green" />
 	<img src="https://img.shields.io/badge/language-typescript-blueviolet" />
 	<img src="https://img.shields.io/badge/styling-tailwindcss-06b6d4" />
-	[![Playwright E2E Tests](https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml/badge.svg)](https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml)
-	![License](https://img.shields.io/github/license/thh1809/GreenConnectWeb)
-	![Last Commit](https://img.shields.io/github/last-commit/thh1809/GreenConnectWeb)
+	<a href="https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml">
+    <img
+      src="https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml/badge.svg"
+      alt="Playwright E2E Tests"
+    />
+  </a>
+
+  <a href="https://github.com/thh1809/GreenConnectWeb/blob/main/LICENSE">
+    <img
+      src="https://img.shields.io/github/license/thh1809/GreenConnectWeb"
+      alt="License"
+    />
+  </a>
+
+  <a href="https://github.com/thh1809/GreenConnectWeb/commits/main">
+    <img
+      src="https://img.shields.io/github/last-commit/thh1809/GreenConnectWeb"
+      alt="Last Commit"
+    />
+  </a>
 </p>
 
 <p align="center">
