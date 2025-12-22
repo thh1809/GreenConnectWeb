@@ -1,3 +1,4 @@
+
 <p align="center">
 	<img src="./public/Eco-Tech-logo-web-no-background.ico" alt="Green Connect Logo" width="120"/>
 </p>
@@ -13,18 +14,38 @@
 	<img src="https://img.shields.io/badge/architecture-app--router-green" />
 	<img src="https://img.shields.io/badge/language-typescript-blueviolet" />
 	<img src="https://img.shields.io/badge/styling-tailwindcss-06b6d4" />
+	<a href="https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml">
+    <img
+      src="https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml/badge.svg"
+      alt="Playwright E2E Tests"
+    />
+  </a>
+
+  <a href="https://github.com/thh1809/GreenConnectWeb/blob/main/LICENSE">
+    <img
+      src="https://img.shields.io/github/license/thh1809/GreenConnectWeb"
+      alt="License"
+    />
+  </a>
+
+  <a href="https://github.com/thh1809/GreenConnectWeb/commits/main">
+    <img
+      src="https://img.shields.io/github/last-commit/thh1809/GreenConnectWeb"
+      alt="Last Commit"
+    />
+  </a>
 </p>
 
 <p align="center">
-	<i><b>Green Connect</b> là nền tảng web hiện đại giúp kết nối cộng đồng vì môi trường xanh, với landing page giới thiệu và dashboard quản trị tiện lợi.</i>
+	<i><b>Green Connect</b> is a modern web platform that connects the community for a greener environment, featuring an introductory landing page and a convenient admin dashboard.</i>
 </p>
 
 <p align="center">
-	👥 <b>Kết nối:</b> ♻️ Người dùng  • 🛠️ Quản trị viên  • 🧑‍⚖️ Moderator
+	👥 <b>Connect:</b> ♻️ User  • 🛠️ Admin  • 🧑‍⚖️ Moderator
 </p>
 
 <p align="center">
-	🌱 Xây dựng với <b>Next.js</b> • <b>TypeScript</b> • <b>Tailwind CSS</b> • <b>Shadcn/UI</b>
+	🌱 Built with <b>Next.js</b> • <b>TypeScript</b> • <b>Tailwind CSS</b> • <b>Shadcn/UI</b>
 </p>
 
 ---
