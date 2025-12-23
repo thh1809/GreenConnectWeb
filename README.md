@@ -153,7 +153,6 @@ GREENCONNECTWEB/
 ├── .env.example
 │
 ├── Dockerfile
-├── docker-compose.yml
 │
 ├── playwright.config.ts          # Playwright configuration
 ├── next.config.mjs               # Next.js configuration
