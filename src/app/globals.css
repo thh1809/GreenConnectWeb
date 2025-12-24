@@ -21,6 +21,7 @@
   --secondary: 60 33% 91%;
   --secondary-foreground: 0 0% 0%;
   --warning: 48 100% 61%;
+  --success: 144 70% 43%;
   --danger: 0 70% 45%;
   --warning-update: 20 94% 59%;
   --muted: 0 0% 93%;
@@ -57,6 +58,7 @@
   --secondary: 60 33% 24%;
   --secondary-foreground: 0 0% 94%;
   --warning: 48 100% 61%;
+  --success: 144 70% 43%;
   --danger: 0 70% 45%;
   --warning-update: 20 94% 59%;
   --muted: 0 0% 20%;

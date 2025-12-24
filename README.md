@@ -7,27 +7,37 @@
 	<img src="./public/leaf_web_2.png" alt="Leaf Icon" width="30" />
 	Green Connect Web
 </h1>
-
 <p align="center">
-	<img src="https://img.shields.io/badge/platform-next.js-blue" />
-	<img src="https://img.shields.io/badge/ui-shadcn--ui-success" />
-	<img src="https://img.shields.io/badge/architecture-app--router-green" />
-	<img src="https://img.shields.io/badge/language-typescript-blueviolet" />
-	<img src="https://img.shields.io/badge/styling-tailwindcss-06b6d4" />
-	<a href="https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml">
+	 <!-- Testing -->
+  <a href="https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml">
     <img
       src="https://github.com/thh1809/GreenConnectWeb/actions/workflows/playwright.yml/badge.svg"
       alt="Playwright E2E Tests"
     />
   </a>
+  <!-- Framework & Core -->
+  <img src="https://img.shields.io/badge/language-typescript-3178C6" alt="TypeScript" />
 
+  <!-- UI & Styling -->
+  <img src="https://img.shields.io/badge/ui-shadcn--ui-success" alt="shadcn/ui" />
+  <img src="https://img.shields.io/badge/styling-tailwindcss-06B6D4" alt="Tailwind CSS" />
+
+  <!-- Data & State -->
+  <img src="https://img.shields.io/badge/data--fetching-tanstack--query-FF4154" alt="TanStack Query" />
+
+  <!-- Tooling -->
+  <img src="https://img.shields.io/badge/git--hooks-husky-yellow" alt="Husky" />
+  <img src="https://img.shields.io/badge/commit--style-commitlint-blue" alt="Commitlint" />
+
+  <!-- License -->
   <a href="https://github.com/thh1809/GreenConnectWeb/blob/main/LICENSE">
     <img
-      src="https://img.shields.io/github/license/thh1809/GreenConnectWeb"
-      alt="License"
-    />
+  src="https://img.shields.io/github/license/thh1809/GreenConnectWeb?branch=main&cacheSeconds=60"
+  alt="License"
+/>
   </a>
 
+  <!-- Last Commit -->
   <a href="https://github.com/thh1809/GreenConnectWeb/commits/main">
     <img
       src="https://img.shields.io/github/last-commit/thh1809/GreenConnectWeb"
