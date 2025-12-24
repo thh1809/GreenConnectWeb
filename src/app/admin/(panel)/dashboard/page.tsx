@@ -57,14 +57,15 @@ export default function DashboardPage() {
   }, [startDate, endDate])
 
   useEffect(() => {
-    // Set default date range: last 30 days
-    const end = new Date()
-    const start = new Date()
-    start.setDate(start.getDate() - 30)
-    
-    setEndDate(end.toISOString().slice(0, 16))
-    setStartDate(start.toISOString().slice(0, 16))
-  }, [])
+  const end = new Date()
+  const start = new Date()
+
+  start.setFullYear(start.getFullYear() - 1) // 1 year ago
+
+  setEndDate(end.toISOString().slice(0, 16))
+  setStartDate(start.toISOString().slice(0, 16))
+}, [])
+
 
   useEffect(() => {
     if (startDate && endDate) {
@@ -92,6 +93,20 @@ export default function DashboardPage() {
     }
   }
 
+  const getTransactionStatusColor = (status: string): string => {
+    switch (status) {
+      case 'Completed':
+      case 'Success':
+        return 'hsl(var(--success))'
+      case 'Failed':
+        return 'hsl(var(--danger))'
+      case 'Scheduled':
+        return 'hsl(var(--primary))'
+      default:
+        return 'hsl(var(--warning))'
+    }
+  }
+
   // Prepare chart data from transaction status
   const transactionChartData = reportData?.transactionStatus.map((status, index) => ({
     label: formatTransactionStatus(status.transactionStatus),
@@ -102,6 +117,7 @@ export default function DashboardPage() {
   const pieChartData = reportData?.transactionStatus.map((status, index) => ({
     label: formatTransactionStatus(status.transactionStatus),
     value: status.totalTransactionStatus,
+    color: getTransactionStatusColor(status.transactionStatus),
   })) || []
 
   return (
@@ -307,8 +323,7 @@ export default function DashboardPage() {
                             <div
                               className="h-4 w-4 rounded-full"
                               style={{
-                                backgroundColor: `hsl(var(--primary))`,
-                                opacity: 0.8 - index * 0.1,
+                                backgroundColor: item.color,
                               }}
                             />
                             <div className="flex-1">

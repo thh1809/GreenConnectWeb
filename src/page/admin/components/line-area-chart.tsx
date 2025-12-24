@@ -1,3 +1,15 @@
+ 'use client';
+
+ import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+
 type Point = { label: string; value: number };
 
 type LineAreaChartProps = {
@@ -5,55 +17,68 @@ type LineAreaChartProps = {
   height?: number;
 };
 
-export function LineAreaChart({ data, height = 220 }: LineAreaChartProps) {
-  const width = 900;
-  const paddingX = 32;
-  const paddingY = 24;
-  const innerW = width - paddingX * 2;
-  const innerH = height - paddingY * 2;
+export function LineAreaChart({ data, height = 260 }: LineAreaChartProps) {
+  if (data.length === 0) {
+    return (
+      <div className="flex items-center justify-center" style={{ height }}>
+        <p className="text-sm text-muted-foreground">Không có dữ liệu</p>
+      </div>
+    );
+  }
 
-  const max = Math.max(...data.map((d) => d.value), 1);
-  const stepX = innerW / Math.max(data.length - 1, 1);
-
-  const points = data.map((d, i) => {
-    const x = paddingX + i * stepX;
-    const y = paddingY + innerH - (d.value / max) * innerH;
-    return [x, y] as const;
-  });
-
-  const path = points
-    .map((p, i) => (i === 0 ? `M ${p[0]},${p[1]}` : `L ${p[0]},${p[1]}`))
-    .join(" ");
-
-  const area = `${path} L ${paddingX + innerW},${paddingY + innerH} L ${paddingX},${paddingY + innerH} Z`;
+  const maxValue = Math.max(...data.map((d) => d.value), 0);
+  const yMax = maxValue <= 1 ? 2 : Math.ceil(maxValue * 1.15);
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full">
-      <defs>
-        <linearGradient id="gcArea" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="currentColor" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {/* grid */}
-      <g className="text-border">
-        {Array.from({ length: 4 }).map((_, i) => {
-          const y = paddingY + (i * innerH) / 4;
-          return (
-            <line key={i} x1={paddingX} x2={paddingX + innerW} y1={y} y2={y} stroke="currentColor" />
-          );
-        })}
-      </g>
-      {/* area + line + points use primary color */}
-      <g className="text-primary">
-        <path d={area} fill="url(#gcArea)" />
-        <path d={path} fill="none" stroke="currentColor" strokeWidth={2} />
-        {points.map((p, i) => (
-          <circle key={i} cx={p[0]} cy={p[1]} r={3} fill="currentColor" />
-        ))}
-      </g>
-    </svg>
+    <div className="w-full" style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="gcAreaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.35} />
+          <XAxis
+            dataKey="label"
+            axisLine={false}
+            tickLine={false}
+            interval="preserveStartEnd"
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+          />
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            width={32}
+            domain={[0, yMax]}
+            allowDecimals={false}
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+          />
+          <Tooltip
+            cursor={{ stroke: 'hsl(var(--border))', strokeDasharray: '3 3' }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const value = payload[0]?.value;
+              return (
+                <div className="rounded-lg border bg-card px-3 py-2 text-sm shadow-sm">
+                  <div className="font-medium">{label}</div>
+                  <div className="text-muted-foreground">Số lượng: <span className="text-foreground font-medium">{String(value)}</span></div>
+                </div>
+              );
+            }}
+          />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke="hsl(var(--primary))"
+            strokeWidth={2}
+            fill="url(#gcAreaFill)"
+            dot={{ r: 3, strokeWidth: 2, fill: 'hsl(var(--background))', stroke: 'hsl(var(--primary))' }}
+            activeDot={{ r: 5, strokeWidth: 2, fill: 'hsl(var(--background))', stroke: 'hsl(var(--primary))' }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
-
-
