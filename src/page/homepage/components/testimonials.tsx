@@ -152,8 +152,11 @@ const Testimonials = () => {
         </div>
 
         {/* Mobile: 1 thẻ hiển thị */}
-        <div className="md:hidden max-w-sm mx-auto mb-8">
-          <Card className="p-6 bg-card shadow-soft border-0 rounded-xl transition-smooth">
+        {/* <div className="md:hidden max-w-sm mx-auto mb-8"> */}
+        <div className="md:hidden w-full mb-8 px-4">
+          {/* <Card className="p-6 bg-card shadow-soft border-0 rounded-xl transition-smooth"> */}
+          <Card className="w-full p-6 bg-card shadow-soft border-0 rounded-xl transition-smooth">
+
             <div className="flex justify-center mb-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-primary rounded-full blur-sm" />
