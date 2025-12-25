@@ -27,7 +27,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Tắt gửi dữ liệu ẩn danh cho Next.js (cho nhẹ)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Lệnh build (Tạo ra thư mục .next/standalone)
@@ -51,7 +53,6 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 
 # Copy kết quả build nhỏ gọn (Standalone) sang đây
-# Giúp giảm dung lượng cực lớn
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
