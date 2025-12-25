@@ -11,12 +11,12 @@ export const adminRoutes = [
     href: '/admin/users',
     icon: 'UserRound',
   },
-  {
-    label: 'Người thu gom',
+  // {
+  //   label: 'Người thu gom',
 
-    href: '/admin/collector',
-    icon: 'Briefcase',
-  },
+  //   href: '/admin/collector',
+  //   icon: 'Briefcase',
+  // },
 
   {
     label: 'Danh mục',
