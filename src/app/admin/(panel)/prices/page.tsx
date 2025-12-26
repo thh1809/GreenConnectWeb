@@ -128,7 +128,7 @@ export default function PricesPage() {
     }
     if (priceItem) {
       setEditingPrice(priceItem)
-      setCategoryId(priceItem.scrapCategoryId.toString())
+      setCategoryId(priceItem.scrapCategoryId)
       setPricePerKg(priceItem.pricePerKg?.toString() || '')
     } else {
       setEditingPrice(null)
@@ -171,7 +171,7 @@ export default function PricesPage() {
       } else {
         // Create new price (POST)
         await pricesApi.create({
-          scrapCategoryId: parseInt(categoryId),
+          scrapCategoryId: categoryId,
           pricePerKg: priceValue,
         })
       }

@@ -12,7 +12,7 @@
 } from 'recharts';
 
 type BarChartProps = {
-  data: { label: string; value: number }[];
+  data: { label: string; value: number; color?: string }[];
   height?: number;
   color?: string;
 };
@@ -58,7 +58,7 @@ export function BarChart({ data, height = 300, color = 'hsl(var(--primary))' }: 
   const chartData: ChartDatum[] = data.map((d) => ({
     label: d.label,
     value: d.value,
-    color: colorForLabel(d.label, color),
+    color: d.color ?? colorForLabel(d.label, color),
   }));
 
   const maxValue = Math.max(...chartData.map((d) => d.value), 0);

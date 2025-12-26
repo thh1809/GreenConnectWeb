@@ -107,6 +107,36 @@ const formatDate = (dateString: string) => {
       })
 }
 
+const formatRank = (rank: unknown) => {
+  const raw =
+    typeof rank === 'string'
+      ? rank
+      : rank && typeof rank === 'object'
+        ? String((rank as any).name ?? (rank as any).rank ?? '')
+        : ''
+
+  const normalized = raw.trim()
+  if (!normalized) return '—'
+
+  const r = normalized.toLowerCase()
+  if (r.includes('bronze')) return 'Đồng (Bronze)'
+  if (r.includes('silver')) return 'Bạc (Silver)'
+  if (r.includes('gold')) return 'Vàng (Gold)'
+  if (r.includes('platinum')) return 'Bạch kim (Platinum)'
+  if (r.includes('diamond')) return 'Kim cương (Diamond)'
+
+  if (normalized.includes('.')) {
+    const last = normalized.split('.').pop()
+    const cleaned = last || normalized
+    if (cleaned.toLowerCase() === 'rank') return '—'
+    return cleaned
+  }
+
+  if (r === 'rank') return '—'
+
+  return normalized
+}
+
 const PAGE_SIZE = 10
 
 export default function PostsPage() {
@@ -130,9 +160,9 @@ export default function PostsPage() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [postDetail, setPostDetail] = useState<ScrapPostFull | null>(null)
   const [isLoadingDetail, setIsLoadingDetail] = useState(false)
-  const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null)
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null)
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null)
 
   const fetchPosts = async () => {
     setIsLoading(true)
@@ -207,15 +237,10 @@ export default function PostsPage() {
     setCategoryToDelete(null)
   }
 
-  const handleDeleteClick = (categoryId: number) => {
-    if (!postDetail) return
-
-    const detail = postDetail.scrapPostDetails.find(d => d.scrapCategoryId === categoryId)
-    if (!detail) return
-
-    if (detail.status !== 'Available') {
+  const handleDeleteClick = (categoryId: string) => {
+    if (!postDetail) {
       toast.error('Lỗi', {
-        description: 'Chỉ có thể xóa món hàng chưa được đặt mua (Available)',
+        description: 'Không thể xóa món hàng khi chưa tải chi tiết bài đăng',
       })
       return
     }
@@ -225,7 +250,7 @@ export default function PostsPage() {
   }
 
   const handleDeleteConfirm = async () => {
-    if (!selectedPostId || !categoryToDelete) return
+    if (!selectedPostId || categoryToDelete === null) return
 
     try {
       setDeletingCategoryId(categoryToDelete)
@@ -352,7 +377,7 @@ export default function PostsPage() {
             </TableHeader>
             <TableBody>
                   {postsData.length === 0 ? (
-                    <TableRow>
+                    <TableRow key="empty">
                       <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
                         Không có bài đăng nào phù hợp bộ lọc hiện tại.
                   </TableCell>
@@ -365,7 +390,7 @@ export default function PostsPage() {
                             {post.household.avatarUrl ? (
                       <Image
                                 src={post.household.avatarUrl}
-                                alt={post.household.fullName}
+                                alt={post.household.fullName || 'Avatar'}
                         width={48}
                         height={48}
                         className="h-full w-full object-cover"
@@ -522,11 +547,11 @@ export default function PostsPage() {
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Hạng</div>
-                  <div className="text-sm font-semibold dialog-value">{postDetail.household.rank}</div>
+                  <div className="text-sm font-semibold dialog-value">{formatRank(postDetail.household.rank)}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Điểm</div>
-                  <div className="text-sm font-semibold dialog-value">{postDetail.household.pointBalance.toLocaleString('vi-VN')}</div>
+                  <div className="text-sm font-semibold dialog-value">{(postDetail.household.pointBalance ?? 0).toLocaleString('vi-VN')}</div>
                 </div>
               </div>
 
@@ -628,7 +653,7 @@ export default function PostsPage() {
                             <div className="h-32 w-full overflow-hidden rounded-md border border-border">
                               <Image
                                 src={detail.imageUrl}
-                                alt={detail.scrapCategory.categoryName}
+                                alt={detail.scrapCategory?.categoryName || 'Ảnh món hàng'}
                                 width={200}
                                 height={128}
                                 className="h-full w-full object-cover"
