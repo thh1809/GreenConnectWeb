@@ -1,8 +1,7 @@
 # ---------------------------------------------------
 # 1. Giai đoạn Base: Cài môi trường Node
 # ---------------------------------------------------
-FROM node:18-alpine AS base
-
+FROM node:20-alpine AS base
 # ---------------------------------------------------
 # 2. Giai đoạn Deps: Cài đặt thư viện (Dependencies)
 # ---------------------------------------------------
@@ -15,8 +14,10 @@ COPY package.json package-lock.json* pnpm-lock.yaml* ./
 
 # Cài đặt thư viện (Tự động nhận diện npm, pnpm...)
 RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else npm ci; \
+  if [ -f pnpm-lock.yaml ]; then \
+    corepack enable pnpm && pnpm i --frozen-lockfile --fetch-retries 5 --fetch-retry-mintimeout 20000; \
+  else \
+    npm ci --fetch-retries 5 --fetch-retry-mintimeout 20000; \
   fi
 
 # ---------------------------------------------------
@@ -27,7 +28,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Tắt gửi dữ liệu ẩn danh cho Next.js (cho nhẹ)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Lệnh build (Tạo ra thư mục .next/standalone)
@@ -51,7 +54,6 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 
 # Copy kết quả build nhỏ gọn (Standalone) sang đây
-# Giúp giảm dung lượng cực lớn
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
