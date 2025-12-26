@@ -26,11 +26,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { categories as categoriesApi, type ScrapCategory } from "@/lib/api/categories"
@@ -48,13 +46,37 @@ export default function CategoriesPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<ScrapCategory | null>(null)
   const [categoryName, setCategoryName] = useState("")
-  const [description, setDescription] = useState("")
+  const [imageUrl, setImageUrl] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dialogError, setDialogError] = useState<string | null>(null)
 
+  const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
+  const [imagePreviewAlt, setImagePreviewAlt] = useState<string | null>(null)
+
+  const isProbablyImageUrl = (value: string) => {
+    const v = value.trim().toLowerCase()
+    if (!v) return false
+    if (!v.startsWith('http://') && !v.startsWith('https://')) return false
+    return (
+      v.endsWith('.png') ||
+      v.endsWith('.jpg') ||
+      v.endsWith('.jpeg') ||
+      v.endsWith('.gif') ||
+      v.endsWith('.webp') ||
+      v.includes('image')
+    )
+  }
+
+  const openImagePreview = (url: string, alt: string) => {
+    setImagePreviewUrl(url)
+    setImagePreviewAlt(alt)
+    setImagePreviewOpen(true)
+  }
+
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null)
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null)
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -86,11 +108,11 @@ export default function CategoriesPage() {
     if (category) {
       setEditingCategory(category)
       setCategoryName(category.categoryName)
-      setDescription(category.description || "")
+      setImageUrl(category.imageUrl || "")
     } else {
       setEditingCategory(null)
       setCategoryName("")
-      setDescription("")
+      setImageUrl("")
     }
     setDialogError(null)
     setDialogOpen(true)
@@ -100,21 +122,21 @@ export default function CategoriesPage() {
     setDialogOpen(false)
     setEditingCategory(null)
     setCategoryName("")
-    setDescription("")
+    setImageUrl("")
     setDialogError(null)
   }
 
   const handleSaveCategory = async () => {
     const trimmedName = categoryName.trim()
-    const trimmedDescription = description.trim()
+    const trimmedImageUrl = imageUrl.trim()
     
     if (!trimmedName) {
       setDialogError('Tên danh mục không được để trống')
       return
     }
 
-    if (!trimmedDescription) {
-      setDialogError('Mô tả không được để trống')
+    if (!trimmedImageUrl) {
+      setDialogError('Image URL không được để trống')
       return
     }
 
@@ -124,7 +146,7 @@ export default function CategoriesPage() {
       
       const payload = {
         categoryName: trimmedName,
-        description: trimmedDescription,
+        imageUrl: trimmedImageUrl,
       }
       
       if (editingCategory) {
@@ -151,7 +173,7 @@ export default function CategoriesPage() {
     }
   }
 
-  const handleDeleteClick = (id: number) => {
+  const handleDeleteClick = (id: string) => {
     setCategoryToDelete(id)
     setDeleteDialogOpen(true)
   }
@@ -184,12 +206,44 @@ export default function CategoriesPage() {
     }
   }
 
+  const normalizedQuery = searchQuery.trim().toLowerCase()
   const filteredCategories = categoriesData.filter(category =>
-    category.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
+    String(category.categoryName ?? '').toLowerCase().includes(normalizedQuery)
   )
 
   return (
     <div className="space-y-6">
+      <Dialog
+        open={imagePreviewOpen}
+        onOpenChange={(open) => {
+          setImagePreviewOpen(open)
+          if (!open) {
+            setImagePreviewUrl(null)
+            setImagePreviewAlt(null)
+          }
+        }}
+      >
+        <DialogContent className="max-w-3xl bg-background dark:bg-background border-2 border-border dark:border-border">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">Xem ảnh</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              {imagePreviewAlt || 'Ảnh danh mục'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-auto rounded-lg border bg-muted/10 p-3">
+            {imagePreviewUrl ? (
+              <img
+                src={imagePreviewUrl}
+                alt={imagePreviewAlt || 'Category image'}
+                className="w-full h-auto rounded-md object-contain"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
@@ -239,15 +293,30 @@ export default function CategoriesPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="category-description" className="text-sm font-semibold">
-                  Mô tả <span className="text-danger">*</span>
+                  Image URL 
                 </Label>
-                <Textarea
+                <Input
                   id="category-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Nhập mô tả"
-                  className="min-h-[100px] resize-none bg-background"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="Nhập image url (nếu có)"
+                  className="bg-background"
                 />
+                {isProbablyImageUrl(imageUrl) && (
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <div className="text-xs text-muted-foreground mb-2">Xem trước</div>
+                    <img
+                      src={imageUrl}
+                      alt={categoryName || 'Category image'}
+                      className="h-28 w-full rounded-md object-cover"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Error Message */}
@@ -308,7 +377,7 @@ export default function CategoriesPage() {
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Tên danh mục</TableHead>
-                    <TableHead>Mô tả</TableHead>
+                    <TableHead>Image URL</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -337,7 +406,7 @@ export default function CategoriesPage() {
                     <TableRow>
                       <TableHead>ID</TableHead>
                       <TableHead>Tên danh mục</TableHead>
-                      <TableHead>Mô tả</TableHead>
+                      <TableHead>Image </TableHead>
                       <TableHead className="text-right">Hành động</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -345,13 +414,32 @@ export default function CategoriesPage() {
                     {filteredCategories.map((category) => (
                       <TableRow key={category.scrapCategoryId}>
                         <TableCell className="font-medium">
-                          #{category.scrapCategoryId}
+                          {category.scrapCategoryId}
                         </TableCell>
                         <TableCell className="font-medium">
                           {category.categoryName}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {category.description || "-"}
+                          {category.imageUrl && isProbablyImageUrl(category.imageUrl) ? (
+                            <button
+                              type="button"
+                              className="inline-flex items-center justify-center"
+                              onClick={() => openImagePreview(category.imageUrl as string, category.categoryName)}
+                            >
+                              <img
+                                src={category.imageUrl}
+                                alt={category.categoryName}
+                                className="h-10 w-10 rounded-md object-cover border"
+                                loading="lazy"
+                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                  ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+                                }}
+                              />
+                            </button>
+                          ) : (
+                            "-"
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-end gap-2">
@@ -489,7 +577,7 @@ export default function CategoriesPage() {
             <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-danger text-white hover:bg-danger/90"
             >
               Xóa
             </AlertDialogAction>

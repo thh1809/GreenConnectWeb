@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { LineAreaChart } from '@/page/admin/components/line-area-chart'
@@ -9,7 +9,6 @@ import { BarChart } from '@/page/admin/components/bar-chart'
 import { StatCard } from '@/page/admin/components/stat-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
 import {
   AlarmClock,
@@ -24,15 +23,43 @@ import {
   Activity,
 } from 'lucide-react'
 import { reports as reportsApi, type ReportResponse } from '@/lib/api/reports'
+import formatDateTimeLocal from '@/helpers/date-time'
 
 export default function DashboardPage() {
   const [reportData, setReportData] = useState<ReportResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
-  // Date range state
-  const [startDate, setStartDate] = useState<string>('')
-  const [endDate, setEndDate] = useState<string>('')
+
+  const now = useMemo(() => new Date(), [])
+  const oneYearAgo = useMemo(() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - 1)
+    return d
+  }, [])
+
+  const [startDate, setStartDate] = useState<string>(formatDateTimeLocal(oneYearAgo))
+  const [endDate, setEndDate] = useState<string>(formatDateTimeLocal(now))
+
+  const [debouncedStartDate, setDebouncedStartDate] = useState(startDate)
+  const [debouncedEndDate, setDebouncedEndDate] = useState(endDate)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedStartDate(startDate)
+      setDebouncedEndDate(endDate)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [startDate, endDate])
+
+  const applyQuickFilter = (days: number) => {
+    const to = new Date()
+    const from = new Date()
+    from.setDate(from.getDate() - days)
+
+    setStartDate(formatDateTimeLocal(from))
+    setEndDate(formatDateTimeLocal(to))
+  }
 
   const fetchReport = useCallback(async () => {
     try {
@@ -40,11 +67,11 @@ export default function DashboardPage() {
       setError(null)
       
       const params: { start?: string; end?: string } = {}
-      if (startDate) {
-        params.start = new Date(startDate).toISOString()
+      if (debouncedStartDate) {
+        params.start = new Date(debouncedStartDate).toISOString()
       }
-      if (endDate) {
-        params.end = new Date(endDate).toISOString()
+      if (debouncedEndDate) {
+        params.end = new Date(debouncedEndDate).toISOString()
       }
       
       const response = await reportsApi.getReport(params)
@@ -54,24 +81,13 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [startDate, endDate])
+  }, [debouncedStartDate, debouncedEndDate])
 
   useEffect(() => {
-  const end = new Date()
-  const start = new Date()
-
-  start.setFullYear(start.getFullYear() - 1) // 1 year ago
-
-  setEndDate(end.toISOString().slice(0, 16))
-  setStartDate(start.toISOString().slice(0, 16))
-}, [])
-
-
-  useEffect(() => {
-    if (startDate && endDate) {
+    if (debouncedStartDate && debouncedEndDate) {
       fetchReport()
     }
-  }, [startDate, endDate, fetchReport])
+  }, [debouncedStartDate, debouncedEndDate, fetchReport])
 
   const handleRefresh = () => {
     fetchReport()
@@ -82,8 +98,14 @@ export default function DashboardPage() {
     switch (status) {
       case 'Scheduled':
         return 'Đã lên lịch'
+      case 'InProgress':
+        return 'Đang xử lý'
       case 'Completed':
         return 'Hoàn thành'
+      case 'CanceledByUser':
+        return 'Hủy bởi người dùng'
+      case 'CanceledBySystem':
+        return 'Hủy bởi hệ thống'
       case 'Failed':
         return 'Thất bại'
       case 'Success':
@@ -96,14 +118,21 @@ export default function DashboardPage() {
   const getTransactionStatusColor = (status: string): string => {
     switch (status) {
       case 'Completed':
-      case 'Success':
         return 'hsl(var(--success))'
+      case 'InProgress':
+        return 'hsl(210 90% 45%)'
+      case 'Scheduled':
+        return 'hsl(var(--warning))'
+      case 'CanceledByUser':
+        return 'hsl(var(--warning-update))'
+      case 'CanceledBySystem':
+        return 'hsl(var(--danger))'
       case 'Failed':
         return 'hsl(var(--danger))'
-      case 'Scheduled':
-        return 'hsl(var(--primary))'
+      case 'Success':
+        return 'hsl(var(--success))'
       default:
-        return 'hsl(var(--warning))'
+        return 'hsl(var(--muted-foreground))'
     }
   }
 
@@ -111,6 +140,7 @@ export default function DashboardPage() {
   const transactionChartData = reportData?.transactionStatus.map((status, index) => ({
     label: formatTransactionStatus(status.transactionStatus),
     value: status.totalTransactionStatus,
+    color: getTransactionStatusColor(status.transactionStatus),
   })) || []
 
   // Prepare pie chart data
@@ -149,30 +179,38 @@ export default function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="startDate" className="text-sm font-medium">
-                Từ ngày
-              </Label>
-              <Input
-                id="startDate"
-                type="datetime-local"
-                value={startDate}
-                onChange={e => setStartDate(e.target.value)}
-                className="bg-background"
-              />
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => applyQuickFilter(7)}>
+                7 ngày
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => applyQuickFilter(30)}>
+                30 ngày
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => applyQuickFilter(365)}>
+                1 năm
+              </Button>
             </div>
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="endDate" className="text-sm font-medium">
-                Đến ngày
-              </Label>
-              <Input
-                id="endDate"
-                type="datetime-local"
-                value={endDate}
-                onChange={e => setEndDate(e.target.value)}
-                className="bg-background"
-              />
+
+            <div className="flex flex-wrap items-end gap-4">
+              <div>
+                <label className="mb-1 block text-xs text-muted-foreground">Từ ngày</label>
+                <Input
+                  type="datetime-local"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                  className="w-56"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-muted-foreground">Đến ngày</label>
+                <Input
+                  type="datetime-local"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                  className="w-56"
+                />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -293,7 +331,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Charts Section */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
             {/* Pie Chart - Transaction Status Distribution */}
             {pieChartData.length > 0 && (
               <Card className="border-border/50">
@@ -353,8 +391,29 @@ export default function DashboardPage() {
                   </CardDescription>
                 </CardHeader>
                 <Separator />
-                <CardContent className="pt-6">
-                  <BarChart data={transactionChartData} height={300} />
+                <CardContent className="pt-6 space-y-4">
+                  <BarChart data={transactionChartData} height={280} />
+                  <div className="grid grid-cols-2 gap-4">
+                    {transactionChartData.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 p-3 rounded-lg bg-muted/50"
+                      >
+                        <div
+                          className="h-4 w-4 rounded-full"
+                          style={{
+                            backgroundColor: item.color,
+                          }}
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{item.label}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {item.value}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}

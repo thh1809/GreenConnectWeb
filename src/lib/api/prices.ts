@@ -2,9 +2,9 @@ import { get, post, patch, del, apiRequest } from './client';
 
 export interface ReferencePrice {
   referencePriceId: string; // UUID
-  scrapCategoryId: number;
+  scrapCategoryId: string;
   scrapCategory: {
-    scrapCategoryId: number;
+    scrapCategoryId: string;
     categoryName: string;
     description: string | null;
   } | null;
@@ -42,7 +42,7 @@ export interface GetPricesParams {
 }
 
 export interface CreatePriceRequest {
-  scrapCategoryId: number;
+  scrapCategoryId: string;
   pricePerKg: number;
 }
 
