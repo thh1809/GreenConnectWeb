@@ -1,10 +1,28 @@
 import { get, post, put, del } from './client';
 
 export interface ScrapCategory {
-  scrapCategoryId: number;
+  scrapCategoryId: string;
   categoryName: string;
-  description: string | null;
+  imageUrl?: string | null;
 }
+
+type RawScrapCategory = {
+  id: string;
+  name: string;
+  imageUrl?: string | null;
+};
+
+type RawCategoriesResponse = {
+  data: RawScrapCategory[];
+  pagination: {
+    totalRecord?: number;
+    totalRecords?: number;
+    currentPage: number;
+    totalPages: number;
+    nextPage: number | null;
+    prevPage: number | null;
+  };
+};
 
 export interface CategoriesResponse {
   data: ScrapCategory[];
@@ -19,18 +37,23 @@ export interface CategoriesResponse {
 
 export interface CreateCategoryRequest {
   categoryName: string;
-  description?: string; 
+  imageUrl?: string;
+  description?: string;
+  stringUrl?: string;
 }
 
 export interface UpdateCategoryRequest {
   categoryName?: string;
+  imageUrl?: string;
   description?: string;
+  stringUrl?: string;
 }
 
 export const categories = {
   getAll: (params?: {
     pageNumber?: number;
     pageSize?: number;
+    searchName?: string;
   }): Promise<CategoriesResponse> => {
     const searchParams = new URLSearchParams();
     
@@ -40,39 +63,84 @@ export const categories = {
     if (params?.pageSize) {
       searchParams.append('pageSize', params.pageSize.toString());
     }
+    if (params?.searchName) {
+      searchParams.append('searchName', params.searchName);
+    }
 
     const queryString = searchParams.toString();
     const endpoint = `/api/v1/scrap-categories${queryString ? `?${queryString}` : ''}`;
-    
-    return get<CategoriesResponse>(endpoint);
+
+    return get<RawCategoriesResponse>(endpoint).then((raw) => ({
+      data: (raw?.data ?? []).map((c) => ({
+        scrapCategoryId: String(c.id),
+        categoryName: String(c.name ?? ''),
+        imageUrl: c.imageUrl ?? null,
+      })),
+      pagination: {
+        totalRecords: Number(raw?.pagination?.totalRecords ?? raw?.pagination?.totalRecord ?? 0),
+        currentPage: Number(raw?.pagination?.currentPage ?? 1),
+        totalPages: Number(raw?.pagination?.totalPages ?? 1),
+        nextPage: raw?.pagination?.nextPage ?? null,
+        prevPage: raw?.pagination?.prevPage ?? null,
+      },
+    }));
   },
   
-  getById: (id: number): Promise<ScrapCategory> => {
-    return get<ScrapCategory>(`/api/v1/scrap-categories/${id}`);
+  getById: (id: string): Promise<ScrapCategory> => {
+    return get<RawScrapCategory>(`/api/v1/scrap-categories/${id}`).then((c) => ({
+      scrapCategoryId: String(c.id),
+      categoryName: String(c.name ?? ''),
+      imageUrl: c.imageUrl ?? null,
+    }));
   },
   
   create: (data: CreateCategoryRequest): Promise<ScrapCategory> => {
     const searchParams = new URLSearchParams();
     searchParams.append('categoryName', data.categoryName);
-    // Description is required by API, always send it
-    searchParams.append('description', data.description || '');
+    const effectiveUrl = data.stringUrl ?? data.imageUrl;
+    const effectiveDescription = data.description ?? data.imageUrl;
+    if (effectiveUrl !== undefined) {
+      searchParams.append('stringUrl', effectiveUrl);
+    }
+    if (effectiveDescription !== undefined) {
+      searchParams.append('description', effectiveDescription);
+    }
+    if (data.imageUrl !== undefined) {
+      searchParams.append('imageUrl', data.imageUrl);
+    }
     const queryString = searchParams.toString();
-    return post<ScrapCategory>(`/api/v1/scrap-categories?${queryString}`);
+    return post<RawScrapCategory>(`/api/v1/scrap-categories?${queryString}`).then((c) => ({
+      scrapCategoryId: String(c.id),
+      categoryName: String(c.name ?? ''),
+      imageUrl: c.imageUrl ?? null,
+    }));
   },
   
-  update: (id: number, data: UpdateCategoryRequest): Promise<ScrapCategory> => {
+  update: (id: string, data: UpdateCategoryRequest): Promise<ScrapCategory> => {
     const searchParams = new URLSearchParams();
     if (data.categoryName) {
       searchParams.append('categoryName', data.categoryName);
     }
-    if (data.description) {
-      searchParams.append('description', data.description);
+    const effectiveUrl = data.stringUrl ?? data.imageUrl;
+    const effectiveDescription = data.description ?? data.imageUrl;
+    if (effectiveUrl !== undefined) {
+      searchParams.append('stringUrl', effectiveUrl);
+    }
+    if (effectiveDescription !== undefined) {
+      searchParams.append('description', effectiveDescription);
+    }
+    if (data.imageUrl !== undefined) {
+      searchParams.append('imageUrl', data.imageUrl);
     }
     const queryString = searchParams.toString();
-    return put<ScrapCategory>(`/api/v1/scrap-categories/${id}?${queryString}`);
+    return put<RawScrapCategory>(`/api/v1/scrap-categories/${id}?${queryString}`).then((c) => ({
+      scrapCategoryId: String(c.id),
+      categoryName: String(c.name ?? ''),
+      imageUrl: c.imageUrl ?? null,
+    }));
   },
   
-  delete: (id: number): Promise<void> => {
+  delete: (id: string): Promise<void> => {
     return del<void>(`/api/v1/scrap-categories/${id}`);
   },
 };

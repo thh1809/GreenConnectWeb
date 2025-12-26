@@ -34,7 +34,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
-import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Eye } from "lucide-react"
+import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { rewardItems as rewardItemsApi, type RewardItem } from "@/lib/api/reward-items"
 
 export default function RewardItemsPage() {
@@ -59,12 +59,6 @@ export default function RewardItemsPage() {
   const [isActive, setIsActive] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dialogError, setDialogError] = useState<string | null>(null)
-
-  // Detail dialog state
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false)
-  const [detailItem, setDetailItem] = useState<RewardItem | null>(null)
-  const [detailLoading, setDetailLoading] = useState(false)
-  const [detailError, setDetailError] = useState<string | null>(null)
 
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -227,30 +221,6 @@ export default function RewardItemsPage() {
   const filteredItems = (rewardItemsData || []).filter(item =>
     item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
-  const handleViewDetail = async (id: number) => {
-    try {
-      setDetailLoading(true)
-      setDetailError(null)
-      const item = await rewardItemsApi.getById(id)
-      setDetailItem(item)
-      setDetailDialogOpen(true)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Không thể tải chi tiết vật phẩm"
-      setDetailError(errorMessage)
-      toast.error('Lỗi', {
-        description: errorMessage,
-      })
-    } finally {
-      setDetailLoading(false)
-    }
-  }
-
-  const handleCloseDetailDialog = () => {
-    setDetailDialogOpen(false)
-    setDetailItem(null)
-    setDetailError(null)
-  }
 
   return (
     <div className="space-y-6">
@@ -544,24 +514,6 @@ export default function RewardItemsPage() {
                                   <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    aria-label="View"
-                                    className="h-8 w-8"
-                                    onClick={() => handleViewDetail(item.rewardItemId)}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Xem chi tiết</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="icon-sm"
-                                    variant="outline"
                                     aria-label="Edit"
                                     className="h-8 w-8"
                                     onClick={() => handleOpenDialog(item)}
@@ -669,127 +621,8 @@ export default function RewardItemsPage() {
         </CardContent>
       </Card>
 
-      {/* Detail Dialog */}
-      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl bg-background dark:bg-background border-2 border-border dark:border-border">
-          <DialogHeader className="space-y-2 text-left">
-            <DialogTitle className="text-2xl font-bold">Chi tiết vật phẩm đổi thưởng</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Thông tin chi tiết về vật phẩm đổi thưởng
-            </DialogDescription>
-          </DialogHeader>
-
-          {detailLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner className="h-8 w-8" />
-            </div>
-          ) : detailError ? (
-            <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              {detailError}
-            </div>
-          ) : detailItem ? (
-            <div className="space-y-6">
-              {/* Item Image */}
-              {detailItem.imageUrl && (
-                <div className="flex justify-center">
-                  <div className="relative max-h-64 w-full">
-                    <Image
-                      src={detailItem.imageUrl}
-                      alt={detailItem.itemName}
-                      width={256}
-                      height={256}
-                      className="rounded-lg object-contain"
-                      unoptimized
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Item Details */}
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-muted-foreground dark:text-white/80">ID</Label>
-                  <div className="text-base font-medium">#{detailItem.rewardItemId}</div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-muted-foreground">Tên vật phẩm</Label>
-                  <div className="text-base font-semibold">{detailItem.itemName}</div>
-                </div>
-
-                {detailItem.description && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-muted-foreground">Mô tả</Label>
-                    <div className="text-base text-muted-foreground whitespace-pre-wrap">
-                      {detailItem.description}
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-muted-foreground">Điểm đổi thưởng</Label>
-                  <div className="text-base font-semibold text-primary">
-                    {detailItem.pointsCost || detailItem.pointCost || 0} điểm
-                  </div>
-                </div>
-
-                {detailItem.type && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-muted-foreground">Loại</Label>
-                    <div className="text-base">{detailItem.type}</div>
-                  </div>
-                )}
-
-                {detailItem.value && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-muted-foreground">Giá trị</Label>
-                    <div className="text-base">{detailItem.value}</div>
-                  </div>
-                )}
-
-                {detailItem.stockQuantity !== null && detailItem.stockQuantity !== undefined && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-muted-foreground">Số lượng tồn kho</Label>
-                    <div className="text-base">{detailItem.stockQuantity}</div>
-                  </div>
-                )}
-
-                {detailItem.isActive !== undefined && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-muted-foreground">Trạng thái</Label>
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
-                        detailItem.isActive
-                          ? "bg-success/10 text-success"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {detailItem.isActive ? "Hoạt động" : "Tạm ngưng"}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : null}
-
-          <DialogFooter className="pt-4">
-            <Button variant="outline" onClick={handleCloseDetailDialog}>
-              Đóng
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={deleteDialogOpen}
-        onOpenChange={(open) => {
-          setDeleteDialogOpen(open)
-          if (!open) {
-            setItemToDelete(null)
-          }
-        }}
-      >
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-background dark:bg-background border-2 border-border dark:border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>

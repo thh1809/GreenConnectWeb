@@ -12,13 +12,13 @@ export interface Household {
 }
 
 export interface ScrapCategory {
-  scrapCategoryId: number;
+  scrapCategoryId: string;
   categoryName: string;
   description: string | null;
 }
 
 export interface ScrapPostDetail {
-  scrapCategoryId: number;
+  scrapCategoryId: string;
   scrapCategory: ScrapCategory;
   amountDescription: string;
   imageUrl: string | null;
@@ -72,6 +72,53 @@ export interface GetPostsParams {
   pageSize?: number;
 }
 
+const normalizeRank = (rank: unknown): string => {
+  if (rank === null || rank === undefined) return '';
+
+  const raw =
+    typeof rank === 'string'
+      ? rank
+      : typeof rank === 'number'
+        ? String(rank)
+        : typeof rank === 'object'
+          ? String(
+              (rank as any).name ??
+                (rank as any).rank ??
+                (rank as any).value ??
+                (rank as any).code ??
+                ''
+            )
+          : '';
+
+  const normalized = raw.trim();
+  if (!normalized) return '';
+
+  const lastSegment = normalized.includes('.') ? normalized.split('.').pop() || normalized : normalized;
+  const seg = lastSegment.trim();
+  if (!seg || seg.toLowerCase() === 'rank') return '';
+
+  // Some backends serialize enums as numeric values
+  if (/^\d+$/.test(seg)) {
+    const n = Number(seg);
+    switch (n) {
+      case 0:
+        return 'Bronze';
+      case 1:
+        return 'Silver';
+      case 2:
+        return 'Gold';
+      case 3:
+        return 'Platinum';
+      case 4:
+        return 'Diamond';
+      default:
+        return '';
+    }
+  }
+
+  return seg;
+};
+
 export const posts = {
   getAll: (params?: GetPostsParams): Promise<PostsResponse> => {
     const searchParams = new URLSearchParams();
@@ -97,15 +144,57 @@ export const posts = {
 
     const queryString = searchParams.toString();
     const endpoint = `/api/v1/posts${queryString ? `?${queryString}` : ''}`;
-    
-    return get<PostsResponse>(endpoint);
+
+    return get<any>(endpoint).then((raw) => ({
+      data: (raw?.data ?? []).map((p: any) => ({
+        scrapPostId: String(p?.id ?? p?.scrapPostId ?? ''),
+        householdId: String(p?.householdId ?? ''),
+        household: p?.household
+          ? {
+              ...p.household,
+              rank: normalizeRank(p.household?.rank),
+            }
+          : p?.household,
+        title: String(p?.title ?? ''),
+        description: String(p?.description ?? ''),
+        availableTimeRange: String(p?.availableTimeRange ?? ''),
+        createdAt: String(p?.createdAt ?? ''),
+        updatedAt: String(p?.updatedAt ?? ''),
+        status: p?.status,
+      })),
+      pagination: raw?.pagination,
+    }));
   },
 
   getById: (id: string): Promise<ScrapPostFull> => {
-    return get<ScrapPostFull>(`/api/v1/posts/${id}`);
+    return get<any>(`/api/v1/posts/${id}`).then((p) => ({
+      scrapPostId: String(p?.id ?? p?.scrapPostId ?? ''),
+      title: String(p?.title ?? ''),
+      description: String(p?.description ?? ''),
+      address: String(p?.address ?? ''),
+      availableTimeRange: String(p?.availableTimeRange ?? ''),
+      status: p?.status,
+      createdAt: String(p?.createdAt ?? ''),
+      updatedAt: String(p?.updatedAt ?? ''),
+      householdId: String(p?.householdId ?? ''),
+      household: p?.household
+        ? {
+            ...p.household,
+            rank: normalizeRank(p.household?.rank),
+          }
+        : p?.household,
+      mustTakeAll: Boolean(p?.mustTakeAll),
+      scrapPostDetails: (p?.scrapPostDetails ?? []).map((d: any) => ({
+        scrapCategoryId: d?.scrapCategoryId,
+        scrapCategory: d?.scrapCategory,
+        amountDescription: String(d?.amountDescription ?? ''),
+        imageUrl: d?.imageUrl ?? null,
+        status: d?.status,
+      })),
+    }));
   },
 
-  deleteDetail: (postId: string, categoryId: number): Promise<void> => {
+  deleteDetail: (postId: string, categoryId: string): Promise<void> => {
     return del<void>(`/api/v1/posts/${postId}/details/${categoryId}`);
   },
 };
