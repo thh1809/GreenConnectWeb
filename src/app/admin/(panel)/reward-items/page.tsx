@@ -32,7 +32,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { rewardItems as rewardItemsApi, type RewardItem } from "@/lib/api/reward-items"
@@ -353,17 +352,6 @@ export default function RewardItemsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is-active" className="text-sm font-semibold">
-                  Trạng thái hoạt động
-                </Label>
-                <Switch
-                  id="is-active"
-                  checked={isActive}
-                  onCheckedChange={setIsActive}
-                />
-              </div>
-
               {/* Error Message */}
               {dialogError && (
                 <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
@@ -423,8 +411,11 @@ export default function RewardItemsPage() {
                     <TableHead>ID</TableHead>
                     <TableHead>Hình ảnh</TableHead>
                     <TableHead>Tên vật phẩm</TableHead>
+                    <TableHead>Mô tả</TableHead>
+                    <TableHead>Loại</TableHead>
+                    <TableHead>Giá trị</TableHead>
                     <TableHead>Điểm đổi thưởng</TableHead>
-                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Tồn kho</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -434,8 +425,11 @@ export default function RewardItemsPage() {
                       <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                     </TableRow>
                   ))}
@@ -456,9 +450,11 @@ export default function RewardItemsPage() {
                       <TableHead className="h-12 px-4 font-semibold">ID</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Hình ảnh</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Tên vật phẩm</TableHead>
+                      <TableHead className="h-12 px-4 font-semibold">Mô tả</TableHead>
+                      <TableHead className="h-12 px-4 font-semibold">Loại</TableHead>
+                      <TableHead className="h-12 px-4 font-semibold">Giá trị</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Điểm đổi</TableHead>
                       <TableHead className="h-12 px-4 font-semibold">Tồn kho</TableHead>
-                      <TableHead className="h-12 px-4 font-semibold">Trạng thái</TableHead>
                       <TableHead className="h-12 px-4 text-right font-semibold">Hành động</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -489,22 +485,19 @@ export default function RewardItemsPage() {
                         <TableCell className="px-4 py-4 font-medium">
                           {item.itemName}
                         </TableCell>
+                        <TableCell className="px-4 py-4 text-muted-foreground max-w-xs truncate">
+                          {item.description || "—"}</TableCell>
+                        <TableCell className="px-4 py-4">
+                          <Badge variant="outline">{item.type || "—"}</Badge>
+                        </TableCell>
+                        <TableCell className="px-4 py-4">
+                          <span className="font-medium">{item.value || "—"}</span>
+                        </TableCell>
                         <TableCell className="px-4 py-4">
                           <span className="font-semibold text-primary">{item.pointsCost || item.pointCost || 0}</span> điểm
                         </TableCell>
                         <TableCell className="px-4 py-4 text-muted-foreground">
                           {item.stockQuantity !== null && item.stockQuantity !== undefined ? item.stockQuantity : "Không giới hạn"}
-                        </TableCell>
-                        <TableCell className="px-4 py-4">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              item.isActive !== false
-                                ? "bg-success/10 text-success"
-                                : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {item.isActive !== false ? "Hoạt động" : "Tạm ngưng"}
-                          </span>
                         </TableCell>
                         <TableCell className="px-4 py-4">
                           <div className="flex items-center justify-end gap-2">

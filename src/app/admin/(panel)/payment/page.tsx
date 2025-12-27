@@ -73,6 +73,20 @@ export default function PaymentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dialogError, setDialogError] = useState<string | null>(null)
 
+  useEffect(() => {
+    const priceValue = parseFloat(price)
+    if (isNaN(priceValue)) return
+
+    if (priceValue === 0) {
+      if (packageType !== 'Freemium') setPackageType('Freemium')
+      return
+    }
+
+    if (priceValue > 0) {
+      if (packageType !== 'Paid') setPackageType('Paid')
+    }
+  }, [price, packageType])
+
   // Detail dialog state
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
   const [detailPackage, setDetailPackage] = useState<PaymentPackage | null>(null)
@@ -191,13 +205,22 @@ export default function PaymentPage() {
         return
       }
 
+      if (priceValue === 0 && packageType !== 'Freemium') {
+        setDialogError('Giá = 0 thì loại gói phải là Miễn phí')
+        return
+      }
+
+      if (priceValue > 0 && packageType === 'Freemium') {
+        setDialogError('Giá > 0 thì không được chọn Miễn phí')
+        return
+      }
+
       if (isNaN(connectionAmountValue) || connectionAmountValue <= 0) {
         setDialogError('Số lượt kết nối phải là số nguyên dương')
         return
       }
 
-      // Auto-detect package type based on price
-      const detectedPackageType = priceValue === 0 ? 'Free' : packageType
+      const detectedPackageType: 'Freemium' | 'Paid' = priceValue === 0 ? 'Freemium' : packageType
       const packageData = {
         name: packageName.trim(),
         description: description.trim() || '',
@@ -430,8 +453,18 @@ export default function PaymentPage() {
                     <SelectValue placeholder="Chọn loại gói" />
                   </SelectTrigger>
                   <SelectContent className="z-[10001]" position="popper" sideOffset={4}>
-                    <SelectItem value="Freemium">Miễn phí</SelectItem>
-                    <SelectItem value="Paid">Trả phí</SelectItem>
+                    <SelectItem value="Freemium" disabled={(() => {
+                      const pv = parseFloat(price)
+                      return !isNaN(pv) && pv > 0
+                    })()}>
+                      Miễn phí
+                    </SelectItem>
+                    <SelectItem value="Paid" disabled={(() => {
+                      const pv = parseFloat(price)
+                      return !isNaN(pv) && pv === 0
+                    })()}>
+                      Trả phí
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -511,8 +544,8 @@ export default function PaymentPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="Freemium">Freemium</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
+                  <SelectItem value="Freemium">Miễn phí</SelectItem>
+                  <SelectItem value="Paid">Trả phí</SelectItem>
                 </SelectContent>
               </Select>
               <Select
@@ -530,8 +563,8 @@ export default function PaymentPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Không sắp xếp</SelectItem>
-                  <SelectItem value="asc">Giá tăng dần</SelectItem>
                   <SelectItem value="desc">Giá giảm dần</SelectItem>
+                  <SelectItem value="asc">Giá tăng dần</SelectItem>
                 </SelectContent>
               </Select>
             </div>

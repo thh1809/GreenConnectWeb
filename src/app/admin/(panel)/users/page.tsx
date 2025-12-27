@@ -250,7 +250,6 @@ export default function UsersPage() {
                     <TableHead>Tên / Điện thoại</TableHead>
                     <TableHead>Hạng</TableHead>
                     <TableHead>Vai trò</TableHead>
-                    <TableHead>Điểm</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead>Ngày tạo</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
@@ -262,7 +261,6 @@ export default function UsersPage() {
                       <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
@@ -280,7 +278,6 @@ export default function UsersPage() {
                     <TableHead>Tên / Điện thoại</TableHead>
                     <TableHead>Hạng</TableHead>
                     <TableHead>Vai trò</TableHead>
-                    <TableHead>Điểm</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead>Ngày tạo</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
@@ -289,7 +286,7 @@ export default function UsersPage() {
                 <TableBody>
                   {filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
+                      <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                         Không có người dùng phù hợp bộ lọc hiện tại.
                       </TableCell>
                     </TableRow>
@@ -319,7 +316,6 @@ export default function UsersPage() {
                             <span className="text-xs text-muted-foreground">Chưa gán</span>
                           )}
                         </TableCell>
-                        <TableCell>{user.pointBalance.toLocaleString('vi-VN')}</TableCell>
                         <TableCell>
                           <Badge variant={getStatusBadgeVariant(user.status)}>
                             {formatUserStatus(user.status)}
