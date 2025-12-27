@@ -4,10 +4,12 @@ import Logo from '@public/Eco-Tech-logo-web-no-background.ico';
 import { Facebook, Instagram, Leaf, Moon, Sun, Twitter } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
+  const urlDownload =
+    'https://drive.google.com/file/d/1N9pL8hzPsQGNsJ2hhRPSpKO90-vHRAaR/view?usp=drive_link';
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('theme') === 'dark';
@@ -45,6 +47,9 @@ const Footer = () => {
             <Button
               size="lg"
               className="bg-light-dark-default text-primary hover:bg-light-dark-default/90 transition-smooth shadow-glow text-base font-medium uppercase tracking-wide"
+              onClick={() => {
+                window.open(urlDownload, '_blank');
+              }}
             >
               Tải cho Android
             </Button>
@@ -52,6 +57,9 @@ const Footer = () => {
               size="lg"
               variant="outline"
               className="border-2 border-light-dark-default text-light-dark-default bg-light-dark-default/10 hover:bg-light-dark-default/20 backdrop-blur-sm transition-smooth text-base font-medium uppercase tracking-wide"
+              onClick={() => {
+                toast.info('Đang phát triển');
+              }}
             >
               Tải cho iOS
             </Button>

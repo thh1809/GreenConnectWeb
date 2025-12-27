@@ -1,6 +1,9 @@
 const nextConfig = {
   /* config options here */
-  output: "standalone",
+  // Chỉ bật standalone khi không phải Windows hoặc khi build cho Docker
+  // Trên Windows, standalone cần Developer Mode hoặc quyền admin
+  // Docker builds chạy trên Linux nên sẽ tự động bật standalone
+  ...(process.platform !== 'win32' || process.env.DOCKER_BUILD ? { output: "standalone" } : {}),
   images: {
     remotePatterns: [
       {
