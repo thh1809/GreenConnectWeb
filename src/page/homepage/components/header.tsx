@@ -10,6 +10,8 @@ import { clientNavLinks } from '../routes/client-route';
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const urlDownload =
+    'https://drive.google.com/file/d/1N9pL8hzPsQGNsJ2hhRPSpKO90-vHRAaR/view?usp=drive_link';
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -67,6 +69,9 @@ const Header = () => {
                 size="lg"
                 variant="primary"
                 className="font-semibold tracking-wide shadow-md hover:shadow-lg transition-all"
+                onClick={() => {
+                  window.open(urlDownload, '_blank');
+                }}
               >
                 Tải ứng dụng
               </Button>
