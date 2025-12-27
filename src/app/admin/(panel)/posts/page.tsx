@@ -335,7 +335,6 @@ export default function PostsPage() {
                     <TableHead>Hình ảnh</TableHead>
                     <TableHead>Tiêu đề</TableHead>
                     <TableHead>Tác giả</TableHead>
-                    <TableHead>Thời gian có sẵn</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead>Ngày tạo</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
@@ -369,7 +368,6 @@ export default function PostsPage() {
                 <TableHead>Hình ảnh</TableHead>
                 <TableHead>Tiêu đề</TableHead>
                 <TableHead>Tác giả</TableHead>
-                    <TableHead>Thời gian có sẵn</TableHead>
                 <TableHead>Trạng thái</TableHead>
                     <TableHead>Ngày tạo</TableHead>
                 <TableHead className="text-right">Hành động</TableHead>
@@ -411,7 +409,6 @@ export default function PostsPage() {
                             <span className="text-xs text-muted-foreground">{post.household.phoneNumber}</span>
                           </div>
                   </TableCell>
-                        <TableCell className="text-sm">{post.availableTimeRange || '—'}</TableCell>
                   <TableCell>
                           <Badge variant={getStatusBadgeVariant(post.status)}>
                             {formatPostStatus(post.status)}
@@ -563,10 +560,6 @@ export default function PostsPage() {
                   <div className="text-sm dialog-value">{postDetail.address}</div>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <div className="text-sm font-medium text-muted-foreground">Thời gian có sẵn</div>
-                    <div className="text-sm dialog-value">{postDetail.availableTimeRange || '—'}</div>
-                  </div>
                   <div>
                     <div className="text-sm font-medium text-muted-foreground">Trạng thái</div>
                     <Badge variant={getStatusBadgeVariant(postDetail.status)}>
