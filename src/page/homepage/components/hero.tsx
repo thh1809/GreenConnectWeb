@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import heroImage from '@public/hero-image.png';
 import { ArrowDown } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 const Hero = () => {
+  const urlDownload =
+    'https://drive.google.com/file/d/1N9pL8hzPsQGNsJ2hhRPSpKO90-vHRAaR/view?usp=drive_link';
   return (
     <section
       id="home"
@@ -39,6 +42,9 @@ const Hero = () => {
                 size="lg"
                 variant="primary"
                 className="bg-light-dark-default/90 text-primary font-semibold uppercase tracking-wide shadow-md hover:shadow-lg transition-all duration-300"
+                onClick={() => {
+                  window.open(urlDownload, '_blank');
+                }}
               >
                 Tải cho Android
               </Button>
@@ -46,6 +52,9 @@ const Hero = () => {
                 size="lg"
                 variant="outline"
                 className="text-base font-semibold uppercase tracking-wide border-2 border-light-dark-default text-light-dark-default bg-transparent hover:bg-light-dark-default/10 backdrop-blur-sm transition-all duration-300"
+                onClick={() => {
+                  toast.info('Đang phát triển');
+                }}
               >
                 Tải cho iOS
               </Button>
