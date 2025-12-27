@@ -18,7 +18,6 @@
   <!-- Framework & Core -->
   <img src="https://img.shields.io/badge/framework-next.js-000000?logo=nextdotjs&logoColor=white" />
   <img src="https://img.shields.io/badge/language-typescript-3178C6?logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/language-typescript-3178C6" alt="TypeScript" />
 
   <!-- UI & Styling -->
   <img src="https://img.shields.io/badge/ui-shadcn--ui-success" alt="shadcn/ui" />
