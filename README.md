@@ -16,17 +16,15 @@
     />
   </a>
   <!-- Framework & Core -->
+  <img src="https://img.shields.io/badge/framework-next.js-000000?logo=nextdotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/language-typescript-3178C6?logo=typescript&logoColor=white" />
   <img src="https://img.shields.io/badge/language-typescript-3178C6" alt="TypeScript" />
 
   <!-- UI & Styling -->
   <img src="https://img.shields.io/badge/ui-shadcn--ui-success" alt="shadcn/ui" />
   <img src="https://img.shields.io/badge/styling-tailwindcss-06B6D4" alt="Tailwind CSS" />
 
-  <!-- Data & State -->
-  <img src="https://img.shields.io/badge/data--fetching-tanstack--query-FF4154" alt="TanStack Query" />
-
   <!-- Tooling -->
-  <img src="https://img.shields.io/badge/git--hooks-husky-yellow" alt="Husky" />
   <img src="https://img.shields.io/badge/commit--style-commitlint-blue" alt="Commitlint" />
 
   <!-- License -->
