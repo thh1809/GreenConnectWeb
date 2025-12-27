@@ -186,22 +186,24 @@ export default function PaymentPage() {
       const priceValue = parseFloat(price)
       const connectionAmountValue = parseInt(connectionAmount, 10)
 
-      if (isNaN(priceValue) || priceValue <= 0) {
-        setDialogError('Giá phải là số dương')
+      if (isNaN(priceValue) || priceValue < 0) {
+        setDialogError('Giá phải là số không âm')
         return
       }
 
       if (isNaN(connectionAmountValue) || connectionAmountValue <= 0) {
-        setDialogError('Số coin quy đổi phải là số nguyên dương')
+        setDialogError('Số lượt kết nối phải là số nguyên dương')
         return
       }
 
+      // Auto-detect package type based on price
+      const detectedPackageType = priceValue === 0 ? 'Free' : packageType
       const packageData = {
         name: packageName.trim(),
         description: description.trim() || '',
         price: priceValue,
         connectionAmount: connectionAmountValue,
-        packageType: packageType === 'Paid' ? 1 : 0, // 1 for Paid, 0 for Freemium
+        packageType: detectedPackageType === 'Paid' ? 1 : 0, // 1 for Paid, 0 for Freemium
       }
 
       if (editingPackage) {
@@ -427,7 +429,7 @@ export default function PaymentPage() {
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Chọn loại gói" />
                   </SelectTrigger>
-                  <SelectContent position="popper" sideOffset={4}>
+                  <SelectContent className="z-[10001]" position="popper" sideOffset={4}>
                     <SelectItem value="Freemium">Miễn phí</SelectItem>
                     <SelectItem value="Paid">Trả phí</SelectItem>
                   </SelectContent>
@@ -769,11 +771,14 @@ export default function PaymentPage() {
                     </div>
                   </div>
 
-                  {detailPackage.connectionAmount !== undefined && (
+                  {detailPackage.connectionAmount !== undefined &&
+                    (detailPackage.packageType === 'Paid' || !detailPackage.description) && (
                     <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-muted-foreground">Số coin quy đổi</Label>
+                      <Label className="text-sm font-semibold text-muted-foreground">
+                        {detailPackage.packageType === 'Freemium' ? 'Số lượt/tuần' : 'Số lượt kết nối'}
+                      </Label>
                       <div className="text-xl font-bold text-success">
-                        {detailPackage.connectionAmount.toLocaleString('vi-VN')} coin
+                        {detailPackage.connectionAmount.toLocaleString('vi-VN')} lượt
                       </div>
                     </div>
                   )}
@@ -847,7 +852,7 @@ export default function PaymentPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận ngưng hoạt động</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn ngưng hoạt động gói thanh toán này? Gói sẽ không còn hiển thị cho người dùng mua nữa, nhưng vẫn được lưu trong Database để đối soát lịch sử.
+              Gói thanh toán sẽ không còn hiển thị với người dùng.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

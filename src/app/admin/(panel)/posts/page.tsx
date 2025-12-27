@@ -436,13 +436,6 @@ export default function PostsPage() {
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
-                    <Button
-                            size="icon"
-                      variant="destructive"
-                      aria-label="Xóa"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </TableCell>
                 </TableRow>
                     ))
@@ -519,7 +512,7 @@ export default function PostsPage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background dark:bg-background border-2 border-border dark:border-border">
+        <DialogContent className="w-[95vw] sm:max-w-5xl md:max-w-6xl max-h-[95vh] overflow-y-auto bg-background dark:bg-background border-2 border-border dark:border-border">
           <DialogHeader>
             <DialogTitle>Chi tiết bài đăng</DialogTitle>
             <DialogDescription>
@@ -545,10 +538,10 @@ export default function PostsPage() {
                   <div className="text-sm font-medium text-muted-foreground">Số điện thoại</div>
                   <div className="text-sm font-semibold dialog-value">{postDetail.household.phoneNumber}</div>
                 </div>
-                <div>
+                {/* <div>
                   <div className="text-sm font-medium text-muted-foreground">Hạng</div>
                   <div className="text-sm font-semibold dialog-value">{formatRank(postDetail.household.rank)}</div>
-                </div>
+                </div> */}
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Điểm</div>
                   <div className="text-sm font-semibold dialog-value">{(postDetail.household.pointBalance ?? 0).toLocaleString('vi-VN')}</div>
@@ -605,7 +598,7 @@ export default function PostsPage() {
                 ) : (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {postDetail.scrapPostDetails.map((detail, index) => (
-                      <div key={index} className="border rounded-lg p-4 space-y-2 relative">
+                      <div key={index} className="relative space-y-3 rounded-xl border border-border bg-card p-5 shadow-sm">
                         {detail.status === 'Available' && (
                           <div className="absolute top-2 right-2">
                             <TooltipProvider>
@@ -650,13 +643,13 @@ export default function PostsPage() {
                         {detail.imageUrl && (
                           <div>
                             <div className="text-xs font-medium text-muted-foreground mb-2">Hình ảnh</div>
-                            <div className="h-32 w-full overflow-hidden rounded-md border border-border">
+                            <div className="h-48 w-full overflow-hidden rounded-lg border border-border bg-muted/20 flex items-center justify-center">
                               <Image
                                 src={detail.imageUrl}
                                 alt={detail.scrapCategory?.categoryName || 'Ảnh món hàng'}
                                 width={200}
                                 height={128}
-                                className="h-full w-full object-cover"
+                                className="h-full w-full object-contain"
                               />
                             </div>
                           </div>
