@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
@@ -249,11 +249,28 @@ export default function PricesPage() {
     }
   }
 
+  const categoryNameById = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const c of categoriesData) {
+      map.set(String(c.scrapCategoryId), c.categoryName ?? '')
+    }
+    return map
+  }, [categoriesData])
+
+  const getCategoryName = (priceItem: ReferencePrice) => {
+    return (
+      priceItem.scrapCategory?.categoryName ||
+      categoryNameById.get(String(priceItem.scrapCategoryId)) ||
+      ''
+    )
+  }
+
   const filteredPrices = pricesData.filter(priceItem => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
+    const categoryName = getCategoryName(priceItem).toLowerCase()
     return (
-      priceItem.scrapCategory?.categoryName?.toLowerCase().includes(query) ||
+      categoryName.includes(query) ||
       priceItem.pricePerKg?.toString().includes(query) ||
       priceItem.referencePriceId.toLowerCase().includes(query)
     )
@@ -302,39 +319,53 @@ export default function PricesPage() {
                 <Label htmlFor="category" className="text-sm font-semibold">
                   Danh mục <span className="text-danger">*</span>
                 </Label>
-                <Select 
-                  value={categoryId} 
-                  onValueChange={setCategoryId}
-                  disabled={categoriesData.length === 0}
-                >
-                  <SelectTrigger 
-                    id="category" 
-                    className="bg-background w-full"
-                    aria-label="Chọn danh mục"
+                {editingPrice ? (
+                  <Input
+                    id="category"
+                    value={getCategoryName(editingPrice) || '—'}
+                    readOnly
+                    disabled
+                    className="bg-background"
+                  />
+                ) : (
+                  <Select 
+                    value={categoryId} 
+                    onValueChange={setCategoryId}
+                    onOpenChange={(open) => {
+                      if (open && categoriesData.length === 0) {
+                        fetchCategories()
+                      }
+                    }}
                   >
-                    <SelectValue placeholder={categoriesData.length === 0 ? 'Đang tải danh mục...' : 'Chọn danh mục'} />
-                  </SelectTrigger>
-                  <SelectContent 
-                    className="z-[100]"
-                    position="popper"
-                    sideOffset={4}
-                  >
-                    {categoriesData.length === 0 ? (
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground text-center">
-                        Đang tải danh mục...
-                      </div>
-                    ) : (
-                      categoriesData.map(category => (
-                        <SelectItem 
-                          key={category.scrapCategoryId} 
-                          value={category.scrapCategoryId.toString()}
-                        >
-                          {category.categoryName}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
+                    <SelectTrigger 
+                      id="category" 
+                      className="bg-background w-full"
+                      aria-label="Chọn danh mục"
+                    >
+                      <SelectValue placeholder={categoriesData.length === 0 ? 'Đang tải danh mục...' : 'Chọn danh mục'} />
+                    </SelectTrigger>
+                    <SelectContent 
+                      className="z-[10001]"
+                      position="popper"
+                      sideOffset={4}
+                    >
+                      {categoriesData.length === 0 ? (
+                        <div className="px-2 py-1.5 text-sm text-muted-foreground text-center">
+                          Đang tải danh mục...
+                        </div>
+                      ) : (
+                        categoriesData.map(category => (
+                          <SelectItem 
+                            key={category.scrapCategoryId} 
+                            value={category.scrapCategoryId.toString()}
+                          >
+                            {category.categoryName}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -470,7 +501,7 @@ export default function PricesPage() {
                           {priceItem.referencePriceId.substring(0, 8)}...
                         </TableCell>
                         <TableCell className="px-4 py-4 font-medium">
-                          {priceItem.scrapCategory?.categoryName || `Danh mục #${priceItem.scrapCategoryId}`}
+                          {getCategoryName(priceItem) || '—'}
                         </TableCell>
                         <TableCell className="px-4 py-4 font-semibold text-primary">
                           {priceItem.pricePerKg !== undefined && priceItem.pricePerKg !== null
@@ -644,14 +675,14 @@ export default function PricesPage() {
               {/* Price Details */}
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-muted-foreground dark:text-white/80">ID</Label>
+                  <Label className="text-sm font-semibold text-muted-foreground">ID</Label>
                   <div className="text-base font-medium font-mono">{detailPrice.referencePriceId}</div>
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-muted-foreground">Danh mục</Label>
                   <div className="text-base font-semibold">
-                    {detailPrice.scrapCategory?.categoryName || `Danh mục #${detailPrice.scrapCategoryId}`}
+                    {getCategoryName(detailPrice) || '—'}
                   </div>
                   {detailPrice.scrapCategory?.description && (
                     <div className="text-sm text-muted-foreground">
@@ -745,7 +776,7 @@ export default function PricesPage() {
             <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-danger text-white hover:bg-danger/90"
             >
               Xóa
             </AlertDialogAction>

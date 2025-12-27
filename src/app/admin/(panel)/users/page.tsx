@@ -472,7 +472,7 @@ export default function UsersPage() {
               disabled={isBanning}
               className={selectedUser?.status === 'Blocked' 
                 ? "bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary dark:text-primary-foreground"
-                : "bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive dark:text-white"}
+                : "bg-danger text-white hover:bg-danger/90"}
             >
               {isBanning ? (
                 <>
