@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { Search, Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { categories as categoriesApi, type ScrapCategory } from "@/lib/api/categories"
+import { files as filesApi } from "@/lib/api/files"
 
 export default function CategoriesPage() {
   const [categoriesData, setCategoriesData] = useState<ScrapCategory[]>([])
@@ -46,28 +47,19 @@ export default function CategoriesPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<ScrapCategory | null>(null)
   const [categoryName, setCategoryName] = useState("")
-  const [imageUrl, setImageUrl] = useState("")
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dialogError, setDialogError] = useState<string | null>(null)
+
+  const [localImagePreviewUrl, setLocalImagePreviewUrl] = useState<string | null>(null)
+  const [remoteImagePreviewUrl, setRemoteImagePreviewUrl] = useState<string | null>(null)
 
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [imagePreviewAlt, setImagePreviewAlt] = useState<string | null>(null)
 
-  const isProbablyImageUrl = (value: string) => {
-    const v = value.trim().toLowerCase()
-    if (!v) return false
-    if (!v.startsWith('http://') && !v.startsWith('https://')) return false
-    return (
-      v.endsWith('.png') ||
-      v.endsWith('.jpg') ||
-      v.endsWith('.jpeg') ||
-      v.endsWith('.gif') ||
-      v.endsWith('.webp') ||
-      v.includes('image')
-    )
-  }
-
+  
   const openImagePreview = (url: string, alt: string) => {
     setImagePreviewUrl(url)
     setImagePreviewAlt(alt)
@@ -108,11 +100,15 @@ export default function CategoriesPage() {
     if (category) {
       setEditingCategory(category)
       setCategoryName(category.categoryName)
-      setImageUrl(category.imageUrl || "")
+      setImageUrl(category.imagePath ?? null)
+      setRemoteImagePreviewUrl(category.imageUrl ?? null)
+      setImageFile(null)
     } else {
       setEditingCategory(null)
       setCategoryName("")
-      setImageUrl("")
+      setImageUrl(null)
+      setRemoteImagePreviewUrl(null)
+      setImageFile(null)
     }
     setDialogError(null)
     setDialogOpen(true)
@@ -122,31 +118,88 @@ export default function CategoriesPage() {
     setDialogOpen(false)
     setEditingCategory(null)
     setCategoryName("")
-    setImageUrl("")
+    setImageUrl(null)
+    setImageFile(null)
+    setRemoteImagePreviewUrl(null)
+    if (localImagePreviewUrl && localImagePreviewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(localImagePreviewUrl)
+    }
+    setLocalImagePreviewUrl(null)
     setDialogError(null)
+  }
+
+  const deriveBucketObjectPathFromUploadUrl = (uploadUrl: string): string | null => {
+    try {
+      const u = new URL(uploadUrl)
+
+      // Common GCS signed URL: https://storage.googleapis.com/<bucket>/<object>
+      if (u.hostname === 'storage.googleapis.com') {
+        const parts = u.pathname.split('/').filter(Boolean)
+        if (parts.length >= 2) {
+          const bucket = parts[0]
+          const objectKey = parts.slice(1).join('/')
+          return `${bucket}/${objectKey}`
+        }
+      }
+
+      // Firebase Storage URL style: https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<object>
+      if (u.hostname === 'firebasestorage.googleapis.com') {
+        const parts = u.pathname.split('/').filter(Boolean)
+        const bIdx = parts.indexOf('b')
+        const oIdx = parts.indexOf('o')
+        if (bIdx >= 0 && oIdx >= 0 && parts[bIdx + 1] && parts[oIdx + 1]) {
+          const bucket = parts[bIdx + 1]
+          const objectKey = decodeURIComponent(parts.slice(oIdx + 1).join('/'))
+          return `${bucket}/${objectKey}`
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    return null
   }
 
   const handleSaveCategory = async () => {
     const trimmedName = categoryName.trim()
-    const trimmedImageUrl = imageUrl.trim()
+    const trimmedImageUrl = imageUrl?.trim() ?? ""
     
     if (!trimmedName) {
       setDialogError('Tên danh mục không được để trống')
       return
     }
 
-    if (!trimmedImageUrl) {
-      setDialogError('Image URL không được để trống')
-      return
-    }
-
     try {
       setIsSubmitting(true)
       setDialogError(null)
+
+      let uploadedFilePath: string | null = null
+
+      if (imageFile) {
+        const uploadInfo = await filesApi.getScrapCategoryUploadUrl({
+          fileName: imageFile.name,
+          contentType: imageFile.type || 'application/octet-stream',
+        })
+
+        await filesApi.uploadBinaryToUrl(uploadInfo.uploadUrl, imageFile)
+        // Prefer a stable bucket/object path so GET can map to a working public URL
+        const fp = String(uploadInfo.filePath ?? '').trim()
+        if (fp.includes('/')) {
+          uploadedFilePath = fp
+        } else {
+          uploadedFilePath = deriveBucketObjectPathFromUploadUrl(uploadInfo.uploadUrl) ?? fp
+        }
+      }
+
+      if (!uploadedFilePath && !trimmedImageUrl) {
+        setDialogError('Vui lòng chọn ảnh')
+        return
+      }
       
+      const effectivePath = uploadedFilePath ?? trimmedImageUrl
       const payload = {
         categoryName: trimmedName,
-        imageUrl: trimmedImageUrl,
+        stringUrl: effectivePath,
       }
       
       if (editingCategory) {
@@ -293,20 +346,35 @@ export default function CategoriesPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="category-description" className="text-sm font-semibold">
-                  Image URL 
+                  Ảnh
                 </Label>
                 <Input
                   id="category-description"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="Nhập image url (nếu có)"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] ?? null
+                    setImageFile(f)
+
+                    if (localImagePreviewUrl && localImagePreviewUrl.startsWith('blob:')) {
+                      URL.revokeObjectURL(localImagePreviewUrl)
+                    }
+
+                    if (!f) {
+                      setLocalImagePreviewUrl(null)
+                      return
+                    }
+
+                    const url = URL.createObjectURL(f)
+                    setLocalImagePreviewUrl(url)
+                  }}
                   className="bg-background"
                 />
-                {isProbablyImageUrl(imageUrl) && (
+                {((imageFile && localImagePreviewUrl) || remoteImagePreviewUrl) && (
                   <div className="rounded-lg border bg-muted/20 p-3">
                     <div className="text-xs text-muted-foreground mb-2">Xem trước</div>
                     <img
-                      src={imageUrl}
+                      src={imageFile ? (localImagePreviewUrl ?? undefined) : (remoteImagePreviewUrl ?? undefined)}
                       alt={categoryName || 'Category image'}
                       className="h-28 w-full rounded-md object-cover"
                       loading="lazy"
@@ -420,7 +488,7 @@ export default function CategoriesPage() {
                           {category.categoryName}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {category.imageUrl && isProbablyImageUrl(category.imageUrl) ? (
+                          {category.imageUrl ? (
                             <button
                               type="button"
                               className="inline-flex items-center justify-center"

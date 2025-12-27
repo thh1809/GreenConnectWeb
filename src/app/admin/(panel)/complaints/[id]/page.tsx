@@ -189,14 +189,14 @@ export default function ComplaintDetailPage({
               <span className="text-muted-foreground">Hạng:</span>
               <span>{complaint.complainant.rank}</span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <span className="text-muted-foreground">Vai trò:</span>
               <span>
                 {complaint.complainant.roles?.length
                   ? complaint.complainant.roles.join(', ')
                   : 'Chưa gán'}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -216,14 +216,14 @@ export default function ComplaintDetailPage({
               <span className="text-muted-foreground">Hạng:</span>
               <span>{complaint.accused.rank}</span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <span className="text-muted-foreground">Vai trò:</span>
               <span>
                 {complaint.accused.roles?.length
                   ? complaint.accused.roles.join(', ')
                   : 'Chưa gán'}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -268,12 +268,12 @@ export default function ComplaintDetailPage({
                 <span className="text-muted-foreground">Trạng thái:</span>{' '}
                 <span>{complaint.transaction.status}</span>
               </div>
-              {complaint.transaction.totalPrice !== undefined && (
+              {/* {complaint.transaction.totalPrice !== undefined && (
                 <div>
                   <span className="text-muted-foreground">Tổng giá:</span>{' '}
                   <span>{complaint.transaction.totalPrice.toLocaleString()} VNĐ</span>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>
